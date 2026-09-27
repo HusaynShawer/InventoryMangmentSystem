@@ -1,11 +1,11 @@
 using Microsoft.EntityFrameworkCore;
-using InventoryMangmentSystem.Models; // Required to see your models
+using InventoryMangmentSystem.Models; 
 
 namespace InventoryMangmentSystem.Data
 {
     public class ApplicationDbContext : DbContext
     {
-        // Added the generic <ApplicationDbContext>
+        
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }
