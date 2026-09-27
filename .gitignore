@@ -4,6 +4,16 @@
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
 # User-specific files
+# Build outputs
+bin/
+obj/
+
+# Visual Studio Code
+.vscode/*
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
+
 *.rsuser
 *.suo
 *.user
