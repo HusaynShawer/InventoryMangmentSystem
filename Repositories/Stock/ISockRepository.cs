@@ -7,7 +7,7 @@ public interface IStockRepository
 
     Task<IEnumerable<Stock>> GetAllAsync();
 
-    Task CreateAsync(Stock stock);
+    Task<Stock> CreateAsync(Stock stock);
 
     Task UpdateAsync(Stock stock);
 
