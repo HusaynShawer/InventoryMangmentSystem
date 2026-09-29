@@ -1,32 +1,52 @@
 using InventoryMangmentSystem.Data;
 using InventoryMangmentSystem.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace InventoryMangmentSystem.Repositories;
 
 public class SupplierRepository : ISupplierRepository
 {
-    public Task<Supplier> CreateAsync(Supplier supplier)
+    private readonly ApplicationDbContext _context;
+    public SupplierRepository(ApplicationDbContext context)
     {
-        throw new NotImplementedException();
+        _context = context;        
     }
 
-    public Task DeleteAsync(int id)
+    public async Task<Supplier> CreateAsync(Supplier supplier)
     {
-        throw new NotImplementedException();
+        await _context.Suppliers.AddAsync(supplier);
+        await _context.SaveChangesAsync();
+        return supplier;
     }
 
-    public Task<IEnumerable<Supplier>> GetAllAsync()
+    public async Task DeleteAsync(int id)
     {
-        throw new NotImplementedException();
+        var record = await GetByIdAsync(id);
+       
+        if (record is null)
+            throw new Exception("warehouse not found");
+        
+        _context.Suppliers.Remove(record);
+        await _context.SaveChangesAsync();
     }
 
-    public Task<Supplier?> GetByIdAsync(int id)
+    public async Task<IEnumerable<Supplier>> GetAllAsync()
     {
-        throw new NotImplementedException();
+        return await _context.Suppliers.ToListAsync();
     }
 
-    public Task UpdateAsync(Supplier supplier)
+    public async Task<Supplier?> GetByIdAsync(int id)
     {
-        throw new NotImplementedException();
+        return await _context.Suppliers.FindAsync(id);
     }
+
+    public async Task UpdateAsync(Supplier supplier)
+    {
+        var record = await GetByIdAsync(supplier.Id);
+       
+        if (record is null)
+            throw new Exception("warehouse not found");
+        
+        record.Name = supplier.Name;
+        await _context.SaveChangesAsync();    }
 }
