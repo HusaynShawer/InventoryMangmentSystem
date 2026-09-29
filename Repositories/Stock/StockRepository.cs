@@ -41,14 +41,11 @@ public class StockRepository : IStockRepository
 
     public async Task IncreaseStockAsync(int productId, int quantity)
     {
-        if (quantity <= 0)
-            throw new Exception("Quantity must be bigger than 0");
-
         var stock = await _context.Stocks
             .FirstOrDefaultAsync(s => s.productId == productId);
 
         if (stock is null)
-            throw new Exception("No stock here");
+            throw new Exception("Stock not found");
 
         stock.Quantity += quantity;
 
@@ -57,17 +54,11 @@ public class StockRepository : IStockRepository
 
     public async Task DecreaseStockAsync(int productId, int quantity)
     {
-        if (quantity <= 0)
-            throw new Exception("Quantity must be bigger than 0");
-
         var stock = await _context.Stocks
             .FirstOrDefaultAsync(s => s.productId == productId);
 
         if (stock is null)
-            throw new Exception("No stock here");
-
-        if (stock.Quantity < quantity)
-            throw new Exception("Not enough stock");
+            throw new Exception("Stock not found");
 
         stock.Quantity -= quantity;
 
@@ -79,7 +70,7 @@ public class StockRepository : IStockRepository
         var record = await _context.Stocks.FindAsync(stock.Id);
 
         if (record is null)
-            throw new Exception("No stock here");
+            throw new Exception("Stock not found");
 
         record.Quantity = stock.Quantity;
 
@@ -99,3 +90,21 @@ public class StockRepository : IStockRepository
         await _context.SaveChangesAsync();
     }
 }
+// ```
+
+// The important change is that I removed the duplicate **quantity validation** from the repository because your `StockService` already handles:
+
+// ```csharp
+// if (quantity <= 0)
+// ```
+
+// and, for decreasing:
+
+// ```csharp
+// if (record.Quantity < quantity)
+// ```
+
+// So now the responsibilities are cleaner:
+
+// **Service:** "Is this operation allowed?"
+// **Repository:** "Perform the database operation."
