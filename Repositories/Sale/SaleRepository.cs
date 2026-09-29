@@ -1,7 +1,7 @@
 using InventoryMangmentSystem.Models;
 using InventoryMangmentSystem.Data;
 using Microsoft.EntityFrameworkCore;
-namespace InventoryMangmentSystem;
+namespace InventoryMangmentSystem.Repositories;
 
 public class SaleRepository : ISaleRepository
 {

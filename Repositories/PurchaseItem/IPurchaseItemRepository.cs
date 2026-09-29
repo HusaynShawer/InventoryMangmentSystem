@@ -2,7 +2,7 @@ using InventoryMangmentSystem.Data;
 using InventoryMangmentSystem.Models;
 namespace InventoryMangmentSystem.Repositories;
 
-public interface IPurchaseItemRepository
+public interface IPurchaseItemsRepository
 {
     Task<PurchaseItems> AddAsync(PurchaseItems purchaseItems);
 

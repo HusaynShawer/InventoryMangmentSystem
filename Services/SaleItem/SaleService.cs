@@ -7,8 +7,8 @@ namespace InventoryMangmentSystem.Services;
 public class SaleItemService : ISaleItemService
 {
 
-    private readonly ISaleItemsRepository _saleItem;
-    public SaleItemService(ISaleItemsRepository saleItem)
+    private readonly ISaleItemRepository _saleItem;
+    public SaleItemService(ISaleItemRepository saleItem)
     {
         _saleItem = saleItem;
     }

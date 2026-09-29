@@ -1,5 +1,5 @@
 using InventoryMangmentSystem.Models;
-namespace InventoryMangmentSystem;
+namespace InventoryMangmentSystem.Repositories;
 
 public interface IStockRepository
 {

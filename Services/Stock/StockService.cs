@@ -3,6 +3,7 @@ using InventoryMangmentSystem.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Client.NativeInterop;
+using InventoryMangmentSystem.Repositories;
 namespace InventoryMangmentSystem.Services;
 
 public class StockService : IStockService

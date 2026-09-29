@@ -3,7 +3,7 @@ using InventoryMangmentSystem.Data;
 using InventoryMangmentSystem.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace InventoryMangmentSystem;
+namespace InventoryMangmentSystem.Repositories;
 
 public class CategoryRepository : ICategoryRepository
 {

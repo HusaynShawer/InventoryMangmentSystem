@@ -3,7 +3,7 @@ using InventoryMangmentSystem.Data;
 using Microsoft.EntityFrameworkCore;
 namespace InventoryMangmentSystem.Repositories;
 
-public class SaleItemRepository : ISaleItemsRepository
+public class SaleItemRepository : ISaleItemRepository
 {
     private readonly ApplicationDbContext _context;
     public SaleItemRepository(ApplicationDbContext context)

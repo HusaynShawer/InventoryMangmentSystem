@@ -4,11 +4,11 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 namespace InventoryMangmentSystem.Repositories;
 
-public class PurchaseItemRepository : IPurchaseItemRepository
+public class PurchaseItemsRepository : IPurchaseItemsRepository
 {
 
     private readonly ApplicationDbContext _context;
-    public PurchaseItemRepository(ApplicationDbContext context)
+    public PurchaseItemsRepository(ApplicationDbContext context)
     {
         _context = context;
     }

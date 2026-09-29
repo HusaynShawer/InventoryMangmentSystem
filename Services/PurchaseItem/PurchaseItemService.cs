@@ -7,8 +7,8 @@ namespace InventoryMangmentSystem.Services;
 public class PurchaseItemsService : IPurchaseItemsService
 {
 
-    private readonly IPurchaseItemRepository _purchaseItem;
-    public PurchaseItemsService(IPurchaseItemRepository purchaseItems)
+    private readonly IPurchaseItemsRepository _purchaseItem;
+    public PurchaseItemsService(IPurchaseItemsRepository purchaseItems)
     {
         _purchaseItem = purchaseItems;
     }
