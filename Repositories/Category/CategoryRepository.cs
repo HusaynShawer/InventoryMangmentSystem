@@ -21,38 +21,28 @@ public class CategoryRepository : ICategoryRepository
         return category;
     }
 
-    public async Task<Category> DeleteAsync(int id)
+    public async Task DeleteAsync(int id)
     {
         var record = await GetIDAsync(id);
-        return record; 
+        _context.Categories.Remove(record);
+        await _context.SaveChangesAsync();
     }
 
     public async Task<IEnumerable<Category>> GetAllAsync()
     {
-        var records = await _context.Categories.ToListAsync();
+        return await _context.Categories.ToListAsync();
 
-        if (records is null)
-            throw new Exception("not Categories found");
-
-        return records;
     }
 
-    public async Task<Category> GetIDAsync(int id)
+    public async Task<Category?> GetIDAsync(int id)
     {
-        var record = await _context.Categories.FindAsync(id);
-        if (record is null)
-            throw new Exception("categor is not found");
-        return record;
+        return await _context.Categories.FindAsync(id);
     }
 
-    public async Task<Category> UpdateAsync(Category category)
+    public async Task UpdateAsync(Category category)
     {
         var record = await GetIDAsync(category.Id);
-        if (record is not null)
-        {
-            record.Name = category.Name;
-            await _context.SaveChangesAsync();
-        }
-        throw new Exception("Category not found to update");
+        record.Name = category.Name;
+        await _context.SaveChangesAsync();
     }
 }

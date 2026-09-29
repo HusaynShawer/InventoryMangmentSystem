@@ -23,10 +23,6 @@ public class PurchaseItemRepository : IPurchaseItemRepository
     public async Task DeleteAsync(int id)
     {
         var record = await _context.PurchaseItems.FindAsync(id);
-        if (record is null)
-        {
-            throw new Exception("PurchaseItems is not found to delete it");
-        }
         _context.PurchaseItems.Remove(record);
         await _context.SaveChangesAsync();
     }

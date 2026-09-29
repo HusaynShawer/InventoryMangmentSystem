@@ -15,18 +15,13 @@ public class PurchaseRepository : IPurchaseRepository
     {
         await _context.Purchases.AddAsync(purchase);
         await _context.SaveChangesAsync();
-
         return purchase;
     }
 
     public async Task DeleteAsync(int id)
     {
         var _purchase = await _context.Purchases.FindAsync(id);
-        if (_purchase is null)
-            throw new Exception("purchase not found");
-
         _context.Purchases.Remove(_purchase);
-
         await _context.SaveChangesAsync();
     }
     public async Task<IEnumerable<Purchase>> GetAllAsync()
@@ -48,14 +43,9 @@ public class PurchaseRepository : IPurchaseRepository
     public async Task UpdateAsync(Purchase purchase)
     {
         var record = await GetByIdAsync(purchase.Id);
-
-        if (record is null)
-            throw new Exception("Purchase not found");
-
         record.SupplierId = purchase.SupplierId;
         record.Date = purchase.Date;
         record.TotalAmount = purchase.TotalAmount;
-
         await _context.SaveChangesAsync();
     }   
 }
