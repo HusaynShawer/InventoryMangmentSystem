@@ -19,12 +19,9 @@ public class SaleRepository : ISaleRepository
     {
         return await _context.Sales.FindAsync(id);
     }
-    public async Task Delete(int id)
+    public async Task Delete(Sale sale)
     {
-        var record = await GetSaleAsync(id);
-        if (record is null)
-            throw new Exception("no sales found");
-        _context.Sales.Remove(record);
+        _context.Sales.Remove(sale);
         await _context.SaveChangesAsync();
     }
 
