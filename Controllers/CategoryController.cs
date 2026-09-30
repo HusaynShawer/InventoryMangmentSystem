@@ -21,10 +21,10 @@ public class CategoryController: ControllerBase
         return record.Any() ? Ok(record) : NotFound("No categories found");
     }
 
-    [HttpGet("id")]
-    public async Task<ActionResult<Category>> GetById()
+    [HttpGet("{id}")]
+    public async Task<ActionResult<Category>> GetById(int id)
     {
-        var record = await _service.GetAllAsync();
+        var record = await _service.GetByIdAsync(id);
         return record is null ? Ok(record) : NotFound("Category not found");
     }
     [HttpPost]
@@ -37,18 +37,18 @@ public class CategoryController: ControllerBase
             record
         );
     }
-    [HttpPut("id")]
+    [HttpPut("{id}")]
     public async Task<ActionResult> Update(int id, Category category)
     {
         if (id != category.Id)
             throw new Exception("Miss match");
-        var record = _service.UpdateAsync(category);
+        await _service.UpdateAsync(category);
         return NoContent();
     }
-    [HttpDelete("id")]
-    public async Task<ActionResult> Delete(int id, Category category)
+    [HttpDelete("{id}")]
+    public async Task<ActionResult> Delete(int id)
     {
-        await _service.UpdateAsync(category);
+        await _service.DeleteAsync(id);
         return NoContent();
     }
 }

@@ -21,7 +21,7 @@ public class PurchaseItemsController : ControllerBase
         return _purchaseItems.Any() ? Ok(_purchaseItems) : NotFound("No PurchaseItems found to return");
     }
 
-    [HttpGet("id")]
+    [HttpGet("{id}")]
     public async Task<ActionResult<PurchaseItems>> GetById(int id)
     {
         var _purchaseItem = await _service.GetByIdAsync(id);
@@ -39,7 +39,7 @@ public class PurchaseItemsController : ControllerBase
         );
     }
     
-    [HttpPut("id")]
+    [HttpPut("{id}")]
     public async Task<ActionResult> Update(int id ,PurchaseItems purchaseItems)
     {
         if (id != purchaseItems.Id)
@@ -49,7 +49,7 @@ public class PurchaseItemsController : ControllerBase
         return NoContent();
     }
 
-    [HttpDelete("id")]
+    [HttpDelete("{id}")]
     public async Task<ActionResult> Delete(int id)
     {
         await _service.DeleteAsync(id);

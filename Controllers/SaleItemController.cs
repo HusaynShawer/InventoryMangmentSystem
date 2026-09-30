@@ -21,7 +21,7 @@ public class SaleItemController : ControllerBase
         return _salesItems.Any() ? Ok(_salesItems) : NotFound("No Sale Item found to return");
     }
 
-    [HttpGet("id")]
+    [HttpGet("{id}")]
     public async Task<ActionResult<SaleItem>> GetById(int id)
     {
         var _salesItem = await _service.GetByIdAsync(id);
@@ -39,7 +39,7 @@ public class SaleItemController : ControllerBase
         );
     }
     
-    [HttpPut("id")]
+    [HttpPut("{id}")]
     public async Task<ActionResult> Update(int id ,SaleItem saleItem)
     {
         if (id != saleItem.Id)
@@ -49,7 +49,7 @@ public class SaleItemController : ControllerBase
         return NoContent();
     }
 
-    [HttpDelete("id")]
+    [HttpDelete("{id}")]
     public async Task<ActionResult> Delete(int id)
     {
         await _service.DeleteAsync(id);

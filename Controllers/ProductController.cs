@@ -24,7 +24,7 @@ public class ProductController : ControllerBase
         return products.Any() ? Ok(products) : NotFound("No Products found");
     }
 
-    [HttpGet("id")]
+    [HttpGet("{id}")]
     public async Task<ActionResult<Product>> GetById(int id)
     {
         var product = await _service.GetByIdAsync(id);
@@ -32,7 +32,6 @@ public class ProductController : ControllerBase
 
     }
 
-    [HttpPost]
     [HttpPost]
     public async Task<ActionResult<Product>> Create(Product product)
     {

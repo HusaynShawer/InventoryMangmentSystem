@@ -24,7 +24,7 @@ public class StockMovementController : ControllerBase
         return _stocksMovement.Any() ? Ok(_stocksMovement) : NotFound("No Stock Movements found");
     }
 
-    [HttpGet("id")]
+    [HttpGet("{id}")]
     public async Task<ActionResult<StockMovement>> GetById(int id)
     {
         var _stockMovement = await _service.GetByIdAsync(id);

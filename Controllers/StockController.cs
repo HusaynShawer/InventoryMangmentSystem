@@ -25,7 +25,7 @@ public class StockController : ControllerBase
         return _stocks.Any() ? Ok(_stocks) : NotFound("No Stocks found");
     }
 
-    [HttpGet("id")]
+    [HttpGet("{id}")]
     public async Task<ActionResult<Stock>> GetById(int id)
     {
         var _stock = await _service.GetByProductIdAsync(id);
@@ -64,13 +64,13 @@ public class StockController : ControllerBase
         return NoContent();
     }
 
-    [HttpPatch("id")]
+    [HttpPatch("{id}/decrease")]
     public async Task<ActionResult> DecreaseStockAsync(int id , int quantity)
     {
         await _service.DecreaseStockAsync(id,quantity);
         return NoContent();
     }
-    [HttpPatch("id")]
+    [HttpPatch("{id}/incarease")]
     public async Task<ActionResult> IncreaseStockAsync(int id , int quantity)
     {
         await _service.IncreaseStockAsync(id,quantity);

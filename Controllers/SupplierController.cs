@@ -24,7 +24,7 @@ public class SupplierController : ControllerBase
         return _suppliers.Any() ? Ok(_suppliers) : NotFound("No Suppliers found");
     }
 
-    [HttpGet("id")]
+    [HttpGet("{id}")]
     public async Task<ActionResult<Supplier>> GetById(int id)
     {
         var _supplier = await _service.GetByIdAsync(id);
@@ -32,7 +32,6 @@ public class SupplierController : ControllerBase
 
     }
 
-    [HttpPost]
     [HttpPost]
     public async Task<ActionResult<Supplier>> Create(Supplier supplier)
     {

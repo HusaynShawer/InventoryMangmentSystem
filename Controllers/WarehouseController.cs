@@ -24,7 +24,7 @@ public class WarehouseController : ControllerBase
         return _warehouses.Any() ? Ok(_warehouses) : NotFound("No Warehouse found");
     }
 
-    [HttpGet("id")]
+    [HttpGet("{id}")]
     public async Task<ActionResult<Warehouse>> GetById(int id)
     {
         var _warehouse = await _service.GetByIdAsync(id);
@@ -32,7 +32,6 @@ public class WarehouseController : ControllerBase
 
     }
 
-    [HttpPost]
     [HttpPost]
     public async Task<ActionResult<Warehouse>> Create(Warehouse warehouse)
     {
