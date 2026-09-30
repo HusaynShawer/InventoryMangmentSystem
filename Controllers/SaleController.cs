@@ -8,8 +8,8 @@ namespace InventoryMangmentSystem.Controllers;
 [Route("/api[controller]")]
 public class SaleController : ControllerBase
 {
-    private readonly SaleService _service;
-    public SaleController(SaleService service)
+    private readonly ISaleService _service;
+    public SaleController(ISaleService service)
     {
         _service = service;
     }

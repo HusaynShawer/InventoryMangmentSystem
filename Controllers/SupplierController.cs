@@ -8,10 +8,10 @@ namespace InventoryMangmentSystem.Controllers;
 public class SupplierController : ControllerBase
 {
 
-    private readonly SupplierService _service;
+    private readonly ISupplierService _service;
 
 
-    public SupplierController(SupplierService service)
+    public SupplierController(ISupplierService service)
     {
         _service = service;
     }

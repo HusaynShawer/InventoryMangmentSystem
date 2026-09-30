@@ -9,10 +9,10 @@ namespace InventoryMangmentSystem.Controllers;
 public class StockController : ControllerBase
 {
 
-    private readonly StockService _service;
+    private readonly IStockService _service;
 
 
-    public StockController(StockService service)
+    public StockController(IStockService service)
     {
         _service = service;
     }

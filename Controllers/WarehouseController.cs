@@ -8,10 +8,10 @@ namespace InventoryMangmentSystem.Controllers;
 public class WarehouseController : ControllerBase
 {
 
-    private readonly WarehouseService _service;
+    private readonly IWarehouseService _service;
 
 
-    public WarehouseController(WarehouseService service)
+    public WarehouseController(IWarehouseService service)
     {
         _service = service;
     }
