@@ -11,6 +11,6 @@ public interface IStockMovementRepository
 
     Task UpdateAsync(StockMovement stockMovement);
 
-    Task DeleteAsync(int id);
+    Task DeleteAsync(StockMovement stockMovement);
 
 }

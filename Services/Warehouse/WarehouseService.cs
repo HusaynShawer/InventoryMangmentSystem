@@ -1,7 +1,5 @@
 using InventoryMangmentSystem.Models;
-using InventoryMangmentSystem.Data;
 using InventoryMangmentSystem.Repositories;
-using System.Security.Authentication;
 namespace InventoryMangmentSystem.Services;
 
 public class WarehouseService : IWarehouseService
@@ -24,9 +22,7 @@ public class WarehouseService : IWarehouseService
     public async Task DeleteAsync(int id)
     {
         var record = await GetByIdAsync(id);
-        if (record is null)
-            throw new Exception("warehouse not found to delete it");
-        await _warehouse.DeleteAsync(id);
+        await _warehouse.DeleteAsync(record);
     }
 
     public async Task<IEnumerable<Warehouse>> GetAllAsync()

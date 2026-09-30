@@ -11,7 +11,7 @@ public interface IStockRepository
 
     Task UpdateAsync(Stock stock);
 
-    Task DeleteAsync(int id);
+    Task DeleteAsync(Stock stock);
 
     Task IncreaseStockAsync(int productId, int quantity);
 

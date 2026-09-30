@@ -19,14 +19,9 @@ public class SupplierRepository : ISupplierRepository
         return supplier;
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task DeleteAsync(Supplier supplier)
     {
-        var record = await GetByIdAsync(id);
-       
-        if (record is null)
-            throw new Exception("warehouse not found");
-        
-        _context.Suppliers.Remove(record);
+        _context.Suppliers.Remove(supplier);
         await _context.SaveChangesAsync();
     }
 

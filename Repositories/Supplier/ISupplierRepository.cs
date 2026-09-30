@@ -12,5 +12,5 @@ public interface ISupplierRepository
 
     Task UpdateAsync(Supplier supplier);
 
-    Task DeleteAsync(int id);
+    Task DeleteAsync(Supplier supplier);
 }

@@ -1,7 +1,5 @@
 using InventoryMangmentSystem.Models;
-using InventoryMangmentSystem.Data;
 using InventoryMangmentSystem.Repositories;
-using System.Security.Authentication;
 namespace InventoryMangmentSystem.Services;
 
 public class SupplierService : ISupplierService
@@ -24,9 +22,7 @@ public class SupplierService : ISupplierService
     public async Task DeleteAsync(int id)
     {
         var record = await GetByIdAsync(id);
-        if (record is null)
-            throw new Exception("supplier not found to delete it");
-        await _supplier.DeleteAsync(id);
+        await _supplier.DeleteAsync(record);
     }
 
     public async Task<IEnumerable<Supplier>> GetAllAsync()

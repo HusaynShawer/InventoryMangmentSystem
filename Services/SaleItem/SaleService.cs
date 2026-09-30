@@ -26,7 +26,7 @@ public class SaleItemService : ISaleItemService
         var record = await GetByIdAsync(id);
         if (record is null)
             throw new Exception("SaleItem not found to delete it");
-        await _saleItem.Delete(id);
+        await _saleItem.Delete(record);
     }
 
     public async Task<IEnumerable<SaleItem>> GetAllAsync()

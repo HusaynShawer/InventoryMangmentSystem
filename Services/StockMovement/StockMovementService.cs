@@ -24,9 +24,7 @@ public class StockMovementService : IStockMovementService
     public async Task DeleteAsync(int id)
     {
         var record = await GetByIdAsync(id);
-        if (record is null)
-            throw new Exception("StockMovement not found to delete it");
-        await _stockMovement.DeleteAsync(id);
+        await _stockMovement.DeleteAsync(record);
     }
 
     public async Task<IEnumerable<StockMovement>> GetAllAsync()

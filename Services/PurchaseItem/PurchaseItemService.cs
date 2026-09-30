@@ -24,9 +24,7 @@ public class PurchaseItemsService : IPurchaseItemsService
     public async Task DeleteAsync(int id)
     {
         var record = await GetByIdAsync(id);
-        if (record is null)
-            throw new Exception("purchaseItem not found to delete it");
-        await _purchaseItem.DeleteAsync(id);
+        await _purchaseItem.DeleteAsync(record);
     }
 
     public async Task<IEnumerable<PurchaseItems>> GetAllAsync()

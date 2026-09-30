@@ -1,8 +1,6 @@
 using InventoryMangmentSystem.Models;
-using InventoryMangmentSystem.Data;
 using InventoryMangmentSystem.Services;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics.Contracts;
 namespace InventoryMangmentSystem.Controllers;
 
 [ApiController]

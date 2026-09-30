@@ -22,12 +22,9 @@ public class StockMovementRepository : IStockMovementRepository
         return stockMovement;
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task DeleteAsync(StockMovement stockMovement)
     {
-        var record = await GetByIdAsync(id);
-        if (record is null)
-            throw new Exception("No Stock Movement to delete it");
-        _context.StockMovements.Remove(record);
+        _context.StockMovements.Remove(stockMovement);
         await _context.SaveChangesAsync();
     }
 

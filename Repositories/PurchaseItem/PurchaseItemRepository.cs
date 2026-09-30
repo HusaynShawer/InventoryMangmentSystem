@@ -20,10 +20,9 @@ public class PurchaseItemsRepository : IPurchaseItemsRepository
         
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task DeleteAsync(PurchaseItems purchaseItems)
     {
-        var record = await _context.PurchaseItems.FindAsync(id);
-        _context.PurchaseItems.Remove(record);
+        _context.PurchaseItems.Remove(purchaseItems);
         await _context.SaveChangesAsync();
     }
 

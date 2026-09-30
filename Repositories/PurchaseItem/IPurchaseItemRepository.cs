@@ -14,5 +14,5 @@ public interface IPurchaseItemsRepository
 
     Task UpdateAsync(PurchaseItems purchaseItems);
 
-    Task DeleteAsync(int id);
+    Task DeleteAsync(PurchaseItems purchaseItems);
 }

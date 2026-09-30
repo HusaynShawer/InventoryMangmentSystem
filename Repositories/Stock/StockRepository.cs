@@ -77,16 +77,9 @@ public class StockRepository : IStockRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task DeleteAsync(int productId)
+    public async Task DeleteAsync(Stock stock)
     {
-        var stock = await _context.Stocks
-            .FirstOrDefaultAsync(s => s.productId == productId);
-
-        if (stock is null)
-            throw new Exception("Stock not found");
-
         _context.Stocks.Remove(stock);
-
         await _context.SaveChangesAsync();
     }
 }

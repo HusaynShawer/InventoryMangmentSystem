@@ -18,10 +18,9 @@ public class PurchaseRepository : IPurchaseRepository
         return purchase;
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task DeleteAsync(Purchase purchase)
     {
-        var _purchase = await _context.Purchases.FindAsync(id);
-        _context.Purchases.Remove(_purchase);
+        _context.Purchases.Remove(purchase);
         await _context.SaveChangesAsync();
     }
     public async Task<IEnumerable<Purchase>> GetAllAsync()

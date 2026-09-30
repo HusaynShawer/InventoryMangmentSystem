@@ -1,7 +1,6 @@
 using InventoryMangmentSystem.Services;
 using InventoryMangmentSystem.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 namespace InventoryMangmentSystem.Controllers;
 
 [ApiController]

@@ -11,6 +11,6 @@ public interface IWarehouseRepository
 
     Task UpdateAsync(Warehouse warehouse);
 
-    Task DeleteAsync(int id);
+    Task DeleteAsync(Warehouse warehouse);
 
 }

@@ -1,8 +1,4 @@
-using InventoryMangmentSystem.Data;
 using InventoryMangmentSystem.Models;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Identity.Client.NativeInterop;
 using InventoryMangmentSystem.Repositories;
 namespace InventoryMangmentSystem.Services;
 
@@ -27,7 +23,6 @@ public class StockService : IStockService
         if (quantity <=0)
             throw new Exception("Quantity must be bigger than 0");
         var record = await GetByProductIdAsync(productId);
-
         if(record.Quantity < quantity)
             throw new Exception("quntity not enough to decrease ");
         await _stock.DecreaseStockAsync(productId,quantity);
@@ -35,8 +30,8 @@ public class StockService : IStockService
 
     public async Task DeleteAsync(int productId)
     {
-        await GetByProductIdAsync(productId);
-        await _stock.DeleteAsync(productId);
+        var record = await GetByProductIdAsync(productId);
+        await _stock.DeleteAsync(record);
     }
 
     public async Task<IEnumerable<Stock>> GetAllAsync()

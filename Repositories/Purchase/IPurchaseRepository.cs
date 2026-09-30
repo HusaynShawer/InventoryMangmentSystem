@@ -14,5 +14,5 @@ public interface IPurchaseRepository
 
     Task UpdateAsync(Purchase purchase);
 
-    Task DeleteAsync(int id);
+    Task DeleteAsync(Purchase purchase);
 }

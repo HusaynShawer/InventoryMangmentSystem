@@ -9,5 +9,5 @@ public interface ISaleRepository
     //Task<Sale?> GetSaleWithItemsAsync(int id);
     Task<Sale> CreateAsync(Sale sale);
     Task UpdateAsync(Sale sale);
-    Task Delete(int id);
+    Task Delete(Sale sale);
 }

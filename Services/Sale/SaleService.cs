@@ -24,9 +24,7 @@ public class SaleService : ISaleService
     public async Task DeleteAsync(int id)
     {
         var record = await GetByIdAsync(id);
-        if (record is null)
-            throw new Exception("sale not found to delete it");
-        await _sale.Delete(id);
+        await _sale.Delete(record);
     }
 
     public async Task<IEnumerable<Sale>> GetAllAsync()

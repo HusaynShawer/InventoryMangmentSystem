@@ -26,7 +26,7 @@ public class PurchaseService : IPurchaseService
         var record = await GetByIdAsync(id);
         if (record is null)
             throw new Exception("Purchase not found to delete it");
-        await _purchase.DeleteAsync(id);
+        await _purchase.DeleteAsync(record);
     }
 
     public async Task<IEnumerable<Purchase>> GetAllAsync()
@@ -40,8 +40,6 @@ public class PurchaseService : IPurchaseService
     public async Task<Purchase> GetByIdAsync(int id)
     {
         var record = await _purchase.GetByIdAsync(id);
-        if (record is null)
-            throw new Exception("Purchase not found");
         return record; 
     }
 

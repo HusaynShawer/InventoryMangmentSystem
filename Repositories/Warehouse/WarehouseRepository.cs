@@ -19,14 +19,9 @@ public class WarehouseRepository : IWarehouseRepository
         return warehouse;
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task DeleteAsync(Warehouse warehouse)
     {
-        var record = await GetByIdAsync(id);
-       
-        if (record is null)
-            throw new Exception("warehouse not found");
-       
-        _context.Warehouses.Remove(record);
+        _context.Warehouses.Remove(warehouse);
         await _context.SaveChangesAsync();
     }
 
