@@ -30,8 +30,12 @@ public class SaleRepository : ISaleRepository
     {
         var record = await GetSaleAsync(sale.Id);
         if (record is null)
-            throw new Exception("no sales found");
+            throw new Exception("Sale not found");
+
+        record.WarehouseId = sale.WarehouseId;         
+        record.CreatedByUserId = sale.CreatedByUserId; 
         record.TotalAmount = sale.TotalAmount;
+
         await _context.SaveChangesAsync();
     }
 

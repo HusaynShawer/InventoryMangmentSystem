@@ -63,7 +63,7 @@ public class StockService : IStockService
 
     public async Task UpdateAsync(Stock stock)
     {
-        await GetByProductIdAsync(stock.productId);
+        await GetByProductIdAsync(stock.ProductId);
         await _stock.UpdateAsync(stock);
     }
 }

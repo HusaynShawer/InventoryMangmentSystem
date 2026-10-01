@@ -1,17 +1,19 @@
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Data.Common;
 
 namespace InventoryMangmentSystem.Models
 {
     public class Warehouse
     {
         [Key]
-        public int Id {get; set;}
+        public int Id { get; set; }
 
-        public string Name {get; set;}
-        public string Location {get; set;}
-        
+        public string Name { get; set; } = string.Empty;
+        public string Location { get; set; } = string.Empty;
 
+        public ICollection<Stock> Stocks { get; set; } = new List<Stock>();
+        public ICollection<StockMovement> StockMovements { get; set; } = new List<StockMovement>();
+        public ICollection<UserWarehouse> UserWarehouses { get; set; } = new List<UserWarehouse>();
+        public ICollection<Purchase> Purchases { get; set; } = new List<Purchase>();
+        public ICollection<Sale> Sales { get; set; } = new List<Sale>();
     }
 }

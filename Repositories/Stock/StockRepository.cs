@@ -29,7 +29,7 @@ public class StockRepository : IStockRepository
     public async Task<Stock?> GetByProductIdAsync(int productId)
     {
         return await _context.Stocks
-            .FirstOrDefaultAsync(s => s.productId == productId);
+            .FirstOrDefaultAsync(s => s.ProductId == productId);
     }
 
     public async Task<IEnumerable<Stock>> GetLowStockAsync()
@@ -42,7 +42,7 @@ public class StockRepository : IStockRepository
     public async Task IncreaseStockAsync(int productId, int quantity)
     {
         var stock = await _context.Stocks
-            .FirstOrDefaultAsync(s => s.productId == productId);
+            .FirstOrDefaultAsync(s => s.ProductId == productId);
 
         if (stock is null)
             throw new Exception("Stock not found");
@@ -55,7 +55,7 @@ public class StockRepository : IStockRepository
     public async Task DecreaseStockAsync(int productId, int quantity)
     {
         var stock = await _context.Stocks
-            .FirstOrDefaultAsync(s => s.productId == productId);
+            .FirstOrDefaultAsync(s => s.ProductId == productId);
 
         if (stock is null)
             throw new Exception("Stock not found");

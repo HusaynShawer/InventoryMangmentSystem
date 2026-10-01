@@ -1,8 +1,36 @@
 erDiagram
+    User {
+        int Id PK
+        string UserName
+        string Email
+        string PasswordHash
+        string FullName
+        string Role
+        bool IsActive
+        datetime CreatedAt
+        int SupplierId FK "nullable"
+    }
+
+    Warehouse {
+        int Id PK
+        string Name
+        string Location
+    }
+
+    UserWarehouse {
+        int Id PK
+        int UserId FK
+        int WarehouseId FK
+        string AccessLevel
+        bool IsDefault
+        datetime AssignedAt
+    }
+
     Category {
         int Id PK
         string Name
     }
+
     Product {
         int Id PK
         string Sku
@@ -11,28 +39,29 @@ erDiagram
         decimal UnitPrice
         int ReorderLevel
     }
-    Warehouse {
-        int Id PK
-        string Name
-        string Location
-    }
+
     Stock {
         int Id PK
         int ProductId FK
         int WarehouseId FK
         int Quantity
     }
+
     Supplier {
         int Id PK
         string Name
         string ContactInfo
     }
+
     Purchase {
         int Id PK
         int SupplierId FK
+        int WarehouseId FK
+        int CreatedByUserId FK
         datetime Date
         decimal TotalAmount
     }
+
     PurchaseItem {
         int Id PK
         int PurchaseId FK
@@ -40,11 +69,15 @@ erDiagram
         int Quantity
         decimal UnitCost
     }
+
     Sale {
         int Id PK
+        int WarehouseId FK
+        int CreatedByUserId FK
         datetime Date
         decimal TotalAmount
     }
+
     SaleItem {
         int Id PK
         int SaleId FK
@@ -52,10 +85,12 @@ erDiagram
         int Quantity
         decimal UnitPrice
     }
+
     StockMovement {
         int Id PK
         int ProductId FK
         int WarehouseId FK
+        int UserId FK
         int Quantity
         string MovementType
         int ReferenceId
@@ -73,3 +108,12 @@ erDiagram
     Product ||--o{ SaleItem : sold
     Product ||--o{ StockMovement : moves
     Warehouse ||--o{ StockMovement : at
+    Warehouse ||--o{ Purchase : receives
+    Warehouse ||--o{ Sale : ships
+
+    User ||--o{ Purchase : creates
+    User ||--o{ Sale : creates
+    User ||--o{ StockMovement : performs
+    User ||--o{ UserWarehouse : assigned
+    Warehouse ||--o{ UserWarehouse : has
+    Supplier ||--o| User : "has account"

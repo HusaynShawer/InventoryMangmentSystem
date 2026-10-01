@@ -42,9 +42,15 @@ public class PurchaseRepository : IPurchaseRepository
     public async Task UpdateAsync(Purchase purchase)
     {
         var record = await GetByIdAsync(purchase.Id);
+        if (record is null)
+            throw new Exception("Purchase not found");
+
         record.SupplierId = purchase.SupplierId;
+        record.WarehouseId = purchase.WarehouseId;         
+        record.CreatedByUserId = purchase.CreatedByUserId; 
         record.Date = purchase.Date;
         record.TotalAmount = purchase.TotalAmount;
+
         await _context.SaveChangesAsync();
-    }   
+    }
 }

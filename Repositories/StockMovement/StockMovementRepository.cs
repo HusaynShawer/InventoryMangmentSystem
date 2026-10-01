@@ -42,11 +42,12 @@ public class StockMovementRepository : IStockMovementRepository
     public async Task UpdateAsync(StockMovement stockMovement)
     {
         var record = await _context.StockMovements.FindAsync(stockMovement.Id);
-
         if (record is null)
-            throw new Exception("No stock here");
+            throw new Exception("Stock movement not found");
 
-        record.Warehoused = stockMovement.Warehoused;
+        record.ProductId = stockMovement.ProductId;
+        record.WarehouseId = stockMovement.WarehouseId;
+        record.UserId = stockMovement.UserId;
         record.Quantity = stockMovement.Quantity;
         record.MovementType = stockMovement.MovementType;
         record.Date = stockMovement.Date;

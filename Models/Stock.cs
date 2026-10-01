@@ -1,18 +1,21 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Data.Common;
 
 namespace InventoryMangmentSystem.Models
 {
     public class Stock
     {
         [Key]
-        public int Id {get; set;}
-        [ForeignKey("product")]
-        public int productId {get; set;}
-        [ForeignKey("warehouse")]
-        public int WarehouseId {get; set;}
-        
-        public int Quantity {get; set;}
+        public int Id { get; set; }
+
+        [ForeignKey("Product")]
+        public int ProductId { get; set; }
+        public Product? Product { get; set; }
+
+        [ForeignKey("Warehouse")]
+        public int WarehouseId { get; set; }
+        public Warehouse? Warehouse { get; set; }
+
+        public int Quantity { get; set; }
     }
 }
