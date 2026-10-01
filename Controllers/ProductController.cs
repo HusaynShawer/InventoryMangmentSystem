@@ -1,5 +1,6 @@
 using InventoryMangmentSystem.Models;
 using InventoryMangmentSystem.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 namespace InventoryMangmentSystem.Controllers;
 
@@ -17,6 +18,7 @@ public class ProductController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize]
     public async Task<ActionResult<IEnumerable<Product>>> GetAll()
     {
         var products = await _service.GetAllAsync();
