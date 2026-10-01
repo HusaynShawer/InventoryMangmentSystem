@@ -9,10 +9,10 @@ namespace InventoryMangmentSystem.Controllers;
 public class ProductController : ControllerBase
 {
 
-    private readonly IProductService _service;
+    private readonly GProductService _service;
 
 
-    public ProductController(IProductService service)
+    public ProductController(GProductService service)
     {
         _service = service;
     }
@@ -21,7 +21,7 @@ public class ProductController : ControllerBase
     [Authorize]
     public async Task<ActionResult<IEnumerable<Product>>> GetAll()
     {
-        var products = await _service.GetAllAsync();
+        var products = await _service.GetAll();
 
         return products.Any() ? Ok(products) : NotFound("No Products found");
     }
@@ -29,7 +29,7 @@ public class ProductController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<Product>> GetById(int id)
     {
-        var product = await _service.GetByIdAsync(id);
+        var product = await _service.GetByID(id);
         return product is not null ? Ok(product) : NotFound("Product Not Found");
 
     }
@@ -37,7 +37,7 @@ public class ProductController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Product>> Create(Product product)
     {
-        var createdProduct = await _service.AddAsync(product);
+        var createdProduct = await _service.Add(product);
 
         return CreatedAtAction(
             nameof(GetById),
@@ -52,7 +52,7 @@ public class ProductController : ControllerBase
         if (id != product.Id)
             return BadRequest("ID mismatch.");
 
-        await _service.UpdateAsync(product);
+        await _service.Update(product);
 
         return NoContent();
     }
@@ -60,7 +60,7 @@ public class ProductController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        await _service.DeleteAsync(id);
+        await _service.Delete(id);
 
         return NoContent();
     }
