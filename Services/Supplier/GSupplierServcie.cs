@@ -26,6 +26,14 @@ public class GSupplierService
             throw new Exception("Supplier Not found");
         return record;
     }
+    public async Task<Supplier> Create(Supplier supplier)
+    {
+        var recod = await _repo.Add(supplier);
+        if (recod is null)
+            throw new Exception("sorry Supplier item dont added try again");
+        return supplier;
+
+    }
 
     public async Task Delete(int id)
     {

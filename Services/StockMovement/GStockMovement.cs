@@ -26,6 +26,15 @@ public class GStockMovementService
             throw new Exception("StockMovement Not found");
         return record;
     }
+    public async Task<StockMovement> Create(StockMovement stockMovement)
+    {
+        var recod = await _repo.Add(stockMovement);
+        if (recod is null)
+            throw new Exception("sorry StockMovement item dont added try again");
+        return stockMovement;
+
+    }
+
 
     public async Task Delete(int id)
     {

@@ -8,8 +8,8 @@ namespace InventoryMangmentSystem.Controllers;
 [Route("/api[controller]")]
 public class SaleItemController : ControllerBase
 {
-    private readonly ISaleItemService _service;
-    public SaleItemController(ISaleItemService service)
+    private readonly GsaleItemService _service;
+    public SaleItemController(GsaleItemService service)
     {
         _service = service;
     }
@@ -17,21 +17,21 @@ public class SaleItemController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<SaleItem>>> GetAll()
     {
-        var _salesItems = await _service.GetAllAsync();
+        var _salesItems = await _service.GetAll();
         return _salesItems.Any() ? Ok(_salesItems) : NotFound("No Sale Item found to return");
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<SaleItem>> GetById(int id)
     {
-        var _salesItem = await _service.GetByIdAsync(id);
+        var _salesItem = await _service.GetByID(id);
         return _salesItem is null ? Ok(_salesItem) : NotFound("sale item not found to return");
     }
 
     [HttpPost]
     public async Task<ActionResult<SaleItem>> Create(SaleItem saleItem)
     {
-        var _saleItem = await _service.AddAsync(saleItem);
+        var _saleItem = await _service.Create(saleItem);
         return CreatedAtAction(
             nameof(GetById),
             new {id = _saleItem.Id},
@@ -45,14 +45,14 @@ public class SaleItemController : ControllerBase
         if (id != saleItem.Id)
             throw new Exception("Miss match cant update sale item");
         var _salesItem = await GetById(id);
-        await _service.UpdateAsync(saleItem);
+        await _service.Update(saleItem);
         return NoContent();
     }
 
     [HttpDelete("{id}")]
     public async Task<ActionResult> Delete(int id)
     {
-        await _service.DeleteAsync(id);
+        await _service.Delete(id);
         return NoContent();
     }
 }

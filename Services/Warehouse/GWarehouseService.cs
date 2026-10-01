@@ -27,6 +27,14 @@ public class GWarehouseService
         return record;
     }
 
+    public async Task<Warehouse> Create(Warehouse warehouse)
+    {
+        var recod = await _repo.Add(warehouse);
+        if (recod is null)
+            throw new Exception("sorry Warehouse item dont added try again");
+        return warehouse;
+
+    }
     public async Task Delete(int id)
     {
         var record = await GetByID(id);

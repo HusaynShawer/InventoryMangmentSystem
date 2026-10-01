@@ -29,6 +29,17 @@ public class WarehouseController : ControllerBase
 
         return Ok(warehouse);
     }
+    [HttpPost]
+    public async Task<ActionResult<Warehouse>> Create(Warehouse warehouse)
+    {
+        var _supplier = await _service.Create(warehouse);
+
+        return CreatedAtAction(
+            nameof(GetById),
+            new { id = _supplier.Id},
+            _supplier
+        );
+    }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, Warehouse warehouse)

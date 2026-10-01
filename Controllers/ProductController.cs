@@ -37,7 +37,7 @@ public class ProductController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Product>> Create(Product product)
     {
-        var createdProduct = await _service.Add(product);
+        var createdProduct = await _service.Create(product);
 
         return CreatedAtAction(
             nameof(GetById),

@@ -28,16 +28,16 @@ public class CategoryController: ControllerBase
         var record = await _service.GetByID(id);
         return record is null ? Ok(record) : NotFound("Category not found");
     }
-    // [HttpPost]
-    // public async Task<ActionResult<Category>> Create(Category category)
-    // {
-    //     var record = await _service.Add(category);
-    //     return CreatedAtAction(
-    //         nameof(GetById),
-    //         new {id =record.Id},
-    //         record
-    //     );
-    // }
+    [HttpPost]
+    public async Task<ActionResult<Category>> Create(Category category)
+    {
+        var record = await _service.Create(category);
+        return CreatedAtAction(
+            nameof(GetById),
+            new {id =record.Id},
+            record
+        );
+    }
     [HttpPut("{id}")]
     public async Task<ActionResult> Update(int id, Category category)
     {

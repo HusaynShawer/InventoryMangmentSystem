@@ -8,8 +8,8 @@ namespace InventoryMangmentSystem.Controllers;
 [Route("/api[controller]")]
 public class PurchaseController : ControllerBase
 {
-    private readonly IPurchaseService _service;
-    public PurchaseController(IPurchaseService service)
+    private readonly GPurchaseService _service;
+    public PurchaseController(GPurchaseService service)
     {
         _service = service;
     }
@@ -17,21 +17,21 @@ public class PurchaseController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Purchase>>> GetAll()
     {
-        var purcahses = await _service.GetAllAsync();
+        var purcahses = await _service.GetAll();
         return purcahses.Any() ? Ok(purcahses) : NotFound("No purchases found to return");
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<Purchase>> GetById(int id)
     {
-        var purcahse = await _service.GetByIdAsync(id);
+        var purcahse = await _service.GetByID(id);
         return purcahse is null ? Ok(purcahse) : NotFound("Putchase not found to return");
     }
 
     [HttpPost]
     public async Task<ActionResult<Purchase>> Create(Purchase purchase)
     {
-        var _purchase = await _service.AddAsync(purchase);
+        var _purchase = await _service.Create(purchase);
         return CreatedAtAction(
             nameof(GetById),
             new {id = _purchase.Id},
@@ -45,7 +45,7 @@ public class PurchaseController : ControllerBase
         if (id != purchase.Id)
             throw new Exception("Miss match cant update purchase");
         var purcahse = await GetById(id);
-        await _service.UpdateAsync(purchase);
+        await _service.Update(purchase);
         return NoContent();
     }
 
@@ -53,7 +53,7 @@ public class PurchaseController : ControllerBase
     public async Task<ActionResult> Delete(int id)
     {
         var purchase = await GetById(id);
-        await _service.DeleteAsync(id);
+        await _service.Delete(id);
         return NoContent();
     }
 }

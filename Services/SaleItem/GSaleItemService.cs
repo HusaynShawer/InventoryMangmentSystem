@@ -29,6 +29,14 @@ public class GsaleItemService
             throw new Exception("sale item Not found");
         return record;
     }
+    public async Task<SaleItem> Create(SaleItem saleItem)
+    {
+        var recod = await _repo.Add(saleItem);
+        if (recod is null)
+            throw new Exception("sorry Sale item dont added try again");
+        return saleItem;
+
+    }
 
     public async Task Delete(int id)
     {
