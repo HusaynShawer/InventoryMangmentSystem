@@ -1,3 +1,4 @@
+using InventoryMangmentSystem.Data;
 using InventoryMangmentSystem.Models;
 using InventoryMangmentSystem.Repositories;
 namespace InventoryMangmentSystem.Services;
@@ -5,11 +6,13 @@ namespace InventoryMangmentSystem.Services;
 public class GSupplierService
 {
     private readonly BaseRepository<Supplier> _repo;
-
+    private readonly UnitOfWork _unitOfWork;
     public GSupplierService(
-        BaseRepository<Supplier> repo)
+        BaseRepository<Supplier> repo,
+        UnitOfWork unitOfWork)
     {
         _repo = repo;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<IEnumerable<Supplier>> GetAll()
@@ -31,6 +34,7 @@ public class GSupplierService
         var recod = await _repo.Add(supplier);
         if (recod is null)
             throw new Exception("sorry Supplier item dont added try again");
+        await _unitOfWork.SaveAsync();
         return supplier;
 
     }
@@ -39,11 +43,13 @@ public class GSupplierService
     {
         var record = await GetByID(id);
         _repo.Delete(record);
+        await _unitOfWork.SaveAsync();
     }
     public async Task Update(Supplier supplier)
     {
         var record = await GetByID(supplier.Id);  
         record.Name = supplier.Name;
         _repo.Update(record);
+        await _unitOfWork.SaveAsync();
     }
 }

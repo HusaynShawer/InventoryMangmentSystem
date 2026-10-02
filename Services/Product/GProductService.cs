@@ -8,11 +8,13 @@ namespace InventoryMangmentSystem.Services;
 public class GProductService
 {
     private readonly BaseRepository<Product> _repo;
-
+    private readonly UnitOfWork _unitOfWork;
     public GProductService(
-        BaseRepository<Product> repo)
+        BaseRepository<Product> repo,
+        UnitOfWork unitOfWork)
     {
         _repo = repo;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<IEnumerable<Product>> GetAll()
@@ -34,6 +36,7 @@ public class GProductService
         var recod = await _repo.Add(product);
         if (recod is null)
             throw new Exception("sorry Product dont added try again");
+        await _unitOfWork.SaveAsync();
         return product;
 
     }
@@ -41,6 +44,7 @@ public class GProductService
     public async Task Delete(int id)
     {
         var record = await GetByID(id);
+        await _unitOfWork.SaveAsync();
         _repo.Delete(record);
     }
     public async Task Update(Product product)
@@ -49,6 +53,7 @@ public class GProductService
         record.Name = product.Name;
         record.Sku = product.Sku;
         record.UnitPrice = product.UnitPrice;
+        await _unitOfWork.SaveAsync();
         _repo.Update(record);
     }
 }

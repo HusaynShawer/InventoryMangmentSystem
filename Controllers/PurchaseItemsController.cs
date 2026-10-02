@@ -5,7 +5,7 @@ namespace InventoryMangmentSystem.Controllers;
 
 
 [ApiController]
-[Route("/api[controller]")]
+[Route("api/[controller]")]
 public class PurchaseItemsController : ControllerBase
 {
     private readonly GPurchaseItemsService _service;
@@ -25,7 +25,7 @@ public class PurchaseItemsController : ControllerBase
     public async Task<ActionResult<PurchaseItems>> GetById(int id)
     {
         var _purchaseItem = await _service.GetByID(id);
-        return _purchaseItem is null ? Ok(_purchaseItem) : NotFound("PurchaseItem not found to return");
+        return _purchaseItem is not null ? Ok(_purchaseItem) : NotFound("PurchaseItem not found to return");
     }
 
     [HttpPost]

@@ -1,14 +1,16 @@
 using InventoryMangmentSystem.Models;
 using InventoryMangmentSystem.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 namespace InventoryMangmentSystem.Controllers;
+
 
 [ApiController]
 [Route("api/[controller]")]
 public class WarehouseController : ControllerBase
 {
     private readonly GWarehouseService _service;
-
     public WarehouseController(GWarehouseService service)
     {
         _service = service;
@@ -58,4 +60,22 @@ public class WarehouseController : ControllerBase
         await _service.Delete(id);
         return NoContent();
     }
+
+    [HttpGet("products")]
+    [Authorize]
+    public async Task<ActionResult<IEnumerable<Product>>> GetwarehouseProducts()
+    {
+        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var records = await _service.GetWarehouseProducts(userId);
+        return Ok(records);
+    }
+
+    [HttpGet("products/low")]
+    public async Task<ActionResult<IEnumerable<Product>>> GetWarehouseLowProducts()
+    {
+        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var records = await _service.GetWarehouseLowProducts(userId);
+        return Ok(records);
+    }
+
 }
