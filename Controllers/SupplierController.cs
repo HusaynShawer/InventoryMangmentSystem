@@ -8,10 +8,10 @@ namespace InventoryMangmentSystem.Controllers;
 public class SupplierController : ControllerBase
 {
 
-    private readonly ISupplierService _service;
+    private readonly GSupplierService _service;
 
 
-    public SupplierController(ISupplierService service)
+    public SupplierController(GSupplierService service)
     {
         _service = service;
     }
@@ -19,7 +19,7 @@ public class SupplierController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Supplier>>> GetAll()
     {
-        var _suppliers = await _service.GetAllAsync();
+        var _suppliers = await _service.GetAll();
 
         return _suppliers.Any() ? Ok(_suppliers) : NotFound("No Suppliers found");
     }
@@ -27,7 +27,7 @@ public class SupplierController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<Supplier>> GetById(int id)
     {
-        var _supplier = await _service.GetByIdAsync(id);
+        var _supplier = await _service.GetByID(id);
         return _supplier is not null ? Ok(_supplier) : NotFound("Suppliers Not Found");
 
     }
@@ -35,7 +35,7 @@ public class SupplierController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Supplier>> Create(Supplier supplier)
     {
-        var _supplier = await _service.AddAsync(supplier);
+        var _supplier = await _service.Create(supplier);
 
         return CreatedAtAction(
             nameof(GetById),
@@ -50,7 +50,7 @@ public class SupplierController : ControllerBase
         if (id != supplier.Id)
             return BadRequest("ID mismatch.");
 
-        await _service.UpdateAsync(supplier);
+        await _service.Update(supplier);
 
         return NoContent();
     }
@@ -58,7 +58,7 @@ public class SupplierController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        await _service.DeleteAsync(id);
+        await _service.Delete(id);
 
         return NoContent();
     }

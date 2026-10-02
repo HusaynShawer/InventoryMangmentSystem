@@ -7,11 +7,9 @@ namespace InventoryMangmentSystem.Controllers;
 [Route("api/[controller]")]
 public class WarehouseController : ControllerBase
 {
+    private readonly GWarehouseService _service;
 
-    private readonly IWarehouseService _service;
-
-
-    public WarehouseController(IWarehouseService service)
+    public WarehouseController(GWarehouseService service)
     {
         _service = service;
     }
@@ -19,28 +17,27 @@ public class WarehouseController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Warehouse>>> GetAll()
     {
-        var _warehouses = await _service.GetAllAsync();
+        var warehouses = await _service.GetAll();
 
-        return _warehouses.Any() ? Ok(_warehouses) : NotFound("No Warehouse found");
+        return Ok(warehouses);
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<Warehouse>> GetById(int id)
     {
-        var _warehouse = await _service.GetByIdAsync(id);
-        return _warehouse is not null ? Ok(_warehouse) : NotFound("Warehouse Not Found");
+        var warehouse = await _service.GetByID(id);
 
+        return Ok(warehouse);
     }
-
     [HttpPost]
     public async Task<ActionResult<Warehouse>> Create(Warehouse warehouse)
     {
-        var _warehouse = await _service.AddAsync(warehouse);
+        var _supplier = await _service.Create(warehouse);
 
         return CreatedAtAction(
             nameof(GetById),
-            new { id = _warehouse.Id},
-            _warehouse
+            new { id = _supplier.Id},
+            _supplier
         );
     }
 
@@ -50,7 +47,7 @@ public class WarehouseController : ControllerBase
         if (id != warehouse.Id)
             return BadRequest("ID mismatch.");
 
-        await _service.UpdateAsync(warehouse);
+        await _service.Update(warehouse);
 
         return NoContent();
     }
@@ -58,7 +55,7 @@ public class WarehouseController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        await _service.DeleteAsync(id);
+        await _service.Delete(id);
         return NoContent();
     }
 }
