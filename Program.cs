@@ -15,16 +15,8 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 // Repositories
-// builder.Services.AddScoped<IProductRepository, ProductRepository>();
-// builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<WarehouseRepository>();
 builder.Services.AddScoped<IStockRepository, StockRepository>();
-// builder.Services.AddScoped<ISupplierRepository, SupplierRepository>();
-// builder.Services.AddScoped<IPurchaseRepository, PurchaseRepository>();
-// builder.Services.AddScoped<IPurchaseItemsRepository, PurchaseItemsRepository>();
-// builder.Services.AddScoped<ISaleRepository, SaleRepository>();
-// builder.Services.AddScoped<ISaleItemRepository, SaleItemRepository>();
-// builder.Services.AddScoped<IStockMovementRepository, StockMovementRepository>();
-// builder.Services.AddScoped<IWarehouseRepository, WarehouseRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserWarehouseRepository, UserWarehouseRepository>();
 // Services
@@ -32,11 +24,12 @@ builder.Services.AddScoped<IUserWarehouseRepository, UserWarehouseRepository>();
 builder.Services.AddScoped(typeof(BaseRepository<>));
 builder.Services.AddScoped<GProductService>();
 builder.Services.AddScoped<GCategoryService>();
-//builder.Services.AddScoped<IStockService, StockService>();
+builder.Services.AddScoped<GStockService>();
 builder.Services.AddScoped<GSupplierService>();
 builder.Services.AddScoped<GPurchaseService>();
 builder.Services.AddScoped<GPurchaseItemsService>();
 builder.Services.AddScoped<GsaleService>();
+builder.Services.AddScoped<UserWarehouseService>();
 //builder.Services.AddScoped<ISaleItemService, SaleItemService>();
 builder.Services.AddScoped<GStockMovementService>();
 builder.Services.AddScoped<GWarehouseService>();

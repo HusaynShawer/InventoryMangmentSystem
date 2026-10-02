@@ -1,15 +1,17 @@
 using InventoryMangmentSystem.Models;
 using InventoryMangmentSystem.Repositories;
+using System.Security.Claims;
 namespace InventoryMangmentSystem.Services;
 
 public class GWarehouseService
 {
     private readonly BaseRepository<Warehouse> _repo;
-
+    private readonly WarehouseRepository _warehouseRepository;
     public GWarehouseService(
-        BaseRepository<Warehouse> repo)
+        BaseRepository<Warehouse> repo,WarehouseRepository warehouseRepository)
     {
         _repo = repo;
+        _warehouseRepository = warehouseRepository;
     }
 
     public async Task<IEnumerable<Warehouse>> GetAll()
@@ -46,5 +48,11 @@ public class GWarehouseService
         record.Location = warehouse.Location;
         record.Name = warehouse.Name;
         _repo.Update(record);
+    }
+
+    public async Task<IEnumerable<Product>> GetWarehouseProducts(int userId)
+    {
+        var records = await _warehouseRepository.GetWarehouseProduct(userId);
+        return records;
     }
 }
