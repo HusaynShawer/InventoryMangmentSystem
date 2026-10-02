@@ -1,20 +1,19 @@
 using InventoryMangmentSystem.Models;
 using InventoryMangmentSystem.Data;
 using InventoryMangmentSystem.Repositories;
-using System.Security.Authentication;
-using Microsoft.AspNetCore.Authentication;
-using System.Diagnostics.Eventing.Reader;
 namespace InventoryMangmentSystem.Services;
 
 public class GCategoryService
 {
     private readonly BaseRepository<Category> _repo;
-
+    private readonly UnitOfWork _uow;
     public GCategoryService(
-        BaseRepository<Category> repo)
+        BaseRepository<Category> repo,UnitOfWork uow)
     {
         _repo = repo;
+        _uow = uow;
     }
+    
 
     public async Task<IEnumerable<Category>> GetAll()
     {

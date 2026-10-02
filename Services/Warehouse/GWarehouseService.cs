@@ -1,3 +1,4 @@
+using InventoryMangmentSystem.Data;
 using InventoryMangmentSystem.Models;
 using InventoryMangmentSystem.Repositories;
 using System.Security.Claims;
@@ -7,11 +8,13 @@ public class GWarehouseService
 {
     private readonly BaseRepository<Warehouse> _repo;
     private readonly WarehouseRepository _warehouseRepository;
+    private readonly UnitOfWork _unitOfWork;
     public GWarehouseService(
-        BaseRepository<Warehouse> repo,WarehouseRepository warehouseRepository)
+        BaseRepository<Warehouse> repo,WarehouseRepository warehouseRepository,UnitOfWork unitOfWork)
     {
         _repo = repo;
         _warehouseRepository = warehouseRepository;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<IEnumerable<Warehouse>> GetAll()
@@ -34,6 +37,7 @@ public class GWarehouseService
         var recod = await _repo.Add(warehouse);
         if (recod is null)
             throw new Exception("sorry Warehouse item dont added try again");
+        await _unitOfWork.SaveAsync();
         return warehouse;
 
     }

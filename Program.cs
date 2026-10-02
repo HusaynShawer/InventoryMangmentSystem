@@ -18,6 +18,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<WarehouseRepository>();
 builder.Services.AddScoped<IStockRepository, StockRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<UnitOfWork>();
 builder.Services.AddScoped<IUserWarehouseRepository, UserWarehouseRepository>();
 // Services
 

@@ -1,3 +1,4 @@
+using InventoryMangmentSystem.Data;
 using InventoryMangmentSystem.Models;
 using InventoryMangmentSystem.Repositories;
 using System.Security.Claims;
@@ -6,10 +7,12 @@ namespace InventoryMangmentSystem.Services;
 public class UserWarehouseService
 {
     private readonly BaseRepository<UserWarehouse> _repo;
+    private readonly UnitOfWork _unitOfWork;
     public UserWarehouseService(
-        BaseRepository<UserWarehouse> repo)
+        BaseRepository<UserWarehouse> repo,UnitOfWork unitOfWork)
     {
         _repo = repo;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<IEnumerable<UserWarehouse>> GetAll()
@@ -32,6 +35,7 @@ public class UserWarehouseService
         var recod = await _repo.Add(userWarehouse);
         if (recod is null)
             throw new Exception("sorry User Warehouse item dont added try again");
+        await _unitOfWork.SaveAsync();
         return userWarehouse;
 
     }
