@@ -1,3 +1,4 @@
+using InventoryMangmentSystem.Data;
 using InventoryMangmentSystem.DTOs.Auth;
 using InventoryMangmentSystem.Models;
 using InventoryMangmentSystem.Repositories;
@@ -9,15 +10,17 @@ public class AuthService : IAuthService
     private readonly IUserRepository _userRepo;
     private readonly IPasswordHasher _hasher;
     private readonly ITokenService _tokenService;
-
+    private readonly UnitOfWork _unitofWork;
     public AuthService(
         IUserRepository userRepo,
         IPasswordHasher hasher,
-        ITokenService tokenService)
+        ITokenService tokenService,
+        UnitOfWork unitOfWork )
     {
         _userRepo = userRepo;
         _hasher = hasher;
         _tokenService = tokenService;
+        _unitofWork = unitOfWork;
     }
 
     public async Task<AuthResponseDto> RegisterAsync(RegisterDto dto)
@@ -46,8 +49,7 @@ public class AuthService : IAuthService
         };
 
         await _userRepo.CreateAsync(user);
-
-
+        await _unitofWork.SaveAsync();
         var token = _tokenService.GenerateToken(user);
 
         return new AuthResponseDto

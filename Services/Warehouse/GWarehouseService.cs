@@ -59,4 +59,9 @@ public class GWarehouseService
         var records = await _warehouseRepository.GetWarehouseProduct(userId);
         return records;
     }
+    public async Task<IEnumerable<Product>> GetWarehouseLowProducts(int userId)
+    {
+        var records = await _warehouseRepository.GetWarehouseLowProducts(userId);
+        return records;
+    }
 }

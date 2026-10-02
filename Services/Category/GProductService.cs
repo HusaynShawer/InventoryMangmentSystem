@@ -6,12 +6,12 @@ namespace InventoryMangmentSystem.Services;
 public class GCategoryService
 {
     private readonly BaseRepository<Category> _repo;
-    private readonly UnitOfWork _uow;
+    private readonly UnitOfWork _unitOfWork;
     public GCategoryService(
-        BaseRepository<Category> repo,UnitOfWork uow)
+        BaseRepository<Category> repo,UnitOfWork unitOfWork)
     {
         _repo = repo;
-        _uow = uow;
+        _unitOfWork = unitOfWork;
     }
     
 
@@ -35,18 +35,21 @@ public class GCategoryService
         var recod = await _repo.Add(category);
         if (recod is null)
             throw new Exception("sorry categord dont added try again");
+        await _unitOfWork.SaveAsync();
         return category;
 
     }
     public async Task Delete(int id)
     {
         var record = await GetByID(id);
+        await _unitOfWork.SaveAsync();
         _repo.Delete(record);
     }
     public async Task Update(Category category)
     {
         var record = await GetByID(category.Id);
         record.Name = category.Name;
+        await _unitOfWork.SaveAsync();
         _repo.Update(record);
     }
 }

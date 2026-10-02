@@ -7,11 +7,12 @@ namespace InventoryMangmentSystem.Services;
 public class GPurchaseItemsService
 {
     private readonly BaseRepository<PurchaseItems> _repo;
-
+    private readonly UnitOfWork _unitOfWork;
     public GPurchaseItemsService(
-        BaseRepository<PurchaseItems> repo)
+        BaseRepository<PurchaseItems> repo, UnitOfWork unitOfWork)
     {
         _repo = repo;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<IEnumerable<PurchaseItems>> GetAll()
@@ -34,6 +35,7 @@ public class GPurchaseItemsService
         var recod = await _repo.Add(purchaseItems);
         if (recod is null)
             throw new Exception("sorry purchaseItems dont added try again");
+        await _unitOfWork.SaveAsync();
         return purchaseItems;
 
     }
@@ -41,6 +43,7 @@ public class GPurchaseItemsService
     public async Task Delete(int id)
     {
         var purchaseItem = await GetByID(id);
+        await _unitOfWork.SaveAsync();
         _repo.Delete(purchaseItem);
     }
     public async Task Update(PurchaseItems purchaseItem)
@@ -48,6 +51,7 @@ public class GPurchaseItemsService
         var record = await GetByID(purchaseItem.Id);
         record.Quantity = purchaseItem.Quantity;
         record.UnitPrice = purchaseItem.UnitPrice;
+        await _unitOfWork.SaveAsync();
         _repo.Update(record);
     }
 }

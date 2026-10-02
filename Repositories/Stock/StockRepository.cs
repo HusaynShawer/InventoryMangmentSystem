@@ -4,32 +4,21 @@ using Microsoft.EntityFrameworkCore;
 
 namespace InventoryMangmentSystem.Repositories;
 
-public class StockRepository : IStockRepository
+public class StockRepository : BaseRepository<Stock>
 {
-    private readonly ApplicationDbContext _context;
-
     public StockRepository(ApplicationDbContext context)
+        : base(context)
     {
-        _context = context;
     }
 
-    public async Task<Stock> CreateAsync(Stock stock)
-    {
-        await _context.Stocks.AddAsync(stock);
-        await _context.SaveChangesAsync();
-
-        return stock;
-    }
-
-    public async Task<IEnumerable<Stock>> GetAllAsync()
-    {
-        return await _context.Stocks.ToListAsync();
-    }
-
-    public async Task<Stock?> GetByProductIdAsync(int productId)
+    public async Task<Stock?> GetByProductIdAsync(
+        int productId,
+        int warehouseId)
     {
         return await _context.Stocks
-            .FirstOrDefaultAsync(s => s.ProductId == productId);
+            .FirstOrDefaultAsync(s =>
+                s.ProductId == productId &&
+                s.WarehouseId == warehouseId);
     }
 
     public async Task<IEnumerable<Stock>> GetLowStockAsync()
@@ -39,7 +28,9 @@ public class StockRepository : IStockRepository
             .ToListAsync();
     }
 
-    public async Task IncreaseStockAsync(int productId, int quantity)
+    public async Task<Stock> IncreaseStockAsync(
+        int productId,
+        int quantity)
     {
         var stock = await _context.Stocks
             .FirstOrDefaultAsync(s => s.ProductId == productId);
@@ -49,10 +40,12 @@ public class StockRepository : IStockRepository
 
         stock.Quantity += quantity;
 
-        await _context.SaveChangesAsync();
+        return stock;
     }
 
-    public async Task DecreaseStockAsync(int productId, int quantity)
+    public async Task DecreaseStockAsync(
+        int productId,
+        int quantity)
     {
         var stock = await _context.Stocks
             .FirstOrDefaultAsync(s => s.ProductId == productId);
@@ -61,43 +54,5 @@ public class StockRepository : IStockRepository
             throw new Exception("Stock not found");
 
         stock.Quantity -= quantity;
-
-        await _context.SaveChangesAsync();
-    }
-
-    public async Task UpdateAsync(Stock stock)
-    {
-        var record = await _context.Stocks.FindAsync(stock.Id);
-
-        if (record is null)
-            throw new Exception("Stock not found");
-
-        record.Quantity = stock.Quantity;
-
-        await _context.SaveChangesAsync();
-    }
-
-    public async Task DeleteAsync(Stock stock)
-    {
-        _context.Stocks.Remove(stock);
-        await _context.SaveChangesAsync();
     }
 }
-// ```
-
-// The important change is that I removed the duplicate **quantity validation** from the repository because your `StockService` already handles:
-
-// ```csharp
-// if (quantity <= 0)
-// ```
-
-// and, for decreasing:
-
-// ```csharp
-// if (record.Quantity < quantity)
-// ```
-
-// So now the responsibilities are cleaner:
-
-// **Service:** "Is this operation allowed?"
-// **Repository:** "Perform the database operation."

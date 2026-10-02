@@ -69,4 +69,13 @@ public class WarehouseController : ControllerBase
         var records = await _service.GetWarehouseProducts(userId);
         return Ok(records);
     }
+
+    [HttpGet("products/low")]
+    public async Task<ActionResult<IEnumerable<Product>>> GetWarehouseLowProducts()
+    {
+        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var records = await _service.GetWarehouseLowProducts(userId);
+        return Ok(records);
+    }
+
 }

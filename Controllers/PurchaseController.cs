@@ -1,11 +1,12 @@
 using InventoryMangmentSystem.Models;
+using InventoryMangmentSystem.Schemas;
 using InventoryMangmentSystem.Services;
 using Microsoft.AspNetCore.Mvc;
 namespace InventoryMangmentSystem.Controllers;
 
 
 [ApiController]
-[Route("/api[controller]")]
+[Route("api/[controller]")]
 public class PurchaseController : ControllerBase
 {
     private readonly GPurchaseService _service;
@@ -25,18 +26,18 @@ public class PurchaseController : ControllerBase
     public async Task<ActionResult<Purchase>> GetById(int id)
     {
         var purcahse = await _service.GetByID(id);
-        return purcahse is null ? Ok(purcahse) : NotFound("Putchase not found to return");
+        return purcahse is not null ? Ok(purcahse) : NotFound("Putchase not found to return");
     }
 
     [HttpPost]
-    public async Task<ActionResult<Purchase>> Create(Purchase purchase)
+    public async Task<ActionResult<Purchase>> Create([FromBody] PurchaseCreateDto dto)
     {
-        var _purchase = await _service.Create(purchase);
-        return CreatedAtAction(
-            nameof(GetById),
-            new {id = _purchase.Id},
-            purchase
-        );
+        if (dto.Items is null || dto.Items.Count == 0)
+            return BadRequest("A purchase must contain at least one item.");
+
+        var Created = await _service.Create(dto);
+        return Ok(dto);
+
     }
     
     [HttpPut("{id}")]

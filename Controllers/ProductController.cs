@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using InventoryMangmentSystem.Models;
 using InventoryMangmentSystem.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -22,7 +23,6 @@ public class ProductController : ControllerBase
     public async Task<ActionResult<IEnumerable<Product>>> GetAll()
     {
         var products = await _service.GetAll();
-
         return products.Any() ? Ok(products) : NotFound("No Products found");
     }
 

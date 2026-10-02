@@ -23,4 +23,15 @@ public class WarehouseRepository
 
         return records;
     }
+
+    public async Task<IEnumerable<Product>> GetWarehouseLowProducts(int userId)
+    {
+        var records = await _context.Products
+            .Where(p => p.Stocks.Where(p =>p.Quantity < 5).Any(s =>
+                s.Warehouse.UserWarehouses
+                    .Any(uwh => uwh.UserId == userId)))
+            .ToListAsync();
+
+        return records;
+    }
 }

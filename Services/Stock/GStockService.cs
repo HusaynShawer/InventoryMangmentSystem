@@ -7,10 +7,10 @@ namespace InventoryMangmentSystem.Services;
 
 public class GStockService
 {
-    private readonly BaseRepository<Stock> _repo;
+    private readonly StockRepository _repo;
     private readonly UnitOfWork _uow;
     public GStockService(
-        BaseRepository<Stock> repo,UnitOfWork uow)
+        StockRepository repo,UnitOfWork uow)
     {
         _repo = repo;
         _uow = uow;
@@ -22,4 +22,31 @@ public class GStockService
         await _uow.SaveAsync();
         return result;
     }
+        public async Task<IEnumerable<Stock>> GetAll()
+    {
+        var recods =  await _repo.GetAll();
+        if (!recods.Any())
+            throw new Exception("No Stock found");
+        return recods;
+    }
+    public async Task<Stock> GetByID(int id)
+    {
+        var record = await _repo.GetById(id);
+        if (record is null)
+            throw new Exception("Stock Not found");
+        return record;
+    }
+        public async Task Delete(int id)
+    {
+        var record = await GetByID(id);
+        _repo.Delete(record);
+    }
+    public async Task Update(Stock stock)
+    {
+        var record = await GetByID(stock.Id);
+        record.Quantity = stock.Quantity;  
+        await _uow.SaveAsync();       
+        _repo.Update(record);
+    }
+
 }

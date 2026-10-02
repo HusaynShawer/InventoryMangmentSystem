@@ -16,7 +16,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 // Repositories
 builder.Services.AddScoped<WarehouseRepository>();
-builder.Services.AddScoped<IStockRepository, StockRepository>();
+builder.Services.AddScoped<StockRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<UnitOfWork>();
 builder.Services.AddScoped<IUserWarehouseRepository, UserWarehouseRepository>();
