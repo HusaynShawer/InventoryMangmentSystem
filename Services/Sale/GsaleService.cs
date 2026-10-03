@@ -1,18 +1,23 @@
 using InventoryMangmentSystem.Models;
 using InventoryMangmentSystem.Data;
 using InventoryMangmentSystem.Repositories;
-using System.Security.Authentication;
-using Microsoft.AspNetCore.Authentication;
+using InventoryMangmentSystem.Schemas;
+using Microsoft.AspNetCore.Mvc;
 namespace InventoryMangmentSystem.Services;
 
 public class GsaleService
 {
     private readonly BaseRepository<Sale> _repo;
-
+    private readonly StockRepository _stockRepo;
+    private readonly UnitOfWork _unitOfWork;
     public GsaleService(
-        BaseRepository<Sale> repo)
+        BaseRepository<Sale> repo,
+        StockRepository stockRepo,
+        UnitOfWork unitOfWork)
     {
         _repo = repo;
+        _stockRepo = stockRepo;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<IEnumerable<Sale>> GetAll()
@@ -29,12 +34,38 @@ public class GsaleService
             throw new Exception("Sale Not found");
         return record;
     }
-    public async Task<Sale> Create(Sale sale)
+    public async Task<Sale> Create(SaleDTO dto)
     {
-        var recod = await _repo.Add(sale);
-        if (recod is null)
-            throw new Exception("sorry Sale dont added try again");
-        return sale;
+        var _sale = new Sale
+        {
+            CreatedByUserId = dto.CreatedByUserID,
+            WarehouseId = dto.WarehouseId,
+            Date = dto.Date ?? DateTime.UtcNow,
+        };
+
+        _sale.SaleItems = dto.Items.Select(i => new SaleItem
+        {
+            ProductId = i.ProductId,
+            Quantity = i.Quantity,
+            UnitPrice = i.UnitPrice
+
+        }).ToList();
+
+        _sale.TotalAmount = _sale.SaleItems.Sum(i =>i.Quantity * i.UnitPrice);
+
+        foreach(var item in _sale.SaleItems)
+        {
+            var _stock = await _stockRepo.GetByProductIdAsync(item.ProductId,_sale.WarehouseId);
+            if (_stock is null)
+                throw new Exception("no stock for this project try again");
+            if(item.Quantity > _stock.Quantity)
+                throw new Exception("cant cover quantity");
+            _stock.Quantity -= item.Quantity;
+            _stockRepo.Update(_stock);
+        }
+        await _repo.Add(_sale);
+        await _unitOfWork.SaveAsync();
+        return _sale;
 
     }
 

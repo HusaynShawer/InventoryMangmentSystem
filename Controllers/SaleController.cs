@@ -1,4 +1,5 @@
 using InventoryMangmentSystem.Models;
+using InventoryMangmentSystem.Schemas;
 using InventoryMangmentSystem.Services;
 using Microsoft.AspNetCore.Mvc;
 namespace InventoryMangmentSystem.Controllers;
@@ -29,13 +30,15 @@ public class SaleController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Sale>> Create(Sale sale)
+    public async Task<ActionResult<Sale>> Create([FromBody] SaleDTO dto)
     {
-        var _sale = await _service.Create(sale);
+        if (dto.Items is null || dto.Items.Count ==0)
+            throw new Exception("Sale item cant be null");
+        var _sale = await _service.Create(dto);
         return CreatedAtAction(
             nameof(GetById),
             new {id = _sale.Id},
-            _sale
+            dto
         );
     }
     
