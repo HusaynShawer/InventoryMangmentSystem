@@ -62,6 +62,6 @@ public class GWarehouseService
     public async Task<IEnumerable<Product>> GetWarehouseLowProducts(int userId)
     {
         var records = await _warehouseRepository.GetWarehouseLowProducts(userId);
-        return records;
+        return records.Any() ? records : throw new Exception("no low products in warehouse");
     }
 }

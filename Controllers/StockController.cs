@@ -33,7 +33,7 @@ public class StockController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Policy = "ManagerOrAdmin")]
+    [AllowAnonymous]
     public async Task<ActionResult<Stock>> Create(Stock stock)
     {
         var created = await _service.Create(stock);

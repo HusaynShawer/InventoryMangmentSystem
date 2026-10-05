@@ -71,6 +71,7 @@ public class WarehouseController : ControllerBase
     }
 
     [HttpGet("products/low")]
+    [Authorize]
     public async Task<ActionResult<IEnumerable<Product>>> GetWarehouseLowProducts()
     {
         var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);

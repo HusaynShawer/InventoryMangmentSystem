@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using InventoryMangmentSystem.Models;
+using InventoryMangmentSystem.Schemas;
 using InventoryMangmentSystem.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -35,10 +36,11 @@ public class ProductController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Product>> Create(Product product)
+    [Authorize]
+    public async Task<ActionResult<Product>> Create(ProductDTO dto)
     {
-        var createdProduct = await _service.Create(product);
-
+        var userId = int.Parse(ClaimTypes.NameIdentifier);
+        var createdProduct = await _service.Create(userId, dto);
         return CreatedAtAction(
             nameof(GetById),
             new { id = createdProduct.Id},
