@@ -2,6 +2,7 @@ using InventoryMangmentSystem.Services;
 using InventoryMangmentSystem.Models;
 using Microsoft.AspNetCore.Mvc;
 using InventoryMangmentSystem.Repositories;
+using InventoryMangmentSystem.Schemas;
 namespace InventoryMangmentSystem.Controllers;
 
 [ApiController]
@@ -16,22 +17,22 @@ public class CategoryController: ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Category>>> GetAll()
+    public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetAll()
     {
         var record = await _service.GetAll();
         return record.Any() ? Ok(record) : NotFound("No categories found");
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Category>> GetById(int id)
+    public async Task<ActionResult<CategoryResponseDTO>> GetById(int id)
     {
         var record = await _service.GetByID(id);
-        return record is null ? Ok(record) : NotFound("Category not found");
+        return record is not null ? Ok(record) : NotFound("Category not found");
     }
     [HttpPost]
-    public async Task<ActionResult<Category>> Create(Category category)
+    public async Task<ActionResult<CategoryResponseDTO>> Create(CategoryDTO dTO)
     {
-        var record = await _service.Create(category);
+        var record = await _service.Create(dTO);
         return CreatedAtAction(
             nameof(GetById),
             new {id =record.Id},
@@ -39,11 +40,10 @@ public class CategoryController: ControllerBase
         );
     }
     [HttpPut("{id}")]
-    public async Task<ActionResult> Update(int id, Category category)
+    public async Task<ActionResult> Update(int id, CategoryDTO dTO)
     {
-        if (id != category.Id)
-            throw new Exception("Miss match");
-        await _service.Update(category);
+
+        await _service.Update(id,dTO);
         return NoContent();
     }
     [HttpDelete("{id}")]
