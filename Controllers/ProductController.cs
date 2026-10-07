@@ -1,18 +1,16 @@
 using System.Security.Claims;
-using InventoryMangmentSystem.Models;
 using InventoryMangmentSystem.Schemas;
 using InventoryMangmentSystem.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
 namespace InventoryMangmentSystem.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
 public class ProductController : ControllerBase
 {
-
     private readonly GProductService _service;
-
 
     public ProductController(GProductService service)
     {
@@ -20,50 +18,70 @@ public class ProductController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize]
-    public async Task<ActionResult<IEnumerable<Product>>> GetAll()
+    public async Task<ActionResult<IEnumerable<ProductResponseDTO>>> GetAll()
     {
         var products = await _service.GetAll();
-        return products.Any() ? Ok(products) : NotFound("No Products found");
+        return Ok(products);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Product>> GetById(int id)
+    public async Task<ActionResult<ProductResponseDTO>> GetById(int id)
     {
-        var product = await _service.GetByID(id);
-        return product is not null ? Ok(product) : NotFound("Product Not Found");
-
+        try
+        {
+            var product = await _service.GetByID(id);
+            return Ok(product);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
     }
 
     [HttpPost]
     [Authorize]
-    public async Task<ActionResult<Product>> Create(ProductDTO dto)
+    public async Task<ActionResult<ProductResponseDTO>> Create(ProductDTO dto)
     {
-        var userId = int.Parse(ClaimTypes.NameIdentifier);
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!int.TryParse(userIdClaim, out var userId))
+            return Unauthorized();
+
         var createdProduct = await _service.Create(userId, dto);
+
         return CreatedAtAction(
             nameof(GetById),
-            new { id = createdProduct.Id},
+            new { id = createdProduct.Id },
             createdProduct
         );
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, Product product)
+    [Authorize]
+    public async Task<ActionResult<ProductResponseDTO>> Update(int id, ProductDTO dto)
     {
-        if (id != product.Id)
-            return BadRequest("ID mismatch.");
-
-        await _service.Update(product);
-
-        return NoContent();
+        try
+        {
+            var updated = await _service.Update(id, dto);
+            return Ok(updated);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
     }
 
     [HttpDelete("{id}")]
+    [Authorize]
     public async Task<IActionResult> Delete(int id)
     {
-        await _service.Delete(id);
-
-        return NoContent();
+        try
+        {
+            await _service.Delete(id);
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
     }
 }

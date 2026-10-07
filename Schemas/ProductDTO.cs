@@ -20,6 +20,24 @@ public class StockDTO
 
 }
 
+public class ProductResponseDTO
+{
+    public int Id { get; set; }
+    public string Sku { get; set; }
+    public string Name { get; set; }
+    public int CategoryId { get; set; }
+    public decimal UnitPrice { get; set; }
+    public int ReorderLevel { get; set; }
+    public List<StockResponseDTO> Stocks { get; set; } = new();
+}
+
+public class StockResponseDTO
+{
+    public int Id { get; set; }
+    public int WarehouseId { get; set; }
+    public int Quantity { get; set; }
+}
+
 public class StockMovementDTO
 {
     public int ProductId{get; set;}

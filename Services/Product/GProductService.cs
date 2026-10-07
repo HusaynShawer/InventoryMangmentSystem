@@ -1,42 +1,37 @@
 using InventoryMangmentSystem.Models;
-using InventoryMangmentSystem.Data;
 using InventoryMangmentSystem.Repositories;
-using System.Security.Authentication;
-using Microsoft.AspNetCore.Authentication;
 using InventoryMangmentSystem.Schemas;
+using InventoryMangmentSystem.Data;
 namespace InventoryMangmentSystem.Services;
 
 public class GProductService
 {
     private readonly BaseRepository<Product> _repo;
     private readonly UnitOfWork _unitOfWork;
-    private readonly StockRepository _stockRepo;
+
     public GProductService(
         BaseRepository<Product> repo,
-        StockRepository stockRepository,
         UnitOfWork unitOfWork)
     {
         _repo = repo;
-        _stockRepo = stockRepository;
         _unitOfWork = unitOfWork;
-
     }
 
-    public async Task<IEnumerable<Product>> GetAll()
+
+    public async Task<IEnumerable<ProductResponseDTO>> GetAll()
     {
-        var recods =  await _repo.GetAll();
-        if (!recods.Any())
-            throw new Exception("No producst found");
-        return recods;
+        var products = await _repo.GetAll();
+        return products.Select(MapToDto).ToList();
     }
-    public async Task<Product> GetByID(int id)
+
+    public async Task<ProductResponseDTO> GetByID(int id)
     {
-        var record = await _repo.GetById(id);
-        if (record is null)
-            throw new Exception("product Not found");
-        return record;
+        var product = await GetEntityOrThrow(id);
+        return MapToDto(product);
     }
-    public async Task<Product> Create(int userId, ProductDTO dto)
+
+
+    public async Task<ProductResponseDTO> Create(int userId, ProductDTO dto)
     {
         var product = new Product
         {
@@ -46,40 +41,68 @@ public class GProductService
             UnitPrice = dto.UnitPrice,
             ReorderLevel = dto.ReorderLevel
         };
-        var recod = await _repo.Add(product);
-        
-        if (recod is null)
-            throw new Exception("sorry Product dont added try again");
-       
-        if(dto.stock is not null)
+
+        if (dto.stock is not null)
         {
-            var stock = new Stock
+            product.Stocks.Add(new Stock
             {
-                ProductId = product.Id,
                 WarehouseId = dto.stock.WarehouseId,
                 Quantity = dto.stock.Quantity
-            };
-
-            var _stock = await _stockRepo.Add(stock);
-
+            });
         }
+
+        await _repo.Add(product);
         await _unitOfWork.SaveAsync();
-        return product;
+
+        return MapToDto(product);
     }
+
+
+    public async Task<ProductResponseDTO> Update(int id, ProductDTO dto)
+    {
+        var product = await GetEntityOrThrow(id);
+
+        product.Name = dto.Name;
+        product.Sku = dto.Sku;
+        product.CategoryId = dto.CategoryId;
+        product.UnitPrice = dto.UnitPrice;
+        product.ReorderLevel = dto.ReorderLevel;
+
+        await _unitOfWork.SaveAsync();
+        return MapToDto(product);
+    }
+
 
     public async Task Delete(int id)
     {
-        var record = await GetByID(id);
-        await _unitOfWork.SaveAsync();
-        _repo.Delete(record);
+        var product = await GetEntityOrThrow(id);
+        _repo.Delete(product);
+        await _unitOfWork.SaveAsync();     
     }
-    public async Task Update(Product product)
+
+    // ---------- HELPERS ----------
+
+    private async Task<Product> GetEntityOrThrow(int id)
     {
-        var record = await GetByID(product.Id);
-        record.Name = product.Name;
-        record.Sku = product.Sku;
-        record.UnitPrice = product.UnitPrice;
-        await _unitOfWork.SaveAsync();
-        _repo.Update(record);
+        var product = await _repo.GetById(id);
+        if (product is null)
+            throw new KeyNotFoundException("Product not found");
+        return product;
     }
+
+    private static ProductResponseDTO MapToDto(Product p) => new()
+    {
+        Id = p.Id,
+        Sku = p.Sku,
+        Name = p.Name,
+        CategoryId = p.CategoryId,
+        UnitPrice = p.UnitPrice,
+        ReorderLevel = p.ReorderLevel,
+        Stocks = p.Stocks.Select(s => new StockResponseDTO
+        {
+            Id = s.Id,
+            WarehouseId = s.WarehouseId,
+            Quantity = s.Quantity
+        }).ToList()
+    };
 }
