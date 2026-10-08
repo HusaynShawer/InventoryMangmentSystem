@@ -8,15 +8,19 @@ namespace InventoryMangmentSystem.Services;
 public class GsaleService
 {
     private readonly BaseRepository<Sale> _repo;
+        private readonly BaseRepository<StockMovement> _stockMovementRepo;
+
     private readonly StockRepository _stockRepo;
     private readonly UnitOfWork _unitOfWork;
     public GsaleService(
         BaseRepository<Sale> repo,
         StockRepository stockRepo,
+        BaseRepository<StockMovement> stockMovement,
         UnitOfWork unitOfWork)
     {
         _repo = repo;
         _stockRepo = stockRepo;
+        _stockMovementRepo = stockMovement;
         _unitOfWork = unitOfWork;
     }
 
@@ -36,37 +40,69 @@ public class GsaleService
     }
     public async Task<Sale> Create(SaleDTO dto)
     {
-        var _sale = new Sale
+        var transaction = await _unitOfWork.BeginTransactionAsync();
+        try
         {
-            CreatedByUserId = dto.CreatedByUserID,
-            WarehouseId = dto.WarehouseId,
-            Date = dto.Date ?? DateTime.UtcNow,
-        };
+            var _sale = new Sale
+            {
+                CreatedByUserId = dto.CreatedByUserID,
+                WarehouseId = dto.WarehouseId,
+                Date = dto.Date ?? DateTime.UtcNow,
+            };
 
-        _sale.SaleItems = dto.Items.Select(i => new SaleItem
-        {
-            ProductId = i.ProductId,
-            Quantity = i.Quantity,
-            UnitPrice = i.UnitPrice
+            _sale.SaleItems = dto.Items.Select(i => new SaleItem
+            {
+                ProductId = i.ProductId,
+                Quantity = i.Quantity,
+                UnitPrice = i.UnitPrice
 
-        }).ToList();
+            }).ToList();
 
-        _sale.TotalAmount = _sale.SaleItems.Sum(i =>i.Quantity * i.UnitPrice);
+            _sale.TotalAmount = _sale.SaleItems.Sum(i =>i.Quantity * i.UnitPrice);
+            
+            await _repo.Add(_sale);
+            await _unitOfWork.SaveAsync();
 
-        foreach(var item in _sale.SaleItems)
-        {
-            var _stock = await _stockRepo.GetByProductIdAsync(item.ProductId,_sale.WarehouseId);
-            if (_stock is null)
-                throw new Exception("no stock for this project try again");
-            if(item.Quantity > _stock.Quantity)
-                throw new Exception("cant cover quantity");
-            _stock.Quantity -= item.Quantity;
-            _stockRepo.Update(_stock);
+            foreach(var item in _sale.SaleItems)
+            {
+                var _stock = await _stockRepo.GetByProductIdAsync(item.ProductId,_sale.WarehouseId);
+                
+                if (_stock is null)
+                    throw new Exception(
+                        $"Stock not found for ProductId: {item.ProductId}"
+                    );
+                
+                if(item.Quantity > _stock.Quantity)
+                    throw new Exception("Cant Cover Quantity");
+
+                _stock.Quantity -= item.Quantity;
+                _stockRepo.Update(_stock);
+               
+                var stockMovement = new StockMovement
+                {
+                    ProductId = item.ProductId,
+                    WarehouseId = _sale.WarehouseId,
+                    UserId = _sale.CreatedByUserId,
+                    Quantity = item.Quantity,
+                    MovementType = "Purchase",
+                    ReferenceId = _sale.Id,
+                    Date = DateTime.UtcNow,
+                    Note = "Sale operation"
+                };
+                await _stockMovementRepo.Add(stockMovement);
+            }
+
+            await _unitOfWork.SaveAsync();
+            await _unitOfWork.CommitTransactionAsync(transaction);
+            return _sale;
+
         }
-        await _repo.Add(_sale);
-        await _unitOfWork.SaveAsync();
-        return _sale;
-
+        catch
+        {
+            await _unitOfWork.RollbackTransactionAsync(transaction);
+            throw;
+        }
+        
     }
 
     public async Task Delete(int id)
