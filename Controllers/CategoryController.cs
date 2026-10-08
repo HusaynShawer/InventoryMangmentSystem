@@ -3,11 +3,12 @@ using InventoryMangmentSystem.Models;
 using Microsoft.AspNetCore.Mvc;
 using InventoryMangmentSystem.Repositories;
 using InventoryMangmentSystem.Schemas;
+using Microsoft.AspNetCore.Authorization;
 namespace InventoryMangmentSystem.Controllers;
 
 [ApiController]
 [Route("api/[Controller]")]
-
+[Authorize(Policy ="AminOnly")]
 public class CategoryController: ControllerBase
 {
     private readonly GCategoryService _service;

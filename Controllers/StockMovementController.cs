@@ -1,10 +1,12 @@
 using InventoryMangmentSystem.Models;
 using InventoryMangmentSystem.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 namespace InventoryMangmentSystem.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Policy ="AdminOnly")]
 public class StockMovementController : ControllerBase
 {
 

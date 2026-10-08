@@ -8,6 +8,7 @@ namespace InventoryMangmentSystem.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Policy = "AdminOnly")]
 public class ProductController : ControllerBase
 {
     private readonly GProductService _service;
@@ -18,6 +19,7 @@ public class ProductController : ControllerBase
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<ActionResult<IEnumerable<ProductResponseDTO>>> GetAll()
     {
         var products = await _service.GetAll();
@@ -25,6 +27,7 @@ public class ProductController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [AllowAnonymous]
     public async Task<ActionResult<ProductResponseDTO>> GetById(int id)
     {
         try
@@ -39,7 +42,6 @@ public class ProductController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize]
     public async Task<ActionResult<ProductResponseDTO>> Create(ProductDTO dto)
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -56,7 +58,6 @@ public class ProductController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    [Authorize]
     public async Task<ActionResult<ProductResponseDTO>> Update(int id, ProductDTO dto)
     {
         try
@@ -71,7 +72,6 @@ public class ProductController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [Authorize]
     public async Task<IActionResult> Delete(int id)
     {
         try

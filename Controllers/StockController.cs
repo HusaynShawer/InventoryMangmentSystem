@@ -7,7 +7,7 @@ namespace InventoryMangmentSystem.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+[Authorize(Policy ="AdminOnly")]
 public class StockController : ControllerBase
 {
     private readonly GStockService _service;

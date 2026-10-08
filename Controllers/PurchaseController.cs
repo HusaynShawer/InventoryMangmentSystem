@@ -1,12 +1,14 @@
 using InventoryMangmentSystem.Models;
 using InventoryMangmentSystem.Schemas;
 using InventoryMangmentSystem.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 namespace InventoryMangmentSystem.Controllers;
 
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Policy ="AdminOnly")]
 public class PurchaseController : ControllerBase
 {
     private readonly GPurchaseService _service;

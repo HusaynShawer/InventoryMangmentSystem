@@ -8,6 +8,7 @@ namespace InventoryMangmentSystem.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Policy ="AdminOnly")]
 public class WarehouseController : ControllerBase
 {
     private readonly GWarehouseService _service;
@@ -17,7 +18,7 @@ public class WarehouseController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Warehouse>>> GetAll()
+    public async Task<ActionResult<IEnumerable<WarehouseResponseDTO>>> GetAll()
     {
         var warehouses = await _service.GetAll();
 
@@ -25,16 +26,16 @@ public class WarehouseController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Warehouse>> GetById(int id)
+    public async Task<ActionResult<WarehouseResponseDTO>> GetById(int id)
     {
         var warehouse = await _service.GetByID(id);
 
         return Ok(warehouse);
     }
     [HttpPost]
-    public async Task<ActionResult<Warehouse>> Create(Warehouse warehouse)
+    public async Task<ActionResult<WarehouseResponseDTO>> Create(WarehouseDTO warehouseDTO)
     {
-        var _supplier = await _service.Create(warehouse);
+        var _supplier = await _service.Create(warehouseDTO);
 
         return CreatedAtAction(
             nameof(GetById),
@@ -44,13 +45,9 @@ public class WarehouseController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, Warehouse warehouse)
+    public async Task<IActionResult> Update(int id, WarehouseDTO warehouseDTO)
     {
-        if (id != warehouse.Id)
-            return BadRequest("ID mismatch.");
-
-        await _service.Update(warehouse);
-
+        await _service.Update(id, warehouseDTO);
         return NoContent();
     }
 
@@ -62,7 +59,6 @@ public class WarehouseController : ControllerBase
     }
 
     [HttpGet("products")]
-    [Authorize]
     public async Task<ActionResult<IEnumerable<Product>>> GetwarehouseProducts()
     {
         var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
@@ -71,7 +67,6 @@ public class WarehouseController : ControllerBase
     }
 
     [HttpGet("products/low")]
-    [Authorize]
     public async Task<ActionResult<IEnumerable<Product>>> GetWarehouseLowProducts()
     {
         var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
