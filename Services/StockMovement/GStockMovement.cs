@@ -19,7 +19,7 @@ public class GStockMovementService
             throw new Exception("No StockMovements found");
         return recods;
     }
-    public async Task<StockMovement> GetByID(int id)
+    public async Task<StockMovement> GetByID(Guid id)
     {
         var record = await _repo.GetById(id);
         if (record is null)
@@ -36,7 +36,7 @@ public class GStockMovementService
     }
 
 
-    public async Task Delete(int id)
+    public async Task Delete(Guid id)
     {
         var record = await GetByID(id);
         _repo.Delete(record);

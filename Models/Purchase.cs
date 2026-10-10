@@ -6,20 +6,20 @@ namespace InventoryMangmentSystem.Models
     public class Purchase
     {
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
 
         [ForeignKey("Supplier")]
-        public int SupplierId { get; set; }
+        public Guid SupplierId { get; set; }
         public Supplier? Supplier { get; set; }
 
         
         [ForeignKey("Warehouse")]
-        public int WarehouseId { get; set; }
+        public Guid WarehouseId { get; set; }
         public Warehouse? Warehouse { get; set; }
 
         
         [ForeignKey("CreatedByUser")]
-        public int CreatedByUserId { get; set; }
+        public Guid CreatedByUserId { get; set; }
         public User? CreatedByUser { get; set; }
 
         public DateTime Date { get; set; }

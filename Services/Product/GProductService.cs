@@ -24,14 +24,14 @@ public class GProductService
         return products.Select(MapToDto).ToList();
     }
 
-    public async Task<ProductResponseDTO> GetByID(int id)
+    public async Task<ProductResponseDTO> GetByID(Guid id)
     {
         var product = await GetEntityOrThrow(id);
         return MapToDto(product);
     }
 
 
-    public async Task<ProductResponseDTO> Create(int userId, ProductDTO dto)
+    public async Task<ProductResponseDTO> Create(Guid userId, ProductDTO dto)
     {
         var product = new Product
         {
@@ -54,11 +54,23 @@ public class GProductService
         await _repo.Add(product);
         await _unitOfWork.SaveAsync();
 
+        var _stockMovement = new StockMovement
+        {
+            ProductId = product.Id,
+            WarehouseId = dto.stock.WarehouseId,
+            UserId = userId,
+            Quantity = dto.stock.Quantity,
+            MovementType = $"Add new Product to {dto.stock.WarehouseId}",
+            ReferenceId = product.Id,
+            Date = DateTime.UtcNow,
+            Note = $"Add New Product to warehouse{dto.stock.WarehouseId}"
+        };
+
         return MapToDto(product);
     }
 
 
-    public async Task<ProductResponseDTO> Update(int id, ProductDTO dto)
+    public async Task<ProductResponseDTO> Update(Guid id, ProductDTO dto)
     {
         var product = await GetEntityOrThrow(id);
 
@@ -73,7 +85,7 @@ public class GProductService
     }
 
 
-    public async Task Delete(int id)
+    public async Task Delete(Guid id)
     {
         var product = await GetEntityOrThrow(id);
         _repo.Delete(product);
@@ -82,7 +94,7 @@ public class GProductService
 
     // ---------- HELPERS ----------
 
-    private async Task<Product> GetEntityOrThrow(int id)
+    private async Task<Product> GetEntityOrThrow(Guid id)
     {
         var product = await _repo.GetById(id);
         if (product is null)

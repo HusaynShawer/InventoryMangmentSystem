@@ -8,9 +8,9 @@ public interface IPurchaseItemsService
 
     Task<IEnumerable<PurchaseItems>> GetAllAsync();
 
-    Task<PurchaseItems> GetByIdAsync(int id);
+    Task<PurchaseItems> GetByIdAsync(Guid id);
 
     Task UpdateAsync(PurchaseItems purchaseItems);
 
-    Task DeleteAsync(int id);
+    Task DeleteAsync(Guid id);
 }

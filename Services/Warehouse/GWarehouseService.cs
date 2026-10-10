@@ -24,7 +24,7 @@ public class GWarehouseService
             throw new Exception("No Warehouse found");
         return recods.Select(MapToDto).ToList();
     }
-    public async Task<WarehouseResponseDTO> GetByID(int id)
+    public async Task<WarehouseResponseDTO> GetByID(Guid id)
     {
         var record = await _repo.GetById(id);
         if (record is null)
@@ -43,13 +43,13 @@ public class GWarehouseService
         return MapToDto(recod);
 
     }
-    public async Task Delete(int id)
+    public async Task Delete(Guid id)
     {
         var record = await GetEntityOrThrow(id);
         _repo.Delete(record);
         await _unitOfWork.SaveAsync();
     }
-    public async Task Update(int id, WarehouseDTO warehouseDTO)
+    public async Task Update(Guid id, WarehouseDTO warehouseDTO)
     {
         var record = await GetEntityOrThrow(id);  
         record.Location = warehouseDTO.Location;
@@ -58,12 +58,12 @@ public class GWarehouseService
         await _unitOfWork.SaveAsync();
     }
 
-    public async Task<IEnumerable<Product>> GetWarehouseProducts(int userId)
+    public async Task<IEnumerable<Product>> GetWarehouseProducts(Guid userId)
     {
         var records = await _warehouseRepository.GetWarehouseProduct(userId);
         return records;
     }
-    public async Task<IEnumerable<Product>> GetWarehouseLowProducts(int userId)
+    public async Task<IEnumerable<Product>> GetWarehouseLowProducts(Guid userId)
     {
         var records = await _warehouseRepository.GetWarehouseLowProducts(userId);
         return records.Any() ? records : throw new Exception("no low products in warehouse");
@@ -75,7 +75,7 @@ public class GWarehouseService
         Location = w.Location,
         Name = w.Name
     };
-    private async Task<Warehouse> GetEntityOrThrow(int id)
+    private async Task<Warehouse> GetEntityOrThrow(Guid id)
     {
         var record = await _repo.GetById(id);
         if (record is null)

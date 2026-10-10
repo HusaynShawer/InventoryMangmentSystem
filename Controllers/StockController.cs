@@ -26,7 +26,7 @@ public class StockController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Stock>> GetById(int id)
+    public async Task<ActionResult<Stock>> GetById(Guid id)
     {
         var stock = await _service.GetByID(id);
         return stock is null ? NotFound("Stock not found") : Ok(stock);
@@ -46,7 +46,7 @@ public class StockController : ControllerBase
 
     [HttpPut("{id}")]
     [Authorize(Policy = "ManagerOrAdmin")]
-    public async Task<IActionResult> Update(int id, Stock stock)
+    public async Task<IActionResult> Update(Guid id, Stock stock)
     {
         if (id != stock.Id)
             return BadRequest("ID mismatch.");
@@ -57,7 +57,7 @@ public class StockController : ControllerBase
 
     [HttpDelete("{id}")]
     [Authorize(Policy = "AdminOnly")]
-    public async Task<IActionResult> Delete(int id)
+    public async Task<IActionResult> Delete(Guid id)
     {
         await _service.Delete(id);
         return NoContent();

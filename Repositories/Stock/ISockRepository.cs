@@ -3,7 +3,7 @@ namespace InventoryMangmentSystem.Repositories;
 
 public interface IStockRepository
 {
-    Task<Stock?> GetByProductIdAsync(int productId);
+    Task<Stock?> GetByProductIdAsync(Guid productId);
 
     Task<IEnumerable<Stock>> GetAllAsync();
 
@@ -13,9 +13,9 @@ public interface IStockRepository
 
     Task DeleteAsync(Stock stock);
 
-    Task IncreaseStockAsync(int productId, int quantity);
+    Task IncreaseStockAsync(Guid productId, int quantity);
 
-    Task DecreaseStockAsync(int productId, int quantity);
+    Task DecreaseStockAsync(Guid productId, int quantity);
 
     Task<IEnumerable<Stock>> GetLowStockAsync();
 }

@@ -2,7 +2,7 @@ using InventoryMangmentSystem.Models;
 namespace InventoryMangmentSystem.Repositories;
 public interface IUserWarehouseRepository
 {
-    Task<IEnumerable<UserWarehouse>> GetByUserIdAsync(int userId);
+    Task<IEnumerable<UserWarehouse>> GetByUserIdAsync(Guid userId);
     Task<UserWarehouse> AssignAsync(UserWarehouse uw);
-    Task RemoveAsync(int userId, int warehouseId);
+    Task RemoveAsync(Guid userId, Guid warehouseId);
 }

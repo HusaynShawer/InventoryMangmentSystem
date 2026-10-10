@@ -8,7 +8,7 @@ namespace InventoryMangmentSystem.Controllers;
 
 [ApiController]
 [Route("api/[Controller]")]
-[Authorize(Policy ="AminOnly")]
+[Authorize(Policy ="AdminOnly")]
 public class CategoryController: ControllerBase
 {
     private readonly GCategoryService _service;
@@ -25,7 +25,7 @@ public class CategoryController: ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<CategoryResponseDTO>> GetById(int id)
+    public async Task<ActionResult<CategoryResponseDTO>> GetById(Guid id)
     {
         var record = await _service.GetByID(id);
         return record is not null ? Ok(record) : NotFound("Category not found");
@@ -41,14 +41,14 @@ public class CategoryController: ControllerBase
         );
     }
     [HttpPut("{id}")]
-    public async Task<ActionResult> Update(int id, CategoryDTO dTO)
+    public async Task<ActionResult> Update(Guid id, CategoryDTO dTO)
     {
 
         await _service.Update(id,dTO);
         return NoContent();
     }
     [HttpDelete("{id}")]
-    public async Task<ActionResult> Delete(int id)
+    public async Task<ActionResult> Delete(Guid id)
     {
         await _service.Delete(id);
         return NoContent();

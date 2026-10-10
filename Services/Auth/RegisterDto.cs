@@ -21,5 +21,5 @@ public class RegisterDto
     public string Role { get; set; } = "User";
 
     // اختياري: لو المستخدم Supplier
-    public int? SupplierId { get; set; }
+    public Guid? SupplierId { get; set; }
 }

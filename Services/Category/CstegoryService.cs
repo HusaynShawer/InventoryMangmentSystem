@@ -23,7 +23,7 @@ public class GCategoryService
             throw new Exception("No Category found");
         return recods.Select(MapToDto).ToList();
     }
-    public async Task<CategoryResponseDTO> GetByID(int id)
+    public async Task<CategoryResponseDTO> GetByID(Guid id)
     {
         var record = await _repo.GetById(id);
         if (record is null)
@@ -39,20 +39,20 @@ public class GCategoryService
         await _unitOfWork.SaveAsync();
         return MapToDto(recod);
     }
-    public async Task Delete(int id)
+    public async Task Delete(Guid id)
     {
         var record = await GetEntityOrThrow(id);
         _repo.Delete(record);
         await _unitOfWork.SaveAsync();
     }
-    public async Task Update(int id, CategoryDTO dto)
+    public async Task Update(Guid id, CategoryDTO dto)
     {
         var record = await GetEntityOrThrow(id);
         record.Name = dto.Name;
         _repo.Update(record);
         await _unitOfWork.SaveAsync();
     }
-    private async Task<Category> GetEntityOrThrow(int id)
+    private async Task<Category> GetEntityOrThrow(Guid id)
     {
         var category = await _repo.GetById(id);
         if (category is null)

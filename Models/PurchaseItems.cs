@@ -6,14 +6,14 @@ namespace InventoryMangmentSystem.Models
     public class PurchaseItems
     {
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
 
         [ForeignKey("Purchase")]
-        public int PurchaseId { get; set; }           
+        public Guid PurchaseId { get; set; }           
         public Purchase? Purchase { get; set; }
 
         [ForeignKey("Product")]
-        public int ProductId { get; set; }
+        public Guid ProductId { get; set; }
         public Product? Product { get; set; }
 
         public int Quantity { get; set; }

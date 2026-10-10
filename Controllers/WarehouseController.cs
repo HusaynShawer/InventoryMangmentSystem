@@ -26,7 +26,7 @@ public class WarehouseController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<WarehouseResponseDTO>> GetById(int id)
+    public async Task<ActionResult<WarehouseResponseDTO>> GetById(Guid id)
     {
         var warehouse = await _service.GetByID(id);
 
@@ -45,14 +45,14 @@ public class WarehouseController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, WarehouseDTO warehouseDTO)
+    public async Task<IActionResult> Update(Guid id, WarehouseDTO warehouseDTO)
     {
         await _service.Update(id, warehouseDTO);
         return NoContent();
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
+    public async Task<IActionResult> Delete(Guid id)
     {
         await _service.Delete(id);
         return NoContent();
@@ -61,7 +61,7 @@ public class WarehouseController : ControllerBase
     [HttpGet("products")]
     public async Task<ActionResult<IEnumerable<Product>>> GetwarehouseProducts()
     {
-        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         var records = await _service.GetWarehouseProducts(userId);
         return Ok(records);
     }
@@ -69,7 +69,7 @@ public class WarehouseController : ControllerBase
     [HttpGet("products/low")]
     public async Task<ActionResult<IEnumerable<Product>>> GetWarehouseLowProducts()
     {
-        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         var records = await _service.GetWarehouseLowProducts(userId);
         return Ok(records);
     }

@@ -6,7 +6,7 @@ namespace InventoryMangmentSystem.Models
     public class User
     {
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
 
         [Required, MaxLength(50)]
         public string UserName { get; set; } = string.Empty;
@@ -28,12 +28,11 @@ namespace InventoryMangmentSystem.Models
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        public int? SupplierId { get; set; }
+        public Guid? SupplierId { get; set; }
 
         [ForeignKey("SupplierId")]
         public Supplier? Supplier { get; set; }
 
-        // علاقات
         public ICollection<UserWarehouse> UserWarehouses { get; set; } = new List<UserWarehouse>();
         public ICollection<Purchase> Purchases { get; set; } = new List<Purchase>();
         public ICollection<Sale> Sales { get; set; } = new List<Sale>();

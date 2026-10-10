@@ -28,7 +28,7 @@ public class ProductController : ControllerBase
 
     [HttpGet("{id}")]
     [AllowAnonymous]
-    public async Task<ActionResult<ProductResponseDTO>> GetById(int id)
+    public async Task<ActionResult<ProductResponseDTO>> GetById(Guid id)
     {
         try
         {
@@ -45,7 +45,7 @@ public class ProductController : ControllerBase
     public async Task<ActionResult<ProductResponseDTO>> Create(ProductDTO dto)
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (!int.TryParse(userIdClaim, out var userId))
+        if (!Guid.TryParse(userIdClaim, out var userId))
             return Unauthorized();
 
         var createdProduct = await _service.Create(userId, dto);
@@ -58,7 +58,7 @@ public class ProductController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<ProductResponseDTO>> Update(int id, ProductDTO dto)
+    public async Task<ActionResult<ProductResponseDTO>> Update(Guid id, ProductDTO dto)
     {
         try
         {
@@ -72,7 +72,7 @@ public class ProductController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
+    public async Task<IActionResult> Delete(Guid id)
     {
         try
         {

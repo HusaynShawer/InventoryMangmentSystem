@@ -7,7 +7,7 @@ public class ProductDTO
 {
     public string Sku {get; set;}
     public string Name {get; set;}
-    public int CategoryId {get; set;}
+    public Guid CategoryId {get; set;}
     public decimal UnitPrice {get; set;}
     public int ReorderLevel {get; set;}
     public StockDTO? stock{get; set;}
@@ -15,17 +15,17 @@ public class ProductDTO
 
 public class StockDTO
 {
-    public int WarehouseId {get; set;}
+    public Guid WarehouseId {get; set;}
     public required int Quantity {get; set;}
 
 }
 
 public class ProductResponseDTO
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
     public string Sku { get; set; }
     public string Name { get; set; }
-    public int CategoryId { get; set; }
+    public Guid CategoryId { get; set; }
     public decimal UnitPrice { get; set; }
     public int ReorderLevel { get; set; }
     public List<StockResponseDTO> Stocks { get; set; } = new();
@@ -33,26 +33,26 @@ public class ProductResponseDTO
 
 public class StockResponseDTO
 {
-    public int Id { get; set; }
-    public int WarehouseId { get; set; }
+    public Guid Id { get; set; }
+    public Guid WarehouseId { get; set; }
     public int Quantity { get; set; }
 }
 
 public class StockMovementDTO
 {
-    public int ProductId{get; set;}
-    public int WarehouseId {get; set;}
-    public int UserId {get; set;}
+    public Guid ProductId{get; set;}
+    public Guid WarehouseId {get; set;}
+    public Guid UserId {get; set;}
     public int Quantity{get; set;}
     public int MovementType {get; set;}
-    public int ReferenceId{get;set;}
+    public Guid ReferenceId{get;set;}
     public DateTime Date { get; set;}
     public string? Note {get; set;}
 }
 
     public class SupplierDTo
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         public string Name { get; set; } = string.Empty;
         public string ContactInfo { get; set; } = string.Empty;
@@ -73,7 +73,7 @@ public class StockMovementDTO
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        public int? SupplierId { get; set; }
+        public Guid? SupplierId { get; set; }
 
 
     }

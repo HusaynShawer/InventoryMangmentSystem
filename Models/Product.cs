@@ -6,13 +6,13 @@ namespace InventoryMangmentSystem.Models
     public class Product
     {
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
 
         public string? Sku { get; set; }
         public string? Name { get; set; }
 
         [ForeignKey("Category")]
-        public int CategoryId { get; set; }
+        public Guid CategoryId { get; set; }
         public Category? Category { get; set; }
 
         public decimal UnitPrice { get; set; }

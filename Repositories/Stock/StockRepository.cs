@@ -12,8 +12,8 @@ public class StockRepository : BaseRepository<Stock>
     }
 
     public async Task<Stock?> GetByProductIdAsync(
-        int productId,
-        int warehouseId)
+        Guid productId,
+        Guid warehouseId)
     {
         return await _context.Stocks
             .FirstOrDefaultAsync(s =>
@@ -29,7 +29,7 @@ public class StockRepository : BaseRepository<Stock>
     }
 
     public async Task<Stock> IncreaseStockAsync(
-        int productId,
+        Guid productId,
         int quantity)
     {
         var stock = await _context.Stocks
@@ -44,7 +44,7 @@ public class StockRepository : BaseRepository<Stock>
     }
 
     public async Task DecreaseStockAsync(
-        int productId,
+        Guid productId,
         int quantity)
     {
         var stock = await _context.Stocks
