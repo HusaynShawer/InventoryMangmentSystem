@@ -1,12 +1,14 @@
 using InventoryMangmentSystem.Models;
 using InventoryMangmentSystem.Schemas;
 using InventoryMangmentSystem.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 namespace InventoryMangmentSystem.Controllers;
 
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Policy ="AdminOnly")]
 public class PurchaseController : ControllerBase
 {
     private readonly GPurchaseService _service;
@@ -23,7 +25,7 @@ public class PurchaseController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Purchase>> GetById(int id)
+    public async Task<ActionResult<Purchase>> GetById(Guid id)
     {
         var purcahse = await _service.GetByID(id);
         return purcahse is not null ? Ok(purcahse) : NotFound("Putchase not found to return");
@@ -41,7 +43,7 @@ public class PurchaseController : ControllerBase
     }
     
     [HttpPut("{id}")]
-    public async Task<ActionResult> Update(int id ,Purchase purchase)
+    public async Task<ActionResult> Update(Guid id ,Purchase purchase)
     {
         if (id != purchase.Id)
             throw new Exception("Miss match cant update purchase");
@@ -51,7 +53,7 @@ public class PurchaseController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<ActionResult> Delete(int id)
+    public async Task<ActionResult> Delete(Guid id)
     {
         var purchase = await GetById(id);
         await _service.Delete(id);

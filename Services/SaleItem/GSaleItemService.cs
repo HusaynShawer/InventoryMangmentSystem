@@ -22,7 +22,7 @@ public class GsaleItemService
             throw new Exception("No sale items found");
         return recods;
     }
-    public async Task<SaleItem> GetByID(int id)
+    public async Task<SaleItem> GetByID(Guid id)
     {
         var record = await _repo.GetById(id);
         if (record is null)
@@ -38,7 +38,7 @@ public class GsaleItemService
 
     }
 
-    public async Task Delete(int id)
+    public async Task Delete(Guid id)
     {
         var record = await GetByID(id);
         _repo.Delete(record);

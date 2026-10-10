@@ -25,7 +25,7 @@ public class SupplierController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Supplier>> GetById(int id)
+    public async Task<ActionResult<Supplier>> GetById(Guid id)
     {
         var _supplier = await _service.GetByID(id);
         return _supplier is not null ? Ok(_supplier) : NotFound("Suppliers Not Found");
@@ -45,7 +45,7 @@ public class SupplierController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, Supplier supplier)
+    public async Task<IActionResult> Update(Guid id, Supplier supplier)
     {
         if (id != supplier.Id)
             return BadRequest("ID mismatch.");
@@ -56,7 +56,7 @@ public class SupplierController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
+    public async Task<IActionResult> Delete(Guid id)
     {
         await _service.Delete(id);
 

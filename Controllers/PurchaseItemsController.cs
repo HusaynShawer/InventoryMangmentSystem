@@ -22,7 +22,7 @@ public class PurchaseItemsController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<PurchaseItems>> GetById(int id)
+    public async Task<ActionResult<PurchaseItems>> GetById(Guid id)
     {
         var _purchaseItem = await _service.GetByID(id);
         return _purchaseItem is not null ? Ok(_purchaseItem) : NotFound("PurchaseItem not found to return");
@@ -40,7 +40,7 @@ public class PurchaseItemsController : ControllerBase
     }
     
     [HttpPut("{id}")]
-    public async Task<ActionResult> Update(int id ,PurchaseItems purchaseItems)
+    public async Task<ActionResult> Update(Guid id ,PurchaseItems purchaseItems)
     {
         if (id != purchaseItems.Id)
             throw new Exception("Miss match cant update purchaseItem");
@@ -50,7 +50,7 @@ public class PurchaseItemsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<ActionResult> Delete(int id)
+    public async Task<ActionResult> Delete(Guid id)
     {
         await _service.Delete(id);
         return NoContent();

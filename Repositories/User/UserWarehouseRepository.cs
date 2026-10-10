@@ -13,14 +13,14 @@ public class UserWarehouseRepository : IUserWarehouseRepository
         _context = context;
     }
 
-    public async Task<IEnumerable<UserWarehouse>> GetByUserIdAsync(int userId)
+    public async Task<IEnumerable<UserWarehouse>> GetByUserIdAsync(Guid userId)
     {
         return await _context.UserWarehouses
             .Where(uw => uw.UserId == userId)
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<UserWarehouse>> GetByWarehouseIdAsync(int warehouseId)
+    public async Task<IEnumerable<UserWarehouse>> GetByWarehouseIdAsync(Guid warehouseId)
     {
         return await _context.UserWarehouses
             .Where(uw => uw.WarehouseId == warehouseId)
@@ -34,7 +34,7 @@ public class UserWarehouseRepository : IUserWarehouseRepository
         return userWarehouse;
     }
 
-    public async Task RemoveAsync(int userId, int warehouseId)
+    public async Task RemoveAsync(Guid userId, Guid warehouseId)
     {
         var record = await _context.UserWarehouses
             .FirstOrDefaultAsync(uw => uw.UserId == userId && uw.WarehouseId == warehouseId);

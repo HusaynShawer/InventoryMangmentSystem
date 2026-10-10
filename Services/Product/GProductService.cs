@@ -1,14 +1,14 @@
 using InventoryMangmentSystem.Models;
-using InventoryMangmentSystem.Data;
 using InventoryMangmentSystem.Repositories;
-using System.Security.Authentication;
-using Microsoft.AspNetCore.Authentication;
+using InventoryMangmentSystem.Schemas;
+using InventoryMangmentSystem.Data;
 namespace InventoryMangmentSystem.Services;
 
 public class GProductService
 {
     private readonly BaseRepository<Product> _repo;
     private readonly UnitOfWork _unitOfWork;
+
     public GProductService(
         BaseRepository<Product> repo,
         UnitOfWork unitOfWork)
@@ -17,43 +17,104 @@ public class GProductService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<IEnumerable<Product>> GetAll()
+
+    public async Task<IEnumerable<ProductResponseDTO>> GetAll()
     {
-        var recods =  await _repo.GetAll();
-        if (!recods.Any())
-            throw new Exception("No producst found");
-        return recods;
+        var products = await _repo.GetAll();
+        return products.Select(MapToDto).ToList();
     }
-    public async Task<Product> GetByID(int id)
+
+    public async Task<ProductResponseDTO> GetByID(Guid id)
     {
-        var record = await _repo.GetById(id);
-        if (record is null)
-            throw new Exception("product Not found");
-        return record;
+        var product = await GetEntityOrThrow(id);
+        return MapToDto(product);
     }
-    public async Task<Product> Create(Product product)
+
+
+    public async Task<ProductResponseDTO> Create(Guid userId, ProductDTO dto)
     {
-        var recod = await _repo.Add(product);
-        if (recod is null)
-            throw new Exception("sorry Product dont added try again");
+        var product = new Product
+        {
+            Name = dto.Name,
+            Sku = dto.Sku,
+            CategoryId = dto.CategoryId,
+            UnitPrice = dto.UnitPrice,
+            ReorderLevel = dto.ReorderLevel
+        };
+
+        if (dto.stock is not null)
+        {
+            product.Stocks.Add(new Stock
+            {
+                WarehouseId = dto.stock.WarehouseId,
+                Quantity = dto.stock.Quantity
+            });
+        }
+
+        await _repo.Add(product);
         await _unitOfWork.SaveAsync();
+
+        var _stockMovement = new StockMovement
+        {
+            ProductId = product.Id,
+            WarehouseId = dto.stock.WarehouseId,
+            UserId = userId,
+            Quantity = dto.stock.Quantity,
+            MovementType = $"Add new Product to {dto.stock.WarehouseId}",
+            ReferenceId = product.Id,
+            Date = DateTime.UtcNow,
+            Note = $"Add New Product to warehouse{dto.stock.WarehouseId}"
+        };
+
+        return MapToDto(product);
+    }
+
+
+    public async Task<ProductResponseDTO> Update(Guid id, ProductDTO dto)
+    {
+        var product = await GetEntityOrThrow(id);
+
+        product.Name = dto.Name;
+        product.Sku = dto.Sku;
+        product.CategoryId = dto.CategoryId;
+        product.UnitPrice = dto.UnitPrice;
+        product.ReorderLevel = dto.ReorderLevel;
+
+        await _unitOfWork.SaveAsync();
+        return MapToDto(product);
+    }
+
+
+    public async Task Delete(Guid id)
+    {
+        var product = await GetEntityOrThrow(id);
+        _repo.Delete(product);
+        await _unitOfWork.SaveAsync();     
+    }
+
+    // ---------- HELPERS ----------
+
+    private async Task<Product> GetEntityOrThrow(Guid id)
+    {
+        var product = await _repo.GetById(id);
+        if (product is null)
+            throw new KeyNotFoundException("Product not found");
         return product;
-
     }
 
-    public async Task Delete(int id)
+    private static ProductResponseDTO MapToDto(Product p) => new()
     {
-        var record = await GetByID(id);
-        await _unitOfWork.SaveAsync();
-        _repo.Delete(record);
-    }
-    public async Task Update(Product product)
-    {
-        var record = await GetByID(product.Id);
-        record.Name = product.Name;
-        record.Sku = product.Sku;
-        record.UnitPrice = product.UnitPrice;
-        await _unitOfWork.SaveAsync();
-        _repo.Update(record);
-    }
+        Id = p.Id,
+        Sku = p.Sku,
+        Name = p.Name,
+        CategoryId = p.CategoryId,
+        UnitPrice = p.UnitPrice,
+        ReorderLevel = p.ReorderLevel,
+        Stocks = p.Stocks.Select(s => new StockResponseDTO
+        {
+            Id = s.Id,
+            WarehouseId = s.WarehouseId,
+            Quantity = s.Quantity
+        }).ToList()
+    };
 }

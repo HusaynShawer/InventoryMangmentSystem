@@ -22,7 +22,7 @@ public class GPurchaseItemsService
             throw new Exception("No purchaseitems found");
         return records;
     }
-    public async Task<PurchaseItems> GetByID(int id)
+    public async Task<PurchaseItems> GetByID(Guid id)
     {
         var record = await _repo.GetById(id);
         if (record is null)
@@ -40,7 +40,7 @@ public class GPurchaseItemsService
 
     }
 
-    public async Task Delete(int id)
+    public async Task Delete(Guid id)
     {
         var purchaseItem = await GetByID(id);
         await _unitOfWork.SaveAsync();

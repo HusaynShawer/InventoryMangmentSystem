@@ -29,14 +29,14 @@ public class GStockService
             throw new Exception("No Stock found");
         return recods;
     }
-    public async Task<Stock> GetByID(int id)
+    public async Task<Stock> GetByID(Guid id)
     {
         var record = await _repo.GetById(id);
         if (record is null)
             throw new Exception("Stock Not found");
         return record;
     }
-        public async Task Delete(int id)
+        public async Task Delete(Guid id)
     {
         var record = await GetByID(id);
         _repo.Delete(record);

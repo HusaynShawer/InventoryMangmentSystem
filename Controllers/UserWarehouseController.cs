@@ -25,7 +25,7 @@ public class UserWarehouseController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<UserWarehouse>> GetById(int id)
+    public async Task<ActionResult<UserWarehouse>> GetById(Guid id)
     {
         var warehouse = await _service.GetByID(id);
 
@@ -44,7 +44,7 @@ public class UserWarehouseController : ControllerBase
     }
 
     // [HttpPut("{id}")]
-    // public async Task<IActionResult> Update(int id, Warehouse warehouse)
+    // public async Task<IActionResult> Update(Guid id, Warehouse warehouse)
     // {
     //     if (id != warehouse.Id)
     //         return BadRequest("ID mismatch.");
@@ -55,7 +55,7 @@ public class UserWarehouseController : ControllerBase
     // }
 
     // [HttpDelete("{id}")]
-    // public async Task<IActionResult> Delete(int id)
+    // public async Task<IActionResult> Delete(Guid id)
     // {
     //     await _service.Delete(id);
     //     return NoContent();

@@ -6,15 +6,15 @@ namespace InventoryMangmentSystem.Models
     public class Sale
     {
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
 
 
         [ForeignKey("Warehouse")]
-        public int WarehouseId { get; set; }
+        public Guid WarehouseId { get; set; }
         public Warehouse? Warehouse { get; set; }
 
         [ForeignKey("CreatedByUser")]
-        public int CreatedByUserId { get; set; }
+        public Guid CreatedByUserId { get; set; }
         public User? CreatedByUser { get; set; }
 
         public DateTime Date { get; set; }

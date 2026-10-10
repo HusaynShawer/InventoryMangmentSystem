@@ -13,7 +13,7 @@ public class WarehouseRepository
         _context = context;
     }
 
-    public async Task<IEnumerable<Product>> GetWarehouseProduct(int userId)
+    public async Task<IEnumerable<Product>> GetWarehouseProduct(Guid userId)
     {
         var records = await _context.Products
             .Where(p => p.Stocks.Any(s =>
@@ -24,7 +24,7 @@ public class WarehouseRepository
         return records;
     }
 
-    public async Task<IEnumerable<Product>> GetWarehouseLowProducts(int userId)
+    public async Task<IEnumerable<Product>> GetWarehouseLowProducts(Guid userId)
     {
         var records = await _context.Products
             .Where(p => p.Stocks.Where(p =>p.Quantity < 5).Any(s =>

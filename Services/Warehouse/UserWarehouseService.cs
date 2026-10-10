@@ -22,7 +22,7 @@ public class UserWarehouseService
             throw new Exception("No UserWarehouse found");
         return recods;
     }
-    public async Task<UserWarehouse> GetByID(int id)
+    public async Task<UserWarehouse> GetByID(Guid id)
     {
         var record = await _repo.GetById(id);
         if (record is null)
@@ -39,7 +39,7 @@ public class UserWarehouseService
         return userWarehouse;
 
     }
-    public async Task Delete(int id)
+    public async Task Delete(Guid id)
     {
         var record = await GetByID(id);
         _repo.Delete(record);

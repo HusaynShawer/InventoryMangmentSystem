@@ -22,7 +22,7 @@ public class GSupplierService
             throw new Exception("No Suppliers found");
         return recods;
     }
-    public async Task<Supplier> GetByID(int id)
+    public async Task<Supplier> GetByID(Guid id)
     {
         var record = await _repo.GetById(id);
         if (record is null)
@@ -39,7 +39,7 @@ public class GSupplierService
 
     }
 
-    public async Task Delete(int id)
+    public async Task Delete(Guid id)
     {
         var record = await GetByID(id);
         _repo.Delete(record);
