@@ -13,12 +13,7 @@ public class ProductDTO
     public StockDTO? stock{get; set;}
 }
 
-public class StockDTO
-{
-    public Guid WarehouseId {get; set;}
-    public required int Quantity {get; set;}
 
-}
 
 public class ProductResponseDTO
 {
@@ -31,24 +26,7 @@ public class ProductResponseDTO
     public List<StockResponseDTO> Stocks { get; set; } = new();
 }
 
-public class StockResponseDTO
-{
-    public Guid Id { get; set; }
-    public Guid WarehouseId { get; set; }
-    public int Quantity { get; set; }
-}
 
-public class StockMovementDTO
-{
-    public Guid ProductId{get; set;}
-    public Guid WarehouseId {get; set;}
-    public Guid UserId {get; set;}
-    public int Quantity{get; set;}
-    public int MovementType {get; set;}
-    public Guid ReferenceId{get;set;}
-    public DateTime Date { get; set;}
-    public string? Note {get; set;}
-}
 
     public class SupplierDTo
     {
