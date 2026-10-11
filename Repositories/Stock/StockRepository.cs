@@ -21,11 +21,18 @@ public class StockRepository : BaseRepository<Stock>
                 s.WarehouseId == warehouseId);
     }
 
-    public async Task<IEnumerable<Stock>> GetLowStockAsync()
+    public async Task<IEnumerable<LowStockDto>> GetLowStockAsync(Guid warehouseId)
     {
-        return await _context.Stocks
-            .Where(s => s.Quantity <= 5)
-            .ToListAsync();
+        return await _context.Stocks.Where(s =>s.WarehouseId == warehouseId &&
+                                        s.Quantity <=s.Product.ReorderLevel).Select(s =>new LowStockDto
+                                        {
+                                            ProductId = s.ProductId,
+                                            ProductName = s.Product.Name,
+                                            SKU = s.Product.Sku,
+                                            WarehouseId = s.WarehouseId,
+                                            WarehouseName = s.Warehouse.Name,
+                                            Quantity = s.Quantity
+                                        }).ToListAsync();
     }
 
     public async Task<Stock> IncreaseStockAsync(

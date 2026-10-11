@@ -31,3 +31,23 @@ public class StockAdjustmentDTO
     public string reason {get; set;}
     public int ActualQuantity {get; set;}
 }
+
+public class LowStockDto
+{
+    public Guid ProductId { get; set; }
+    public string ProductName { get; set; } = string.Empty;
+    public string SKU { get; set; } = string.Empty;
+
+    public Guid WarehouseId { get; set; }
+    public string WarehouseName { get; set; } = string.Empty;
+
+    public int Quantity { get; set; }
+}
+
+public class TransferDto
+{
+    public Guid productId {get; set;}
+    public Guid formWarehouseId {get; set;}
+    public Guid toWarehouseId {get; set;}
+    public int Quantity {get; set;}
+}
