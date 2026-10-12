@@ -41,10 +41,7 @@ public class GStockService
     }
         public async Task<IEnumerable<Stock>> GetAll()
     {
-        var recods =  await _repo.GetAll();
-        if (!recods.Any())
-            throw new Exception("No Stock found");
-        return recods;
+        return await _repo.GetAll();
     }
     public async Task<Stock> GetByID(Guid id)
     {

@@ -13,7 +13,7 @@ builder.Services.AddControllers();
 
 // 1. Register the DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),sql => sql.EnableRetryOnFailure()));
 // Repositories
 builder.Services.AddScoped<WarehouseRepository>();
 builder.Services.AddScoped<StockRepository>();
@@ -75,6 +75,33 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var logger = scope.ServiceProvider
+        .GetRequiredService<ILoggerFactory>()
+        .CreateLogger("DatabaseStartup");
+
+    const int maxAttempts = 10;
+    for (var attempt = 1; ; attempt++)
+    {
+        try
+        {
+            db.Database.Migrate();
+            break;
+        }
+        catch (Exception ex) when (attempt < maxAttempts)
+        {
+            logger.LogWarning(
+                ex,
+                "Database migration failed (attempt {Attempt}/{Max}). Retrying in 5s...",
+                attempt,
+                maxAttempts);
+            await Task.Delay(TimeSpan.FromSeconds(5));
+        }
+    }
+}
 
 app.UseAuthentication();
 app.UseAuthorization();

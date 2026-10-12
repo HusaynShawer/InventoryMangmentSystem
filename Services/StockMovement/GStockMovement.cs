@@ -14,10 +14,7 @@ public class GStockMovementService
 
     public async Task<IEnumerable<StockMovement>> GetAll()
     {
-        var recods =  await _repo.GetAll();
-        if (!recods.Any())
-            throw new Exception("No StockMovements found");
-        return recods;
+        return await _repo.GetAll();
     }
     public async Task<StockMovement> GetByID(Guid id)
     {

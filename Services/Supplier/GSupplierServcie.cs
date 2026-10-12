@@ -17,10 +17,7 @@ public class GSupplierService
 
     public async Task<IEnumerable<Supplier>> GetAll()
     {
-        var recods =  await _repo.GetAll();
-        if (!recods.Any())
-            throw new Exception("No Suppliers found");
-        return recods;
+        return await _repo.GetAll();
     }
     public async Task<Supplier> GetByID(Guid id)
     {

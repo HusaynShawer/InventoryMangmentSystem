@@ -8,20 +8,22 @@ public class GWarehouseService
 {
     private readonly BaseRepository<Warehouse> _repo;
     private readonly WarehouseRepository _warehouseRepository;
+    private readonly BaseRepository<UserWarehouse> _userWarehouseRepo;
     private readonly UnitOfWork _unitOfWork;
     public GWarehouseService(
-        BaseRepository<Warehouse> repo,WarehouseRepository warehouseRepository,UnitOfWork unitOfWork)
+        BaseRepository<Warehouse> repo,WarehouseRepository warehouseRepository,
+        BaseRepository<UserWarehouse> userWarehouseRepository,
+        UnitOfWork unitOfWork)
     {
         _repo = repo;
         _warehouseRepository = warehouseRepository;
+        _userWarehouseRepo = userWarehouseRepository;
         _unitOfWork = unitOfWork;
     }
 
     public async Task<IEnumerable<WarehouseResponseDTO>> GetAll()
     {
-        var recods =  await _repo.GetAll();
-        if (!recods.Any())
-            throw new Exception("No Warehouse found");
+        var recods = await _repo.GetAll();
         return recods.Select(MapToDto).ToList();
     }
     public async Task<WarehouseResponseDTO> GetByID(Guid id)
@@ -32,13 +34,20 @@ public class GWarehouseService
         return MapToDto(record);
     }
 
-    public async Task<WarehouseResponseDTO> Create(WarehouseDTO warehouseDTO)
+    public async Task<WarehouseResponseDTO> Create(Guid userId, WarehouseDTO warehouseDTO)
     {
 
         var recod = await _repo.Add(new Warehouse{Name = warehouseDTO.Name,
                                     Location = warehouseDTO.Location});
         if (recod is null)
             throw new Exception("sorry Warehouse item dont added try again");
+        var userwarehouse = new UserWarehouse
+        {
+            UserId=userId,
+            WarehouseId = recod.Id,
+            Warehouse = recod
+        };
+        await _userWarehouseRepo.Add(userwarehouse);
         await _unitOfWork.SaveAsync();
         return MapToDto(recod);
 
@@ -65,8 +74,7 @@ public class GWarehouseService
     }
     public async Task<IEnumerable<Product>> GetWarehouseLowProducts(Guid userId)
     {
-        var records = await _warehouseRepository.GetWarehouseLowProducts(userId);
-        return records.Any() ? records : throw new Exception("no low products in warehouse");
+        return await _warehouseRepository.GetWarehouseLowProducts(userId);
     }
 
     public static WarehouseResponseDTO MapToDto(Warehouse w)=> new()

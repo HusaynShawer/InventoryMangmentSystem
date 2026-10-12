@@ -17,10 +17,7 @@ public class GPurchaseItemsService
 
     public async Task<IEnumerable<PurchaseItems>> GetAll()
     {
-        var records =  await _repo.GetAll();
-        if (!records.Any())
-            throw new Exception("No purchaseitems found");
-        return records;
+        return await _repo.GetAll();
     }
     public async Task<PurchaseItems> GetByID(Guid id)
     {
