@@ -5,6 +5,161 @@ Method: full code inspection + build + live probing against the local dev databa
 
 ---
 
+# UPDATE v2 — Progress Review (2026-10-12)
+
+Second pass after commits `277beb8`, `ffc313c`, `a93a773` (Guid migration, Stock adjust/transfer, stock
+low-stock DTOs). Method: full re-read + `dotnet build`.
+
+**Build result:** succeeds, **0 errors, 26 warnings** (mostly nullable `CS86xx`; plus `ASP0026` on
+`AuthController`, which is the build *telling you* the register `[Authorize]` is dead — see C1).
+
+**Are you walking in the right direction? Yes — with a caveat.** You fixed the two things a beginner
+usually can't see (the broken policy name, and several save-order bugs), and you started building the
+warehouse-access check in the right layer (the service). That is real progress. The caveat: while
+adding Adjust/Transfer you reintroduced the *exact* save-order bug in new code, and the security
+fail-open problem (C1–C3) is completely untouched. So: right direction, but don't move on to new
+features until the P0 list is closed.
+
+## What you actually fixed (credit where due)
+
+| # | Was | Now | Evidence |
+|---|---|---|---|
+| C4 | `AminOnly` typo + missing `ManagerOrAdmin` → 500s | **FIXED** | `CategoryController.cs:11` = `AdminOnly`; `StockController.cs:11,49` = `AdminOnly`; `Program.cs:65-70` only registers real policies |
+| C6 (part) | Silent no-op updates/deletes in most services | **PARTLY FIXED** | `GStockService` Delete/Update/Adjust/Transfer now `SaveAsync`; `GWarehouseService`, `GCategoryService`, `GSupplierService`, `GPurchaseService.Update`, `UserWarehouseService.Create` now save |
+| C8 (part) | Warehouse ACL enforced nowhere | **STARTED** | `GStockService.AdjustStock:79-85`, `lowStockDto:110-121`, `Transfer:123-149` check `UserWarehouse` + throw `UnauthorizedAccessException` |
+| C18 (part) | Low-stock hardcoded `5` | **PARTLY FIXED** | `StockRepository.GetLowStockAsync:27` now uses `s.Product.ReorderLevel` — correct. `WarehouseRepository.cs:30` still hardcodes `< 5` |
+| — | Secrets handling | **STARTED** | `csproj` now has a `UserSecretsId` (but nothing moved yet — C9 still open) |
+| C12 (part) | Entity over-posting | **REDUCED** | Warehouse now uses `WarehouseDTO`/`WarehouseResponseDTO` like Product/Category/Auth |
+
+The `UnauthorizedAccessException` helper pattern in `GStockService` is the right shape. Copy it into a
+single shared helper and call it from Purchase/Sale — don't rewrite the approach, reuse it.
+
+## What is still open (the P0s are still P0)
+
+**Still failing open — untouched since v1:**
+
+- **C1 — Anonymous registration can create ADMIN.** `AuthController.cs:10` still has class-level
+  `[AllowAnonymous]`; the action-level `AdminOnly` at `:22` is overridden (the build warning `ASP0026`
+  is this). `RegisterDto.Role` is still client-controlled (`AuthService.cs:45`). **Open.**
+- **C2 — No fallback policy; 4 controllers have no auth.** `Program.cs` still has no
+  `FallbackPolicy`. `UserWarehouseController.cs:11`, `SupplierController.cs:8`,
+  `PurchaseItemsController.cs:9`, `SaleItemController.cs:9` have no `[Authorize]`. **Open.**
+- **C3 — `[AllowAnonymous]` still leaks data/writes.** `StockController.cs:22,37` (GET+POST) and
+  `ProductController.cs:22,30`. **Open.**
+- **C5 — Role casing mismatch.** `Program.cs:67` still `RequireRole("ADMIN")`, domain default is
+  `"User"` / `"Admin"` (`Models/User.cs:25`). No canonical role constant. **Open.**
+- **C9 — Secrets still committed.** `appsettings.json:10` (`sa` password) and `:13` (JWT key) are
+  still tracked by git (`git ls-files` confirms). **Open** — and this is still #1 because the JWT key
+  is in history forever.
+
+**Save-discipline (C6) is half-fixed — these are still silent no-ops:**
+
+| File | Method | Problem |
+|---|---|---|
+| `Services/Purchase/GPurchaseItemService.cs:116-120` | `GPurchaseService.Delete` | saves **before** `Delete`, never after → deletes nothing (the original C6 example, still here) |
+| `Services/PurchaseItem/GPurchaseItemService.cs:43-47, 49-56` | `Delete`, `Update` | save before mutation |
+| `Services/Sale/GsaleService.cs:108-120` | `Delete`, `Update` | **no save at all** |
+| `Services/StockMovement/GStockMovement.cs:29-55` | `Create`, `Update`, `Delete` | **no save at all** |
+| `Services/SaleItem/GSaleItemService.cs:32-52` | `Create`, `Update`, `Delete` | **no save at all** |
+| `Services/Warehouse/UserWarehouseService.cs:42-46` | `Delete` | no save |
+
+Rule to enforce everywhere: **repositories never save; every service mutating method ends with exactly
+one `SaveAsync` after all mutations.** `UserRepository`/`UserWarehouseRepository`/`UserWarehouseRepository`
+still call `SaveChangesAsync` internally — that inconsistency is why you keep guessing.
+
+**Inventory integrity — still open:**
+
+- **C7** No `UNIQUE(ProductId, WarehouseId)` on `Stocks` and no unique index on `Product.Sku`
+  (`ApplicationDBContext.cs` unchanged; migration has `Sku nvarchar(max) nullable`). **Open.**
+- **C10** Purchase/Sale/Transfer still read-modify-write `Stock.Quantity` with no concurrency control
+  (`GPurchaseItemService.cs:84`, `GsaleService.cs:78`, `GStockService.cs:161,178`). **Open.**
+- **C11** No `[Range]` on any quantity/price; `-10` still inverts stock. **Open.**
+- **C13** `PurchaseItems`, `SaleItem`, `StockMovement` still directly writable via anonymous endpoints.
+  **Open.**
+- **C14** Sale movements still written with `MovementType = "Purchase"` (`GsaleService.cs:87`). **Open.**
+- **C15** No global exception handler; controllers still `throw new Exception`/try-catch
+  (`PurchaseController.cs:49`, `SaleController.cs:38,51`, `ProductController.cs`). **Open.**
+- **C16** Cascade deletes unchanged. **Open.**
+- **C17** Product responses still `stocks: []` (`GProductService.cs:23,99` — no `Include`, no projection).
+  **Open.**
+- **C12** Still entity-bound: `Stock`, `Supplier`, `StockMovement`, `PurchaseItems`, `SaleItem`,
+  `UserWarehouse`, plus `Purchase`/`Sale` **update** bodies. **Partly open.**
+
+## New issues introduced since v1 (fix before adding anything else)
+
+- **N1 — `GProductService.Create` NRE + dead movement.** `ProductDTO.stock` is nullable, but after the
+  `if (dto.stock is not null)` block, lines `:60-62` dereference `dto.stock.WarehouseId` /
+  `dto.stock.Quantity` unconditionally → `NullReferenceException` when creating a product without
+  initial stock. Also `_stockMovement` (`:57-67`) is built but **never added to any repo and never
+  saved** — dead code, so product creation records no movement. Build warning `GProductService.cs(60,27)`
+  points right at it.
+- **N2 — `GStockService.Transfer` NRE + leftover debug.** `source` is dereferenced at `:154` without a
+  null check (`GetByProductIdAsync` returns `Stock?`). And `:138-142` still prints
+  `Console.ForegroundColor`/`Console.WriteLine` debug with Arabic text — remove it.
+- **N3 — Adjust/Transfer are unreachable by design.** Those actions live under a controller with
+  `[Authorize(Policy="AdminOnly")]`, but the methods require the caller to have `UserWarehouse` rows.
+  Admins typically have none, and a normal user with rows gets 403 at the controller. Decide the model:
+  warehouse-scoped endpoints should require *authentication* (not `AdminOnly`) and enforce the ACL in
+  the service; admin bypass inside the helper.
+- **N4 — Inconsistent DTO.** `StockMovementDTO.MovementType` is `int` (`StockDTO.cs:21`) but the model
+  is `string` (`Models/StockMovement.cs:25`). Looks unused; delete or fix.
+- **N5 — Dead/misnamed files.** `Services/Purchase/GPurchaseItemService.cs` actually declares
+  `GPurchaseService`; `Services/PurchaseItem/IPurchaseItem.cs` (`IPurchaseItemsService`) is implemented
+  by nobody and never registered; `IStockRepository` signatures don't match `StockRepository` and it
+  isn't registered either. `IStockRepository` + `IncreaseStockAsync`/`DecreaseStockAsync` are dead.
+- **N6 — Nullable derefs** in `GStockService` (`user` from `GetByIdAsync` at `:83,113,125`) and
+  `WarehouseRepo.cs:20,31`. The 26 warnings are essentially this; treat them as a bug list.
+
+## Updated score
+
+Was **36/100**. Now roughly **47/100** — fixed config/authorization plumbing and part of the save
+discipline, but gained new bugs and left the fail-open security holes.
+
+| Area | v1 | Now | Why it moved |
+|---|---|---|---|
+| Architecture | 8/10 | 8/10 | unchanged (still right); dead abstractions grew |
+| Security | 2/10 | 2/10 | C1–C3 untouched |
+| Authorization | 1/10 | 2/10 | ACL helper started + C4 fixed, but mutations still unguarded |
+| Database | 5/10 | 5/10 | C7/C16 untouched |
+| Transactions | 7/10 | 7/10 | core creates still correct |
+| Concurrency | 2/10 | 2/10 | untouched |
+| Error handling | 2/10 | 2/10 | untouched |
+| API design | 4/10 | 5/10 | Warehouse DTOs |
+| Correctness | 3/10 | 3/10 | some saves fixed, but new NREs + wrong movement type |
+| Testing | 0/10 | 0/10 | still zero tests |
+
+## Your next steps, in order (do not add features until 1–5 are done)
+
+1. **Secrets (C9):** move connection string + `Jwt:Key` to user-secrets (the `UserSecretsId` is already
+   there) / env vars, rotate both, and `git rm --cached appsettings.json` pattern.
+2. **Fail closed (C1, C2, C3, C5):** add
+   `o.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();`, remove
+   every `[AllowAnonymous]` except `POST /api/Auth/login`, remove the class-level one on `AuthController`,
+   delete `Role` from `RegisterDto`, and use one role constant (pick `"Admin"`, update `Program.cs:67`).
+3. **Finish the save discipline (C6):** fix the six files in the table above; make `UserRepository`/
+   `UserWarehouseRepository` stop saving.
+4. **Finish the warehouse ACL (C8):** extract your `GStockService` check into one
+   `IWarehouseAccessChecker.EnsureCanAccessAsync(userId, warehouseId)` and call it from
+   `GPurchaseService.Create`, `GsaleService.Create`, and stock mutations; take `CreatedByUserId` from
+   `ClaimTypes.NameIdentifier` (not `PurchaseDTO`/`SaleDTO`).
+5. **Fix the new bugs (N1–N3)** and delete the debug `Console.WriteLine`.
+6. **Then** the inventory P0s: C7 unique indexes, C11 `[Range]`, C10 atomic
+   `ExecuteUpdateAsync`, and C14/C17.
+7. **Write the authorization-matrix test** — it is the one test that would have caught C1–C5 and keeps
+   you honest as you go.
+
+The original v1 review below is still accurate for everything marked "Open"; use it as the detailed
+reference. Re-read sections only for the items you have already closed.
+
+---
+
+# Inventory Management System — Production-Level Code Review (v1)
+
+Reviewed: Controllers, Services, Repositories, UnitOfWork, Models, DTOs, Migrations, Program.cs
+Method: full code inspection + build + live probing against the local dev database.
+
+---
+
 ## Executive Summary
 
 The **architecture shape is right**: Controller → Service → Repository → EF Core with a UnitOfWork, business rules in services, thin controllers, DTOs for Product/Category/Auth, async everywhere, and — importantly — **correct transaction boundaries in Purchase/Sale creation**. That foundation is good and should not be rewritten.

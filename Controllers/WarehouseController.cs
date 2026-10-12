@@ -35,7 +35,12 @@ public class WarehouseController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<WarehouseResponseDTO>> Create(WarehouseDTO warehouseDTO)
     {
-        var _supplier = await _service.Create(warehouseDTO);
+
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+        if (!Guid.TryParse(userIdClaim,out var userId))
+            return Unauthorized();
+
+        var _supplier = await _service.Create(userId, warehouseDTO);
 
         return CreatedAtAction(
             nameof(GetById),

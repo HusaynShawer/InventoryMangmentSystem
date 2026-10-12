@@ -17,10 +17,7 @@ public class UserWarehouseService
 
     public async Task<IEnumerable<UserWarehouse>> GetAll()
     {
-        var recods =  await _repo.GetAll();
-        if (!recods.Any())
-            throw new Exception("No UserWarehouse found");
-        return recods;
+        return await _repo.GetAll();
     }
     public async Task<UserWarehouse> GetByID(Guid id)
     {

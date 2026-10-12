@@ -17,10 +17,7 @@ public class GsaleItemService
 
     public async Task<IEnumerable<SaleItem>> GetAll()
     {
-        var recods =  await _repo.GetAll();
-        if (!recods.Any())
-            throw new Exception("No sale items found");
-        return recods;
+        return await _repo.GetAll();
     }
     public async Task<SaleItem> GetByID(Guid id)
     {

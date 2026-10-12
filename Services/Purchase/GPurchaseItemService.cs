@@ -26,10 +26,7 @@ public class GPurchaseService
 
     public async Task<IEnumerable<Purchase>> GetAll()
     {
-        var recods =  await _repo.GetAll();
-        if (!recods.Any())
-            throw new Exception("No Purchases found");
-        return recods;
+        return await _repo.GetAll();
     }
     public async Task<Purchase> GetByID(Guid id)
     {

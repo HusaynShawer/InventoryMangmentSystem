@@ -18,9 +18,7 @@ public class GCategoryService
 
     public async Task<IEnumerable<CategoryResponseDTO>> GetAll()
     {
-        var recods =  await _repo.GetAll();
-        if (!recods.Any())
-            throw new Exception("No Category found");
+        var recods = await _repo.GetAll();
         return recods.Select(MapToDto).ToList();
     }
     public async Task<CategoryResponseDTO> GetByID(Guid id)

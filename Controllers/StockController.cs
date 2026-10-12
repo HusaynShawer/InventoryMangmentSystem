@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using InventoryMangmentSystem.Models;
 using InventoryMangmentSystem.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -45,7 +46,7 @@ public class StockController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    [Authorize(Policy = "ManagerOrAdmin")]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> Update(Guid id, Stock stock)
     {
         if (id != stock.Id)
@@ -62,4 +63,38 @@ public class StockController : ControllerBase
         await _service.Delete(id);
         return NoContent();
     }
+
+    [HttpPut("adjust")]
+    public async Task<IActionResult> Adjust(
+        [FromBody] StockAdjustmentDTO stockAdjustmentDTO)
+    {
+        var claimUserId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+        if (!Guid.TryParse(claimUserId, out var userId))
+            return Unauthorized();
+        await _service.AdjustStock(userId, stockAdjustmentDTO);
+        return NoContent();
+    }
+
+    [HttpGet("lowstock")]
+    public async Task<ActionResult<IEnumerable<LowStockDto>>> lowStock(Guid warehouseId)
+    {
+        var claimUserId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+        if (!Guid.TryParse(claimUserId, out var userId))
+            return Unauthorized();
+        
+        var _lowStocks = await _service.lowStockDto(warehouseId, userId);
+        return Ok(_lowStocks);
+    }
+    [HttpPost("Transfer")]
+    public async Task<ActionResult> Transfer([FromBody] TransferDto dto)
+    {
+        var claimUserId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+        if (!Guid.TryParse(claimUserId, out var userId))
+            return Unauthorized();
+        
+        await _service.Transfer(userId, dto);
+        return NoContent();
+        
+    }
+
 }

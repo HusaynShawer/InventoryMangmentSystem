@@ -27,7 +27,7 @@ public class UserRepository : IUserRepository
 
     public async Task<User?> GetByIdAsync(Guid id)
     {
-        return await _context.Users.FindAsync(id);
+        return await _context.Users.Include(u =>u.UserWarehouses).FirstOrDefaultAsync(u =>u.Id == id);
     }
 
     public async Task<User> CreateAsync(User user)
