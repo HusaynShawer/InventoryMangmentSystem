@@ -37,8 +37,7 @@ public class GsaleService
     }
     public async Task<Sale> Create(SaleDTO dto)
     {
-        var transaction = await _unitOfWork.BeginTransactionAsync();
-        try
+        return await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
             var _sale = new Sale
             {
@@ -90,15 +89,9 @@ public class GsaleService
             }
 
             await _unitOfWork.SaveAsync();
-            await _unitOfWork.CommitTransactionAsync(transaction);
             return _sale;
 
-        }
-        catch
-        {
-            await _unitOfWork.RollbackTransactionAsync(transaction);
-            throw;
-        }
+        });
         
     }
 

@@ -38,9 +38,7 @@ public class GPurchaseService
 
     public async Task<Purchase> Create(PurchaseCreateDto dto)
     {
-        var transaction = await _unitOfWork.BeginTransactionAsync();
-
-        try
+        return await _unitOfWork.ExecuteInTransactionAsync( async () =>
         {
             var purchase = new Purchase
             {
@@ -98,23 +96,15 @@ public class GPurchaseService
             }
 
             await _unitOfWork.SaveAsync();
-
-            await _unitOfWork.CommitTransactionAsync(transaction);
-
             return purchase;
-        }
-        catch
-        {
-            await _unitOfWork.RollbackTransactionAsync(transaction);
-            throw;
-        }
+        });
     }
 
     public async Task Delete(Guid id)
     {
         var record = await GetByID(id);
-        await _unitOfWork.SaveAsync();
         _repo.Delete(record);
+        await _unitOfWork.SaveAsync();
     }
     public async Task Update(Purchase purchase)
     {

@@ -70,7 +70,7 @@ public class GWarehouseService
     public async Task<IEnumerable<Product>> GetWarehouseProducts(Guid userId)
     {
         var records = await _warehouseRepository.GetWarehouseProduct(userId);
-        return records;
+        return records.Any() ? records : throw new Exception("warehosue dosent have products");
     }
     public async Task<IEnumerable<Product>> GetWarehouseLowProducts(Guid userId)
     {

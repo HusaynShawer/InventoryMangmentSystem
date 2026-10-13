@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Identity.Client;
 
 namespace InventoryMangmentSystem.Data;
 
@@ -43,5 +44,31 @@ public class UnitOfWork
     {
         await transaction.RollbackAsync(cancellationToken);
         await transaction.DisposeAsync();
+    }
+
+
+    public async Task<T> ExecuteInTransactionAsync<T>(
+        Func<Task<T>> action,
+        CancellationToken cancellationToken = default)
+    {
+        var strategy = _context.Database.CreateExecutionStrategy();
+
+        return await strategy.ExecuteAsync(
+            _context,
+            async (context, state, ct) =>
+            {
+                context.ChangeTracker.Clear();
+
+                await using var transaction =
+                    await context.Database.BeginTransactionAsync(ct);
+
+                var result = await action();
+
+                await transaction.CommitAsync(ct);
+
+                return result;
+            },
+            verifySucceeded: null,
+            cancellationToken: cancellationToken);
     }
 }
