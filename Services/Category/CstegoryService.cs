@@ -25,7 +25,7 @@ public class GCategoryService
     {
         var record = await _repo.GetById(id);
         if (record is null)
-            throw new Exception("Category Not found");
+            throw new KeyNotFoundException("Category Not found");
         return MapToDto(record);
     }
 
