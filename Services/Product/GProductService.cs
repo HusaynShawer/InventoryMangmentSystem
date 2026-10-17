@@ -1,3 +1,4 @@
+using InventoryMangmentSystem.Exceptions;
 using InventoryMangmentSystem.Models;
 using InventoryMangmentSystem.Repositories;
 using InventoryMangmentSystem.Schemas;
@@ -98,7 +99,7 @@ public class GProductService
     {
         var product = await _repo.GetById(id);
         if (product is null)
-            throw new KeyNotFoundException("Product not found");
+            throw new NotFoundException("Product not found.");
         return product;
     }
 

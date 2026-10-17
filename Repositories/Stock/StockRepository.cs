@@ -1,4 +1,5 @@
 using InventoryMangmentSystem.Data;
+using InventoryMangmentSystem.Exceptions;
 using InventoryMangmentSystem.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -43,7 +44,7 @@ public class StockRepository : BaseRepository<Stock>
             .FirstOrDefaultAsync(s => s.ProductId == productId);
 
         if (stock is null)
-            throw new Exception("Stock not found");
+            throw new NotFoundException("Stock not found.");
 
         stock.Quantity += quantity;
 
@@ -58,7 +59,7 @@ public class StockRepository : BaseRepository<Stock>
             .FirstOrDefaultAsync(s => s.ProductId == productId);
 
         if (stock is null)
-            throw new Exception("Stock not found");
+            throw new NotFoundException("Stock not found.");
 
         stock.Quantity -= quantity;
     }

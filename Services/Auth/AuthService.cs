@@ -1,5 +1,6 @@
 using InventoryMangmentSystem.Data;
 using InventoryMangmentSystem.DTOs.Auth;
+using InventoryMangmentSystem.Exceptions;
 using InventoryMangmentSystem.Models;
 using InventoryMangmentSystem.Repositories;
 
@@ -28,12 +29,12 @@ public class AuthService : IAuthService
         
         var existing = await _userRepo.GetByUserNameAsync(dto.UserName);
         if (existing is not null)
-            throw new Exception("UserName already exists");
+            throw new ConflictException("Username already exists.");
 
 
         var existingEmail = await _userRepo.GetByEmailAsync(dto.Email);
         if (existingEmail is not null)
-            throw new Exception("Email already exists");
+            throw new ConflictException("Email already exists.");
 
 
         var user = new User
@@ -65,13 +66,13 @@ public class AuthService : IAuthService
     {
         var user = await _userRepo.GetByUserNameAsync(dto.UserName);
         if (user is null)
-            throw new Exception("Invalid username or password");
+            throw new UnauthorizedException("Invalid username or password.");
 
         if (!user.IsActive)
-            throw new Exception("Account is disabled");
+            throw new ForbiddenException("Account is disabled.");
 
         if (!_hasher.VerifyPassword(dto.Password, user.PasswordHash))
-            throw new Exception("Invalid username or password");
+            throw new UnauthorizedException("Invalid username or password.");
 
         var token = _tokenService.GenerateToken(user);
 

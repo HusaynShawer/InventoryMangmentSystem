@@ -1,4 +1,5 @@
 using InventoryMangmentSystem.Data;
+using InventoryMangmentSystem.Exceptions;
 using InventoryMangmentSystem.Models;
 using InventoryMangmentSystem.Repositories;
 using InventoryMangmentSystem.Schemas;
@@ -32,7 +33,7 @@ public class GPurchaseService
     {
         var record = await _repo.GetById(id);
         if (record is null)
-            throw new Exception("purchase Not found");
+            throw new NotFoundException("Purchase not found.");
         return record;
     }
 
@@ -72,7 +73,7 @@ public class GPurchaseService
                 );
 
                 if (stock is null)
-                    throw new Exception(
+                    throw new NotFoundException(
                         $"Stock not found for ProductId: {item.ProductId}"
                     );
 

@@ -1,3 +1,4 @@
+using InventoryMangmentSystem.Exceptions;
 using InventoryMangmentSystem.Models;
 using InventoryMangmentSystem.Schemas;
 using InventoryMangmentSystem.Services;
@@ -21,21 +22,22 @@ public class SaleController : ControllerBase
     public async Task<ActionResult<IEnumerable<Sale>>> GetAll()
     {
         var sales = await _service.GetAll();
-        return sales.Any() ? Ok(sales) : NotFound("No sales found to return");
+        return Ok(sales);
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<Sale>> GetById(Guid id)
     {
         var sale = await _service.GetByID(id);
-        return sale is not null ? Ok(sale) : NotFound("sale not found to return");
+        return Ok(sale);
     }
 
     [HttpPost]
     public async Task<ActionResult<Sale>> Create([FromBody] SaleDTO dto)
     {
         if (dto.Items is null || dto.Items.Count ==0)
-            throw new Exception("Sale item cant be null");
+            throw new BadRequestException(
+                "A sale must contain at least one item.");
         var _sale = await _service.Create(dto);
         return CreatedAtAction(
             nameof(GetById),
@@ -48,7 +50,8 @@ public class SaleController : ControllerBase
     public async Task<ActionResult> Update(Guid id ,Sale sale)
     {
         if (id != sale.Id)
-            throw new Exception("Miss match cant update sale");
+            throw new BadRequestException(
+                "Route id does not match the sale id.");
         var _sale = await GetById(id);
         await _service.Update(sale);
         return NoContent();

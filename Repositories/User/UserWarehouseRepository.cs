@@ -1,4 +1,5 @@
 using InventoryMangmentSystem.Data;
+using InventoryMangmentSystem.Exceptions;
 using InventoryMangmentSystem.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -40,7 +41,7 @@ public class UserWarehouseRepository : IUserWarehouseRepository
             .FirstOrDefaultAsync(uw => uw.UserId == userId && uw.WarehouseId == warehouseId);
 
         if (record is null)
-            throw new Exception("Assignment not found");
+            throw new NotFoundException("Warehouse assignment not found.");
 
         _context.UserWarehouses.Remove(record);
         await _context.SaveChangesAsync();

@@ -1,3 +1,4 @@
+using InventoryMangmentSystem.Exceptions;
 using InventoryMangmentSystem.Models;
 using InventoryMangmentSystem.Schemas;
 using InventoryMangmentSystem.Services;
@@ -21,21 +22,22 @@ public class PurchaseController : ControllerBase
     public async Task<ActionResult<IEnumerable<Purchase>>> GetAll()
     {
         var purcahses = await _service.GetAll();
-        return purcahses.Any() ? Ok(purcahses) : NotFound("No purchases found to return");
+        return Ok(purcahses);
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<Purchase>> GetById(Guid id)
     {
         var purcahse = await _service.GetByID(id);
-        return purcahse is not null ? Ok(purcahse) : NotFound("Putchase not found to return");
+        return Ok(purcahse);
     }
 
     [HttpPost]
     public async Task<ActionResult<Purchase>> Create([FromBody] PurchaseCreateDto dto)
     {
         if (dto.Items is null || dto.Items.Count == 0)
-            return BadRequest("A purchase must contain at least one item.");
+            throw new BadRequestException(
+                "A purchase must contain at least one item.");
 
         var Created = await _service.Create(dto);
         return Ok(dto);
@@ -46,7 +48,8 @@ public class PurchaseController : ControllerBase
     public async Task<ActionResult> Update(Guid id ,Purchase purchase)
     {
         if (id != purchase.Id)
-            throw new Exception("Miss match cant update purchase");
+            throw new BadRequestException(
+                "Route id does not match the purchase id.");
         var purcahse = await GetById(id);
         await _service.Update(purchase);
         return NoContent();

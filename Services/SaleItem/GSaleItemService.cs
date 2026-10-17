@@ -1,3 +1,4 @@
+using InventoryMangmentSystem.Exceptions;
 using InventoryMangmentSystem.Models;
 using InventoryMangmentSystem.Data;
 using InventoryMangmentSystem.Repositories;
@@ -23,14 +24,15 @@ public class GsaleItemService
     {
         var record = await _repo.GetById(id);
         if (record is null)
-            throw new Exception("sale item Not found");
+            throw new NotFoundException("Sale item not found.");
         return record;
     }
     public async Task<SaleItem> Create(SaleItem saleItem)
     {
         var recod = await _repo.Add(saleItem);
         if (recod is null)
-            throw new Exception("sorry Sale item dont added try again");
+            throw new InvalidOperationException(
+                "Sale item could not be created.");
         return saleItem;
 
     }

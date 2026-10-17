@@ -1,3 +1,4 @@
+using InventoryMangmentSystem.Exceptions;
 using InventoryMangmentSystem.Models;
 using InventoryMangmentSystem.Data;
 using InventoryMangmentSystem.Repositories;
@@ -25,7 +26,7 @@ public class GCategoryService
     {
         var record = await _repo.GetById(id);
         if (record is null)
-            throw new KeyNotFoundException("Category Not found");
+            throw new NotFoundException("Category not found.");
         return MapToDto(record);
     }
 
@@ -33,7 +34,8 @@ public class GCategoryService
     {
         var recod = await _repo.Add(new Category{Name = dTO.Name});
         if (recod is null)
-            throw new Exception("Sorry Category Not Added try again");
+            throw new InvalidOperationException(
+                "Category could not be created.");
         await _unitOfWork.SaveAsync();
         return MapToDto(recod);
     }
@@ -54,7 +56,7 @@ public class GCategoryService
     {
         var category = await _repo.GetById(id);
         if (category is null)
-            throw new KeyNotFoundException("category not found");
+            throw new NotFoundException("Category not found.");
         return category;
     }
     public CategoryResponseDTO MapToDto(Category category) => new()
