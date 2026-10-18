@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using InventoryMangmentSystem.Exceptions;
 using InventoryMangmentSystem.Models;
 using InventoryMangmentSystem.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -30,7 +31,7 @@ public class StockController : ControllerBase
     public async Task<ActionResult<Stock>> GetById(Guid id)
     {
         var stock = await _service.GetByID(id);
-        return stock is null ? NotFound("Stock not found") : Ok(stock);
+        return Ok(stock);
     }
 
     [HttpPost]
@@ -50,7 +51,8 @@ public class StockController : ControllerBase
     public async Task<IActionResult> Update(Guid id, Stock stock)
     {
         if (id != stock.Id)
-            return BadRequest("ID mismatch.");
+            throw new BadRequestException(
+                "Route id does not match the stock id.");
 
         await _service.Update(stock);
         return NoContent();

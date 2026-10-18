@@ -1,3 +1,4 @@
+using InventoryMangmentSystem.Exceptions;
 using InventoryMangmentSystem.Models;
 using InventoryMangmentSystem.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -23,14 +24,14 @@ public class StockMovementController : ControllerBase
     {
         var _stocksMovement = await _service.GetAll();
 
-        return _stocksMovement.Any() ? Ok(_stocksMovement) : NotFound("No Stock Movements found");
+        return Ok(_stocksMovement);
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<StockMovement>> GetById(Guid id)
     {
         var _stockMovement = await _service.GetByID(id);
-        return _stockMovement is not null ? Ok(_stockMovement) : NotFound("Stock movement Not Found");
+        return Ok(_stockMovement);
 
     }
 
@@ -50,7 +51,8 @@ public class StockMovementController : ControllerBase
     public async Task<IActionResult> Update(Guid id, StockMovement stockMovement)
     {
         if (id != stockMovement.Id)
-            return BadRequest("ID mismatch.");
+            throw new BadRequestException(
+                "Route id does not match the stock movement id.");
 
         await _service.Update(stockMovement);
 

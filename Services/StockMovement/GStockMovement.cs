@@ -1,3 +1,4 @@
+using InventoryMangmentSystem.Exceptions;
 using InventoryMangmentSystem.Models;
 using InventoryMangmentSystem.Repositories;
 namespace InventoryMangmentSystem.Services;
@@ -20,14 +21,15 @@ public class GStockMovementService
     {
         var record = await _repo.GetById(id);
         if (record is null)
-            throw new Exception("StockMovement Not found");
+            throw new NotFoundException("Stock movement not found.");
         return record;
     }
     public async Task<StockMovement> Create(StockMovement stockMovement)
     {
         var recod = await _repo.Add(stockMovement);
         if (recod is null)
-            throw new Exception("sorry StockMovement item dont added try again");
+            throw new InvalidOperationException(
+                "Stock movement could not be created.");
         return stockMovement;
 
     }

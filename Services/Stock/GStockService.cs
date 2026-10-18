@@ -1,3 +1,4 @@
+using InventoryMangmentSystem.Exceptions;
 using InventoryMangmentSystem.Models;
 using InventoryMangmentSystem.Data;
 using InventoryMangmentSystem.Repositories;
@@ -47,14 +48,15 @@ public class GStockService
     {
         var record = await _repo.GetById(id);
         if (record is null)
-            throw new Exception("Stock Not found");
+            throw new NotFoundException("Stock not found.");
         return record;
     }
     public async Task<Stock> GetByProductId(Guid productId, Guid warehouseId)
     {
         var recod = await _repo.GetByProductIdAsync(productId,warehouseId);
         if (recod is null)
-            throw new Exception("not stock for this product");
+            throw new NotFoundException(
+                "No stock record found for this product in the given warehouse.");
         return recod;
     }
         public async Task Delete(Guid id)
@@ -79,7 +81,8 @@ public class GStockService
 
         var userWarehouseIds = user.UserWarehouses.Select(uwh => uwh.WarehouseId);
         if(!userWarehouseIds.Contains(stockAdjustmentDTO.WarehouseId))
-            throw new Exception("user didnt have this warehosue please add a valid warehosueId");
+            throw new ForbiddenException(
+                "You do not have access to this warehouse.");
         
         
         var stock = await GetByProductId(stockAdjustmentDTO.ProductId, stockAdjustmentDTO.WarehouseId);
@@ -111,7 +114,7 @@ public class GStockService
             .Any(uwh => uwh.WarehouseId == warehouseId);
         
         if (!hasAccess)
-            throw new UnauthorizedAccessException(
+            throw new ForbiddenException(
                 "The user doesn't have access to this warehouse.");
             
         return await _repo.GetLowStockAsync(warehouseId);
@@ -141,7 +144,7 @@ public class GStockService
         if (!warehouseIds.Contains(dto.formWarehouseId) ||
             !warehouseIds.Contains(dto.toWarehouseId))
         {
-            throw new UnauthorizedAccessException(
+            throw new ForbiddenException(
                 "You don't have access to both warehouses.");
         }
 
@@ -149,7 +152,7 @@ public class GStockService
             dto.productId, dto.formWarehouseId);
       
         if (source.Quantity < dto.Quantity)
-            throw new InvalidOperationException(
+            throw new ConflictException(
               "Insufficient stock for this transfer.");
 
         var destination = await _repo.GetByProductIdAsync(

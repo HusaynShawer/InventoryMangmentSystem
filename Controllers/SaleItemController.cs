@@ -1,3 +1,4 @@
+using InventoryMangmentSystem.Exceptions;
 using InventoryMangmentSystem.Models;
 using InventoryMangmentSystem.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -18,14 +19,14 @@ public class SaleItemController : ControllerBase
     public async Task<ActionResult<IEnumerable<SaleItem>>> GetAll()
     {
         var _salesItems = await _service.GetAll();
-        return _salesItems.Any() ? Ok(_salesItems) : NotFound("No Sale Item found to return");
+        return Ok(_salesItems);
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<SaleItem>> GetById(Guid id)
     {
         var _salesItem = await _service.GetByID(id);
-        return _salesItem is not null ? Ok(_salesItem) : NotFound("sale item not found to return");
+        return Ok(_salesItem);
     }
 
     [HttpPost]
@@ -43,7 +44,8 @@ public class SaleItemController : ControllerBase
     public async Task<ActionResult> Update(Guid id ,SaleItem saleItem)
     {
         if (id != saleItem.Id)
-            throw new Exception("Miss match cant update sale item");
+            throw new BadRequestException(
+                "Route id does not match the sale item id.");
         var _salesItem = await GetById(id);
         await _service.Update(saleItem);
         return NoContent();

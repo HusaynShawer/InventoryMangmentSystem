@@ -1,3 +1,4 @@
+using InventoryMangmentSystem.Exceptions;
 using InventoryMangmentSystem.Models;
 using InventoryMangmentSystem.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -18,14 +19,14 @@ public class PurchaseItemsController : ControllerBase
     public async Task<ActionResult<IEnumerable<PurchaseItems>>> GetAll()
     {
         var _purchaseItems = await _service.GetAll();
-        return _purchaseItems.Any() ? Ok(_purchaseItems) : NotFound("No PurchaseItems found to return");
+        return Ok(_purchaseItems);
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<PurchaseItems>> GetById(Guid id)
     {
         var _purchaseItem = await _service.GetByID(id);
-        return _purchaseItem is not null ? Ok(_purchaseItem) : NotFound("PurchaseItem not found to return");
+        return Ok(_purchaseItem);
     }
 
     [HttpPost]
@@ -43,7 +44,8 @@ public class PurchaseItemsController : ControllerBase
     public async Task<ActionResult> Update(Guid id ,PurchaseItems purchaseItems)
     {
         if (id != purchaseItems.Id)
-            throw new Exception("Miss match cant update purchaseItem");
+            throw new BadRequestException(
+                "Route id does not match the purchase item id.");
         var _purchaseItem = await GetById(id);
         await _service.Update(purchaseItems);
         return NoContent();

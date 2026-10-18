@@ -1,3 +1,4 @@
+using InventoryMangmentSystem.Exceptions;
 using InventoryMangmentSystem.Models;
 using InventoryMangmentSystem.Data;
 using InventoryMangmentSystem.Repositories;
@@ -23,7 +24,7 @@ public class GPurchaseItemsService
     {
         var record = await _repo.GetById(id);
         if (record is null)
-            throw new Exception("purchase item Not found");
+            throw new NotFoundException("Purchase item not found.");
         return record;
     }
 
@@ -31,7 +32,8 @@ public class GPurchaseItemsService
     {
         var recod = await _repo.Add(purchaseItems);
         if (recod is null)
-            throw new Exception("sorry purchaseItems dont added try again");
+            throw new InvalidOperationException(
+                "Purchase item could not be created.");
         await _unitOfWork.SaveAsync();
         return purchaseItems;
 

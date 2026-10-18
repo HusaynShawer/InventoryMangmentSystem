@@ -1,4 +1,5 @@
 using InventoryMangmentSystem.Data;
+using InventoryMangmentSystem.Exceptions;
 using InventoryMangmentSystem.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -52,7 +53,7 @@ public class UserRepository : IUserRepository
     {
         var user = await GetByIdAsync(id);
         if (user is null)
-            throw new Exception("User not found");
+            throw new NotFoundException("User not found.");
 
         _context.Users.Remove(user);
         await _context.SaveChangesAsync();

@@ -1,3 +1,4 @@
+using InventoryMangmentSystem.Exceptions;
 using InventoryMangmentSystem.Models;
 using InventoryMangmentSystem.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -21,14 +22,14 @@ public class SupplierController : ControllerBase
     {
         var _suppliers = await _service.GetAll();
 
-        return _suppliers.Any() ? Ok(_suppliers) : NotFound("No Suppliers found");
+        return Ok(_suppliers);
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<Supplier>> GetById(Guid id)
     {
         var _supplier = await _service.GetByID(id);
-        return _supplier is not null ? Ok(_supplier) : NotFound("Suppliers Not Found");
+        return Ok(_supplier);
 
     }
 
@@ -48,7 +49,8 @@ public class SupplierController : ControllerBase
     public async Task<IActionResult> Update(Guid id, Supplier supplier)
     {
         if (id != supplier.Id)
-            return BadRequest("ID mismatch.");
+            throw new BadRequestException(
+                "Route id does not match the supplier id.");
 
         await _service.Update(supplier);
 

@@ -1,4 +1,5 @@
 using InventoryMangmentSystem.Data;
+using InventoryMangmentSystem.Exceptions;
 using InventoryMangmentSystem.Models;
 using InventoryMangmentSystem.Repositories;
 using InventoryMangmentSystem.Schemas;
@@ -32,15 +33,13 @@ public class GPurchaseService
     {
         var record = await _repo.GetById(id);
         if (record is null)
-            throw new Exception("purchase Not found");
+            throw new NotFoundException("Purchase not found.");
         return record;
     }
 
     public async Task<Purchase> Create(PurchaseCreateDto dto)
     {
-        var transaction = await _unitOfWork.BeginTransactionAsync();
-
-        try
+        return await _unitOfWork.ExecuteInTransactionAsync( async () =>
         {
             var purchase = new Purchase
             {
@@ -74,7 +73,7 @@ public class GPurchaseService
                 );
 
                 if (stock is null)
-                    throw new Exception(
+                    throw new NotFoundException(
                         $"Stock not found for ProductId: {item.ProductId}"
                     );
 
@@ -98,23 +97,15 @@ public class GPurchaseService
             }
 
             await _unitOfWork.SaveAsync();
-
-            await _unitOfWork.CommitTransactionAsync(transaction);
-
             return purchase;
-        }
-        catch
-        {
-            await _unitOfWork.RollbackTransactionAsync(transaction);
-            throw;
-        }
+        });
     }
 
     public async Task Delete(Guid id)
     {
         var record = await GetByID(id);
-        await _unitOfWork.SaveAsync();
         _repo.Delete(record);
+        await _unitOfWork.SaveAsync();
     }
     public async Task Update(Purchase purchase)
     {

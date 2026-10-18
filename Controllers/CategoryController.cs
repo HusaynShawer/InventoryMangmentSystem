@@ -21,14 +21,14 @@ public class CategoryController: ControllerBase
     public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetAll()
     {
         var record = await _service.GetAll();
-        return record.Any() ? Ok(record) : NotFound("No categories found");
+        return Ok(record);
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<CategoryResponseDTO>> GetById(Guid id)
     {
         var record = await _service.GetByID(id);
-        return record is not null ? Ok(record) : NotFound("Category not found");
+        return Ok(record);
     }
     [HttpPost]
     public async Task<ActionResult<CategoryResponseDTO>> Create(CategoryDTO dTO)

@@ -4,12 +4,15 @@ using InventoryMangmentSystem.Data;
 using InventoryMangmentSystem.Services;
 using InventoryMangmentSystem.Repositories;
 using InventoryMangmentSystem.Services.Auth;
+using InventoryMangmentSystem.Exceptions;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllers();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 // 1. Register the DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -103,6 +106,7 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+app.UseExceptionHandler();
 app.UseAuthentication();
 app.UseAuthorization();
 

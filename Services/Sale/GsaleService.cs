@@ -1,3 +1,4 @@
+using InventoryMangmentSystem.Exceptions;
 using InventoryMangmentSystem.Models;
 using InventoryMangmentSystem.Data;
 using InventoryMangmentSystem.Repositories;
@@ -32,13 +33,12 @@ public class GsaleService
     {
         var record = await _repo.GetById(id);
         if (record is null)
-            throw new Exception("Sale Not found");
+            throw new NotFoundException("Sale not found.");
         return record;
     }
     public async Task<Sale> Create(SaleDTO dto)
     {
-        var transaction = await _unitOfWork.BeginTransactionAsync();
-        try
+        return await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
             var _sale = new Sale
             {
@@ -65,12 +65,13 @@ public class GsaleService
                 var _stock = await _stockRepo.GetByProductIdAsync(item.ProductId,_sale.WarehouseId);
                 
                 if (_stock is null)
-                    throw new Exception(
+                    throw new NotFoundException(
                         $"Stock not found for ProductId: {item.ProductId}"
                     );
                 
                 if(item.Quantity > _stock.Quantity)
-                    throw new Exception("Cant Cover Quantity");
+                    throw new ConflictException(
+                        "Insufficient stock: the requested quantity cannot be covered.");
 
                 _stock.Quantity -= item.Quantity;
                 _stockRepo.Update(_stock);
@@ -90,15 +91,9 @@ public class GsaleService
             }
 
             await _unitOfWork.SaveAsync();
-            await _unitOfWork.CommitTransactionAsync(transaction);
             return _sale;
 
-        }
-        catch
-        {
-            await _unitOfWork.RollbackTransactionAsync(transaction);
-            throw;
-        }
+        });
         
     }
 

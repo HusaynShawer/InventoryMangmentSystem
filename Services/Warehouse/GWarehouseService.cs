@@ -1,4 +1,5 @@
 using InventoryMangmentSystem.Data;
+using InventoryMangmentSystem.Exceptions;
 using InventoryMangmentSystem.Models;
 using InventoryMangmentSystem.Repositories;
 using System.Security.Claims;
@@ -30,7 +31,7 @@ public class GWarehouseService
     {
         var record = await _repo.GetById(id);
         if (record is null)
-            throw new Exception("Warehouse Not found");
+            throw new NotFoundException("Warehouse not found.");
         return MapToDto(record);
     }
 
@@ -40,7 +41,8 @@ public class GWarehouseService
         var recod = await _repo.Add(new Warehouse{Name = warehouseDTO.Name,
                                     Location = warehouseDTO.Location});
         if (recod is null)
-            throw new Exception("sorry Warehouse item dont added try again");
+            throw new InvalidOperationException(
+                "Warehouse could not be created.");
         var userwarehouse = new UserWarehouse
         {
             UserId=userId,
@@ -87,7 +89,7 @@ public class GWarehouseService
     {
         var record = await _repo.GetById(id);
         if (record is null)
-            throw new KeyNotFoundException("Product not found");
+            throw new NotFoundException("Warehouse not found.");
         return record;
     }
  }

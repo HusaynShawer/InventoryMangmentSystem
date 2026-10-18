@@ -30,15 +30,8 @@ public class ProductController : ControllerBase
     [AllowAnonymous]
     public async Task<ActionResult<ProductResponseDTO>> GetById(Guid id)
     {
-        try
-        {
-            var product = await _service.GetByID(id);
-            return Ok(product);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
+        var product = await _service.GetByID(id);
+        return Ok(product);
     }
 
     [HttpPost]
@@ -60,28 +53,14 @@ public class ProductController : ControllerBase
     [HttpPut("{id}")]
     public async Task<ActionResult<ProductResponseDTO>> Update(Guid id, ProductDTO dto)
     {
-        try
-        {
-            var updated = await _service.Update(id, dto);
-            return Ok(updated);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
+        var updated = await _service.Update(id, dto);
+        return Ok(updated);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        try
-        {
-            await _service.Delete(id);
-            return NoContent();
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
+        await _service.Delete(id);
+        return NoContent();
     }
 }

@@ -1,4 +1,5 @@
 using InventoryMangmentSystem.Data;
+using InventoryMangmentSystem.Exceptions;
 using InventoryMangmentSystem.Models;
 using InventoryMangmentSystem.Repositories;
 using System.Security.Claims;
@@ -23,7 +24,7 @@ public class UserWarehouseService
     {
         var record = await _repo.GetById(id);
         if (record is null)
-            throw new Exception("Warehouse Not found");
+            throw new NotFoundException("User warehouse assignment not found.");
         return record;
     }
 
@@ -31,7 +32,8 @@ public class UserWarehouseService
     {
         var recod = await _repo.Add(userWarehouse);
         if (recod is null)
-            throw new Exception("sorry User Warehouse item dont added try again");
+            throw new InvalidOperationException(
+                "User warehouse assignment could not be created.");
         await _unitOfWork.SaveAsync();
         return userWarehouse;
 

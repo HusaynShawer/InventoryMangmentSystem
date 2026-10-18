@@ -1,4 +1,5 @@
 using InventoryMangmentSystem.Data;
+using InventoryMangmentSystem.Exceptions;
 using InventoryMangmentSystem.Models;
 using InventoryMangmentSystem.Repositories;
 namespace InventoryMangmentSystem.Services;
@@ -23,14 +24,15 @@ public class GSupplierService
     {
         var record = await _repo.GetById(id);
         if (record is null)
-            throw new Exception("Supplier Not found");
+            throw new NotFoundException("Supplier not found.");
         return record;
     }
     public async Task<Supplier> Create(Supplier supplier)
     {
         var recod = await _repo.Add(supplier);
         if (recod is null)
-            throw new Exception("sorry Supplier item dont added try again");
+            throw new InvalidOperationException(
+                "Supplier could not be created.");
         await _unitOfWork.SaveAsync();
         return supplier;
 
