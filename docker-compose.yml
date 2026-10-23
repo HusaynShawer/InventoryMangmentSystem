@@ -1,20 +1,4 @@
 services:
-  db:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    environment:
-      ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD: "HussienSqlServer!"
-    ports:
-      - "1434:1433"
-    volumes:
-      - sqldata:/var/opt/mssql
-    healthcheck:
-      test: /opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P "HussienSqlServer!" -Q "SELECT 1" || exit 1
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 20s
-
   api:
     build: .
     restart: on-failure
@@ -22,10 +6,8 @@ services:
       - "5000:8080"
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__DefaultConnection: "Server=db,1433;Database=InventoryDb;User Id=sa;Password=HussienSqlServer!;TrustServerCertificate=True"
-    depends_on:
-      db:
-        condition: service_healthy
+      ConnectionStrings__DefaultConnection: "Server=172.17.0.2,1433;Database=InventoryMangmentSystemDb;User Id=sa;Password=HussienSqlServer!;TrustServerCertificate=True"
+    network_mode: bridge
 
   web:
     build: ./frontend
@@ -33,6 +15,4 @@ services:
       - "3000:80"
     depends_on:
       - api
-
-volumes:
-  sqldata:
+    network_mode: bridge

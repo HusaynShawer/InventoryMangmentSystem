@@ -1,38 +1,42 @@
-using InventoryMangmentSystem.Exceptions;
-using InventoryMangmentSystem.Models;
-using InventoryMangmentSystem.Repositories;
-using InventoryMangmentSystem.Schemas;
-using InventoryMangmentSystem.Data;
-namespace InventoryMangmentSystem.Services;
+using InventoryManagementSystem.Exceptions;
+using InventoryManagementSystem.Models;
+using InventoryManagementSystem.Repositories;
+using InventoryManagementSystem.DTOs;
+using InventoryManagementSystem.Data;
+using Microsoft.EntityFrameworkCore;
+namespace InventoryManagementSystem.Services;
 
-public class GProductService
+public class ProductService
 {
     private readonly BaseRepository<Product> _repo;
     private readonly UnitOfWork _unitOfWork;
+    private readonly ApplicationDbContext _context;
 
-    public GProductService(
+    public ProductService(
         BaseRepository<Product> repo,
-        UnitOfWork unitOfWork)
+        UnitOfWork unitOfWork,
+        ApplicationDbContext context)
     {
         _repo = repo;
         _unitOfWork = unitOfWork;
+        _context = context;
     }
 
 
-    public async Task<IEnumerable<ProductResponseDTO>> GetAll()
+    public async Task<IEnumerable<ProductResponseDto>> GetAllAsync()
     {
-        var products = await _repo.GetAll();
+        var products = await _repo.GetAllAsync();
         return products.Select(MapToDto).ToList();
     }
 
-    public async Task<ProductResponseDTO> GetByID(Guid id)
+    public async Task<ProductResponseDto> GetByIdAsync(Guid id)
     {
         var product = await GetEntityOrThrow(id);
         return MapToDto(product);
     }
 
 
-    public async Task<ProductResponseDTO> Create(Guid userId, ProductDTO dto)
+    public async Task<ProductResponseDto> Create(Guid userId, ProductDto dto)
     {
         var product = new Product
         {
@@ -43,35 +47,44 @@ public class GProductService
             ReorderLevel = dto.ReorderLevel
         };
 
-        if (dto.stock is not null)
+        Stock? initialStock = null;
+        if (dto.Stock is not null)
         {
-            product.Stocks.Add(new Stock
+            initialStock = new Stock
             {
-                WarehouseId = dto.stock.WarehouseId,
-                Quantity = dto.stock.Quantity
-            });
+                WarehouseId = dto.Stock.WarehouseId,
+                Quantity = dto.Stock.Quantity
+            };
+            product.Stocks.Add(initialStock);
         }
 
         await _repo.Add(product);
         await _unitOfWork.SaveAsync();
 
-        var _stockMovement = new StockMovement
+        if (initialStock is not null && dto.Stock is not null)
         {
-            ProductId = product.Id,
-            WarehouseId = dto.stock.WarehouseId,
-            UserId = userId,
-            Quantity = dto.stock.Quantity,
-            MovementType = $"Add new Product to {dto.stock.WarehouseId}",
-            ReferenceId = product.Id,
-            Date = DateTime.UtcNow,
-            Note = $"Add New Product to warehouse{dto.stock.WarehouseId}"
-        };
+            var stockMovement = new StockMovement
+            {
+                ProductId = product.Id,
+                WarehouseId = dto.Stock.WarehouseId,
+                UserId = userId,
+                Quantity = dto.Stock.Quantity,
+                MovementType = "Adjustment",
+                ReferenceId = initialStock.Id,
+                Date = DateTime.UtcNow,
+                Note = $"Initial stock for new product"
+            };
+            _context.Set<StockMovement>().Add(stockMovement);
+            await _unitOfWork.SaveAsync();
+        }
 
+        // Reload to include stocks
+        product = await GetEntityOrThrow(product.Id);
         return MapToDto(product);
     }
 
 
-    public async Task<ProductResponseDTO> Update(Guid id, ProductDTO dto)
+    public async Task<ProductResponseDto> Update(Guid id, ProductDto dto)
     {
         var product = await GetEntityOrThrow(id);
 
@@ -97,13 +110,13 @@ public class GProductService
 
     private async Task<Product> GetEntityOrThrow(Guid id)
     {
-        var product = await _repo.GetById(id);
+        var product = await _repo.GetByIdAsync(id);
         if (product is null)
             throw new NotFoundException("Product not found.");
         return product;
     }
 
-    private static ProductResponseDTO MapToDto(Product p) => new()
+    private static ProductResponseDto MapToDto(Product p) => new()
     {
         Id = p.Id,
         Sku = p.Sku,
@@ -111,7 +124,7 @@ public class GProductService
         CategoryId = p.CategoryId,
         UnitPrice = p.UnitPrice,
         ReorderLevel = p.ReorderLevel,
-        Stocks = p.Stocks.Select(s => new StockResponseDTO
+        Stocks = p.Stocks.Select(s => new StockResponseDto
         {
             Id = s.Id,
             WarehouseId = s.WarehouseId,

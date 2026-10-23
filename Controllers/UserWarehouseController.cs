@@ -8,6 +8,7 @@ namespace InventoryMangmentSystem.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Policy = "AdminOnly")]
 public class UserWarehouseController : ControllerBase
 {
     private readonly UserWarehouseService _service;
