@@ -1,10 +1,10 @@
-using InventoryMangmentSystem.Data;
-using InventoryMangmentSystem.DTOs.Auth;
-using InventoryMangmentSystem.Exceptions;
-using InventoryMangmentSystem.Models;
-using InventoryMangmentSystem.Repositories;
+using InventoryManagementSystem.Data;
+using InventoryManagementSystem.DTOs.Auth;
+using InventoryManagementSystem.Exceptions;
+using InventoryManagementSystem.Models;
+using InventoryManagementSystem.Repositories;
 
-namespace InventoryMangmentSystem.Services.Auth;
+namespace InventoryManagementSystem.Services.Auth;
 
 public class AuthService : IAuthService
 {

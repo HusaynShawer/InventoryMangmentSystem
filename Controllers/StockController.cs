@@ -1,36 +1,37 @@
 using System.Security.Claims;
-using InventoryMangmentSystem.Exceptions;
-using InventoryMangmentSystem.Models;
-using InventoryMangmentSystem.Services;
+using InventoryManagementSystem.DTOs;
+using InventoryManagementSystem.Exceptions;
+using InventoryManagementSystem.Models;
+using InventoryManagementSystem.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace InventoryMangmentSystem.Controllers;
+namespace InventoryManagementSystem.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
 [Authorize(Policy ="AdminOnly")]
 public class StockController : ControllerBase
 {
-    private readonly GStockService _service;
+    private readonly StockService _service;
 
-    public StockController(GStockService service)
+    public StockController(StockService service)
     {
         _service = service;
     }
 
     [HttpGet]
     [AllowAnonymous]
-    public async Task<ActionResult<IEnumerable<Stock>>> GetAll()
+    public async Task<ActionResult<IEnumerable<Stock>>> GetAllAsync()
     {
-        var stocks = await _service.GetAll();
+        var stocks = await _service.GetAllAsync();
         return Ok(stocks);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Stock>> GetById(Guid id)
+    public async Task<ActionResult<Stock>> GetByIdAsync(Guid id)
     {
-        var stock = await _service.GetByID(id);
+        var stock = await _service.GetByIdAsync(id);
         return Ok(stock);
     }
 
@@ -40,7 +41,7 @@ public class StockController : ControllerBase
     {
         var created = await _service.Create(stock);
         return CreatedAtAction(
-            nameof(GetById),
+            nameof(GetByIdAsync),
             new { id = created.Id },
             created
         );
@@ -68,7 +69,7 @@ public class StockController : ControllerBase
 
     [HttpPut("adjust")]
     public async Task<IActionResult> Adjust(
-        [FromBody] StockAdjustmentDTO stockAdjustmentDTO)
+        [FromBody] StockAdjustmentDto stockAdjustmentDTO)
     {
         var claimUserId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
         if (!Guid.TryParse(claimUserId, out var userId))

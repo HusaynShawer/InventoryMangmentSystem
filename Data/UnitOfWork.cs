@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Identity.Client;
 
-namespace InventoryMangmentSystem.Data;
+namespace InventoryManagementSystem.Data;
 
 public class UnitOfWork
 {

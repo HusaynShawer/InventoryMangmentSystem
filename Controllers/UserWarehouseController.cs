@@ -1,9 +1,9 @@
-using InventoryMangmentSystem.Models;
-using InventoryMangmentSystem.Services;
+using InventoryManagementSystem.Models;
+using InventoryManagementSystem.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-namespace InventoryMangmentSystem.Controllers;
+namespace InventoryManagementSystem.Controllers;
 
 
 [ApiController]
@@ -17,17 +17,17 @@ public class UserWarehouseController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<UserWarehouse>>> GetAll()
+    public async Task<ActionResult<IEnumerable<UserWarehouse>>> GetAllAsync()
     {
-        var warehouses = await _service.GetAll();
+        var warehouses = await _service.GetAllAsync();
 
         return Ok(warehouses);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<UserWarehouse>> GetById(Guid id)
+    public async Task<ActionResult<UserWarehouse>> GetByIdAsync(Guid id)
     {
-        var warehouse = await _service.GetByID(id);
+        var warehouse = await _service.GetByIdAsync(id);
 
         return Ok(warehouse);
     }
@@ -37,7 +37,7 @@ public class UserWarehouseController : ControllerBase
         var _supplier = await _service.Create(userWarehouse);
 
         return CreatedAtAction(
-            nameof(GetById),
+            nameof(GetByIdAsync),
             new { id = _supplier.Id},
             _supplier
         );

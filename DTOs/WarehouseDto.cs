@@ -1,11 +1,14 @@
-public class WarehouseDTO
+namespace InventoryManagementSystem.DTOs;
+
+public class WarehouseDto
 {
-        public string Name { get; set; } = string.Empty;
-        public string Location { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string Location { get; set; } = string.Empty;
 }
-public class WarehouseResponseDTO
+
+public class WarehouseResponseDto
 {
-        public Guid Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public string Location { get; set; } = string.Empty;
+    public Guid Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Location { get; set; } = string.Empty;
 }

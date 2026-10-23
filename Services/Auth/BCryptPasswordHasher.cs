@@ -1,5 +1,5 @@
-using InventoryMangmentSystem.Services.Auth;
-namespace InventoryMangmentSystem.Services.Auth;
+using InventoryManagementSystem.Services.Auth;
+namespace InventoryManagementSystem.Services.Auth;
 
 public class BCryptPasswordHasher : IPasswordHasher
 {

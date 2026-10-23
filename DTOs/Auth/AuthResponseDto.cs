@@ -1,4 +1,4 @@
-namespace InventoryMangmentSystem.DTOs.Auth;
+namespace InventoryManagementSystem.DTOs.Auth;
 
 public class AuthResponseDto
 {

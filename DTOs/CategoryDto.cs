@@ -1,12 +1,12 @@
-namespace InventoryMangmentSystem.Schemas;
-public class CategoryDTO
+namespace InventoryManagementSystem.DTOs;
+
+public class CategoryDto
 {
-        public string Name {get; set;}
+    public string Name { get; set; } = string.Empty;
 }
 
-public class CategoryResponseDTO
+public class CategoryResponseDto
 {
-    public Guid Id {get;set;}
-    public string Name {get; set;}
+    public Guid Id { get; set; }
+    public string Name { get; set; } = string.Empty;
 }
- 

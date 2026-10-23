@@ -1,16 +1,16 @@
-using InventoryMangmentSystem.Models;
+using InventoryManagementSystem.Models;
 
-namespace InventoryMangmentSystem.Services;
+namespace InventoryManagementSystem.Services;
 
-public interface IPurchaseItemsService
+public interface IPurchaseItemService
 {
-    Task<PurchaseItems> AddAsync(PurchaseItems purchaseItems);
+    Task<PurchaseItem> AddAsync(PurchaseItem purchaseItems);
 
-    Task<IEnumerable<PurchaseItems>> GetAllAsync();
+    Task<IEnumerable<PurchaseItem>> GetAllAsync();
 
-    Task<PurchaseItems> GetByIdAsync(Guid id);
+    Task<PurchaseItem> GetByIdAsync(Guid id);
 
-    Task UpdateAsync(PurchaseItems purchaseItems);
+    Task UpdateAsync(PurchaseItem purchaseItems);
 
     Task DeleteAsync(Guid id);
 }

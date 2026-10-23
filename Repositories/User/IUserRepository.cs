@@ -1,5 +1,5 @@
-using InventoryMangmentSystem.Models;
-namespace InventoryMangmentSystem.Repositories;
+using InventoryManagementSystem.Models;
+namespace InventoryManagementSystem.Repositories;
 public interface IUserRepository
 {
     Task<User?> GetByUserNameAsync(string userName);

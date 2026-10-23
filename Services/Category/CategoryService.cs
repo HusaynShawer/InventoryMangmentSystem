@@ -1,15 +1,15 @@
-using InventoryMangmentSystem.Exceptions;
-using InventoryMangmentSystem.Models;
-using InventoryMangmentSystem.Data;
-using InventoryMangmentSystem.Repositories;
-using InventoryMangmentSystem.Schemas;
-namespace InventoryMangmentSystem.Services;
+using InventoryManagementSystem.Exceptions;
+using InventoryManagementSystem.Models;
+using InventoryManagementSystem.Data;
+using InventoryManagementSystem.Repositories;
+using InventoryManagementSystem.DTOs;
+namespace InventoryManagementSystem.Services;
 
-public class GCategoryService
+public class CategoryService
 {
     private readonly BaseRepository<Category> _repo;
     private readonly UnitOfWork _unitOfWork;
-    public GCategoryService(
+    public CategoryService(
         BaseRepository<Category> repo,UnitOfWork unitOfWork)
     {
         _repo = repo;
@@ -17,20 +17,20 @@ public class GCategoryService
     }
     
 
-    public async Task<IEnumerable<CategoryResponseDTO>> GetAll()
+    public async Task<IEnumerable<CategoryResponseDto>> GetAllAsync()
     {
-        var recods = await _repo.GetAll();
+        var recods = await _repo.GetAllAsync();
         return recods.Select(MapToDto).ToList();
     }
-    public async Task<CategoryResponseDTO> GetByID(Guid id)
+    public async Task<CategoryResponseDto> GetByIdAsync(Guid id)
     {
-        var record = await _repo.GetById(id);
+        var record = await _repo.GetByIdAsync(id);
         if (record is null)
             throw new NotFoundException("Category not found.");
         return MapToDto(record);
     }
 
-    public async Task<CategoryResponseDTO> Create(CategoryDTO dTO)
+    public async Task<CategoryResponseDto> Create(CategoryDto dTO)
     {
         var recod = await _repo.Add(new Category{Name = dTO.Name});
         if (recod is null)
@@ -45,7 +45,7 @@ public class GCategoryService
         _repo.Delete(record);
         await _unitOfWork.SaveAsync();
     }
-    public async Task Update(Guid id, CategoryDTO dto)
+    public async Task Update(Guid id, CategoryDto dto)
     {
         var record = await GetEntityOrThrow(id);
         record.Name = dto.Name;
@@ -54,12 +54,12 @@ public class GCategoryService
     }
     private async Task<Category> GetEntityOrThrow(Guid id)
     {
-        var category = await _repo.GetById(id);
+        var category = await _repo.GetByIdAsync(id);
         if (category is null)
             throw new NotFoundException("Category not found.");
         return category;
     }
-    public CategoryResponseDTO MapToDto(Category category) => new()
+    public CategoryResponseDto MapToDto(Category category) => new()
     {
         Id = category.Id,
         Name = category.Name

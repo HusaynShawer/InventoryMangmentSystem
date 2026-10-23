@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace InventoryMangmentSystem.DTOs.Auth;
+namespace InventoryManagementSystem.DTOs.Auth;
 
 public class RegisterDto
 {

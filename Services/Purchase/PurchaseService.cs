@@ -1,19 +1,19 @@
-using InventoryMangmentSystem.Data;
-using InventoryMangmentSystem.Exceptions;
-using InventoryMangmentSystem.Models;
-using InventoryMangmentSystem.Repositories;
-using InventoryMangmentSystem.Schemas;
+using InventoryManagementSystem.Data;
+using InventoryManagementSystem.Exceptions;
+using InventoryManagementSystem.Models;
+using InventoryManagementSystem.Repositories;
+using InventoryManagementSystem.DTOs;
 using Microsoft.AspNetCore.Http.HttpResults;
-namespace InventoryMangmentSystem.Services;
+namespace InventoryManagementSystem.Services;
 
-public class GPurchaseService
+public class PurchaseService
 {
     private readonly BaseRepository<Purchase> _repo;
     private readonly BaseRepository<StockMovement> _stockMovementRepo;
     private readonly StockRepository _stockRepo;
     private readonly UnitOfWork _unitOfWork;
 
-    public GPurchaseService(
+    public PurchaseService(
         BaseRepository<Purchase> repo,
         StockRepository stockRepo,
         BaseRepository<StockMovement> stockMovementRepo,
@@ -25,13 +25,13 @@ public class GPurchaseService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<IEnumerable<Purchase>> GetAll()
+    public async Task<IEnumerable<Purchase>> GetAllAsync()
     {
-        return await _repo.GetAll();
+        return await _repo.GetAllAsync();
     }
-    public async Task<Purchase> GetByID(Guid id)
+    public async Task<Purchase> GetByIdAsync(Guid id)
     {
-        var record = await _repo.GetById(id);
+        var record = await _repo.GetByIdAsync(id);
         if (record is null)
             throw new NotFoundException("Purchase not found.");
         return record;
@@ -50,7 +50,7 @@ public class GPurchaseService
             };
 
             purchase.PurchaseItems = dto.Items
-                .Select(i => new PurchaseItems
+                .Select(i => new PurchaseItem
                 {
                     ProductId = i.ProductId,
                     Quantity = i.Quantity,
@@ -103,13 +103,13 @@ public class GPurchaseService
 
     public async Task Delete(Guid id)
     {
-        var record = await GetByID(id);
+        var record = await GetByIdAsync(id);
         _repo.Delete(record);
         await _unitOfWork.SaveAsync();
     }
     public async Task Update(Purchase purchase)
     {
-        var record = await GetByID(purchase.Id);
+        var record = await GetByIdAsync(purchase.Id);
         record.SupplierId = purchase.SupplierId;
         record.WarehouseId = purchase.WarehouseId;         
         record.CreatedByUserId = purchase.CreatedByUserId; 

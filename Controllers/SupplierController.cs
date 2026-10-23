@@ -1,34 +1,34 @@
-using InventoryMangmentSystem.Exceptions;
-using InventoryMangmentSystem.Models;
-using InventoryMangmentSystem.Services;
+using InventoryManagementSystem.Exceptions;
+using InventoryManagementSystem.Models;
+using InventoryManagementSystem.Services;
 using Microsoft.AspNetCore.Mvc;
-namespace InventoryMangmentSystem.Controllers;
+namespace InventoryManagementSystem.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
 public class SupplierController : ControllerBase
 {
 
-    private readonly GSupplierService _service;
+    private readonly SupplierService _service;
 
 
-    public SupplierController(GSupplierService service)
+    public SupplierController(SupplierService service)
     {
         _service = service;
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Supplier>>> GetAll()
+    public async Task<ActionResult<IEnumerable<Supplier>>> GetAllAsync()
     {
-        var _suppliers = await _service.GetAll();
+        var _suppliers = await _service.GetAllAsync();
 
         return Ok(_suppliers);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Supplier>> GetById(Guid id)
+    public async Task<ActionResult<Supplier>> GetByIdAsync(Guid id)
     {
-        var _supplier = await _service.GetByID(id);
+        var _supplier = await _service.GetByIdAsync(id);
         return Ok(_supplier);
 
     }
@@ -39,7 +39,7 @@ public class SupplierController : ControllerBase
         var _supplier = await _service.Create(supplier);
 
         return CreatedAtAction(
-            nameof(GetById),
+            nameof(GetByIdAsync),
             new { id = _supplier.Id},
             _supplier
         );

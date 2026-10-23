@@ -1,19 +1,19 @@
-using InventoryMangmentSystem.Exceptions;
-using InventoryMangmentSystem.Models;
-using InventoryMangmentSystem.Data;
-using InventoryMangmentSystem.Repositories;
-using InventoryMangmentSystem.Schemas;
+using InventoryManagementSystem.Exceptions;
+using InventoryManagementSystem.Models;
+using InventoryManagementSystem.Data;
+using InventoryManagementSystem.Repositories;
+using InventoryManagementSystem.DTOs;
 using Microsoft.AspNetCore.Mvc;
-namespace InventoryMangmentSystem.Services;
+namespace InventoryManagementSystem.Services;
 
-public class GsaleService
+public class SaleService
 {
     private readonly BaseRepository<Sale> _repo;
         private readonly BaseRepository<StockMovement> _stockMovementRepo;
 
     private readonly StockRepository _stockRepo;
     private readonly UnitOfWork _unitOfWork;
-    public GsaleService(
+    public SaleService(
         BaseRepository<Sale> repo,
         StockRepository stockRepo,
         BaseRepository<StockMovement> stockMovement,
@@ -25,24 +25,24 @@ public class GsaleService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<IEnumerable<Sale>> GetAll()
+    public async Task<IEnumerable<Sale>> GetAllAsync()
     {
-        return await _repo.GetAll();
+        return await _repo.GetAllAsync();
     }
-    public async Task<Sale> GetByID(Guid id)
+    public async Task<Sale> GetByIdAsync(Guid id)
     {
-        var record = await _repo.GetById(id);
+        var record = await _repo.GetByIdAsync(id);
         if (record is null)
             throw new NotFoundException("Sale not found.");
         return record;
     }
-    public async Task<Sale> Create(SaleDTO dto)
+    public async Task<Sale> Create(SaleDto dto)
     {
         return await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
             var _sale = new Sale
             {
-                CreatedByUserId = dto.CreatedByUserID,
+                CreatedByUserId = dto.CreatedByUserId,
                 WarehouseId = dto.WarehouseId,
                 Date = dto.Date ?? DateTime.UtcNow,
             };
@@ -99,12 +99,12 @@ public class GsaleService
 
     public async Task Delete(Guid id)
     {
-        var record = await GetByID(id);
+        var record = await GetByIdAsync(id);
         _repo.Delete(record);
     }
     public async Task Update(Sale sale)
     {
-        var record = await GetByID(sale.Id);
+        var record = await GetByIdAsync(sale.Id);
         record.WarehouseId = sale.WarehouseId;         
         record.CreatedByUserId = sale.CreatedByUserId; 
         record.TotalAmount = sale.TotalAmount;

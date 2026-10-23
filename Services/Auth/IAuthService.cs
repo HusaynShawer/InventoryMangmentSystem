@@ -1,6 +1,6 @@
-using InventoryMangmentSystem.DTOs.Auth;
+using InventoryManagementSystem.DTOs.Auth;
 
-namespace InventoryMangmentSystem.Services.Auth;
+namespace InventoryManagementSystem.Services.Auth;
 
 public interface IAuthService
 {

@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace InventoryMangmentSystem.Models
+namespace InventoryManagementSystem.Models
 {
     public class Warehouse
     {

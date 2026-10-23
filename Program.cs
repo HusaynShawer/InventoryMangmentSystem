@@ -1,42 +1,40 @@
 using System.Text;
 using Microsoft.EntityFrameworkCore;
-using InventoryMangmentSystem.Data;
-using InventoryMangmentSystem.Services;
-using InventoryMangmentSystem.Repositories;
-using InventoryMangmentSystem.Services.Auth;
-using InventoryMangmentSystem.Exceptions;
+using InventoryManagementSystem.Data;
+using InventoryManagementSystem.Services;
+using InventoryManagementSystem.Repositories;
+using InventoryManagementSystem.Services.Auth;
+using InventoryManagementSystem.Exceptions;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 var builder = WebApplication.CreateBuilder(args);
-// Add services to the container.
+
 builder.Services.AddControllers();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
-// 1. Register the DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),sql => sql.EnableRetryOnFailure()));
-// Repositories
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), sql => sql.EnableRetryOnFailure()));
+
 builder.Services.AddScoped<WarehouseRepository>();
 builder.Services.AddScoped<StockRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<UnitOfWork>();
 builder.Services.AddScoped<IUserWarehouseRepository, UserWarehouseRepository>();
-// Services
-
 builder.Services.AddScoped(typeof(BaseRepository<>));
-builder.Services.AddScoped<GProductService>();
-builder.Services.AddScoped<GCategoryService>();
-builder.Services.AddScoped<GStockService>();
-builder.Services.AddScoped<GSupplierService>();
-builder.Services.AddScoped<GPurchaseService>();
-builder.Services.AddScoped<GPurchaseItemsService>();
-builder.Services.AddScoped<GsaleService>();
+
+builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped<CategoryService>();
+builder.Services.AddScoped<StockService>();
+builder.Services.AddScoped<SupplierService>();
+builder.Services.AddScoped<PurchaseService>();
+builder.Services.AddScoped<PurchaseItemService>();
+builder.Services.AddScoped<SaleService>();
 builder.Services.AddScoped<UserWarehouseService>();
-//builder.Services.AddScoped<ISaleItemService, SaleItemService>();
-builder.Services.AddScoped<GStockMovementService>();
-builder.Services.AddScoped<GWarehouseService>();
+builder.Services.AddScoped<SaleItemService>();
+builder.Services.AddScoped<StockMovementService>();
+builder.Services.AddScoped<WarehouseService>();
 builder.Services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -48,7 +46,6 @@ builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-
 }).AddJwtBearer(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
@@ -61,7 +58,6 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = builder.Configuration["Jwt:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
         ClockSkew = TimeSpan.Zero
-    
     };
 });
 
@@ -71,8 +67,6 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("SupplierOnly", p => p.RequireRole("Supplier"));
     options.AddPolicy("UserOnly", p => p.RequireRole("User"));
 });
-
-
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -110,7 +104,6 @@ app.UseExceptionHandler();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

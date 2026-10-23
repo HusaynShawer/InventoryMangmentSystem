@@ -1,14 +1,14 @@
-using InventoryMangmentSystem.Data;
-using InventoryMangmentSystem.Exceptions;
-using InventoryMangmentSystem.Models;
-using InventoryMangmentSystem.Repositories;
-namespace InventoryMangmentSystem.Services;
+using InventoryManagementSystem.Data;
+using InventoryManagementSystem.Exceptions;
+using InventoryManagementSystem.Models;
+using InventoryManagementSystem.Repositories;
+namespace InventoryManagementSystem.Services;
 
-public class GSupplierService
+public class SupplierService
 {
     private readonly BaseRepository<Supplier> _repo;
     private readonly UnitOfWork _unitOfWork;
-    public GSupplierService(
+    public SupplierService(
         BaseRepository<Supplier> repo,
         UnitOfWork unitOfWork)
     {
@@ -16,13 +16,13 @@ public class GSupplierService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<IEnumerable<Supplier>> GetAll()
+    public async Task<IEnumerable<Supplier>> GetAllAsync()
     {
-        return await _repo.GetAll();
+        return await _repo.GetAllAsync();
     }
-    public async Task<Supplier> GetByID(Guid id)
+    public async Task<Supplier> GetByIdAsync(Guid id)
     {
-        var record = await _repo.GetById(id);
+        var record = await _repo.GetByIdAsync(id);
         if (record is null)
             throw new NotFoundException("Supplier not found.");
         return record;
@@ -40,13 +40,13 @@ public class GSupplierService
 
     public async Task Delete(Guid id)
     {
-        var record = await GetByID(id);
+        var record = await GetByIdAsync(id);
         _repo.Delete(record);
         await _unitOfWork.SaveAsync();
     }
     public async Task Update(Supplier supplier)
     {
-        var record = await GetByID(supplier.Id);  
+        var record = await GetByIdAsync(supplier.Id);  
         record.Name = supplier.Name;
         _repo.Update(record);
         await _unitOfWork.SaveAsync();

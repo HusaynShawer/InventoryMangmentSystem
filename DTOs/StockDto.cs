@@ -1,53 +1,52 @@
-public class StockDTO
-{
-    public Guid WarehouseId {get; set;}
-    public required int Quantity {get; set;}
+namespace InventoryManagementSystem.DTOs;
 
+public class StockDto
+{
+    public Guid WarehouseId { get; set; }
+    public required int Quantity { get; set; }
 }
 
-public class StockResponseDTO
+public class StockResponseDto
 {
     public Guid Id { get; set; }
     public Guid WarehouseId { get; set; }
     public int Quantity { get; set; }
 }
 
-public class StockMovementDTO
+public class StockMovementDto
 {
-    public Guid ProductId{get; set;}
-    public Guid WarehouseId {get; set;}
-    public Guid UserId {get; set;}
-    public int Quantity{get; set;}
-    public int MovementType {get; set;}
-    public Guid ReferenceId{get;set;}
-    public DateTime Date { get; set;}
-    public string? Note {get; set;}
+    public Guid ProductId { get; set; }
+    public Guid WarehouseId { get; set; }
+    public Guid UserId { get; set; }
+    public int Quantity { get; set; }
+    public string MovementType { get; set; } = string.Empty;
+    public Guid ReferenceId { get; set; }
+    public DateTime Date { get; set; }
+    public string? Note { get; set; }
 }
 
-public class StockAdjustmentDTO
+public class StockAdjustmentDto
 {
-    public Guid ProductId {get; set;}
-    public Guid WarehouseId{get; set;}
-    public string reason {get; set;}
-    public int ActualQuantity {get; set;}
+    public Guid ProductId { get; set; }
+    public Guid WarehouseId { get; set; }
+    public string Reason { get; set; } = string.Empty;
+    public int ActualQuantity { get; set; }
 }
 
 public class LowStockDto
 {
     public Guid ProductId { get; set; }
     public string ProductName { get; set; } = string.Empty;
-    public string SKU { get; set; } = string.Empty;
-
+    public string Sku { get; set; } = string.Empty;
     public Guid WarehouseId { get; set; }
     public string WarehouseName { get; set; } = string.Empty;
-
     public int Quantity { get; set; }
 }
 
 public class TransferDto
 {
-    public Guid productId {get; set;}
-    public Guid formWarehouseId {get; set;}
-    public Guid toWarehouseId {get; set;}
-    public int Quantity {get; set;}
+    public Guid ProductId { get; set; }
+    public Guid FromWarehouseId { get; set; }
+    public Guid ToWarehouseId { get; set; }
+    public int Quantity { get; set; }
 }

@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace InventoryMangmentSystem.Models
+namespace InventoryManagementSystem.Models
 {
     public class Purchase
     {
@@ -25,6 +25,6 @@ namespace InventoryMangmentSystem.Models
         public DateTime Date { get; set; }
         public decimal TotalAmount { get; set; }
 
-        public ICollection<PurchaseItems> PurchaseItems { get; set; } = new List<PurchaseItems>();
+        public ICollection<PurchaseItem> PurchaseItems { get; set; } = new List<PurchaseItem>();
     }
 }

@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using InventoryMangmentSystem.Models;
+using InventoryManagementSystem.Models;
 
-namespace InventoryMangmentSystem.Data
+namespace InventoryManagementSystem.Data
 {
     public class ApplicationDbContext : DbContext
     {
@@ -15,7 +15,7 @@ namespace InventoryMangmentSystem.Data
         public DbSet<Product> Products { get; set; }
         public DbSet<Supplier> Suppliers { get; set; }
         public DbSet<Purchase> Purchases { get; set; }
-        public DbSet<PurchaseItems> PurchaseItems { get; set; }
+        public DbSet<PurchaseItem> PurchaseItems { get; set; }
         public DbSet<Sale> Sales { get; set; }
         public DbSet<SaleItem> SaleItems { get; set; }
         public DbSet<Warehouse> Warehouses { get; set; }
