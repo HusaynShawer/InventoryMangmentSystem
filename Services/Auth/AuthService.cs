@@ -43,7 +43,7 @@ public class AuthService : IAuthService
             Email = dto.Email,
             PasswordHash = _hasher.HashPassword(dto.Password),
             FullName = dto.FullName,
-            Role = dto.Role,
+            Role = AppRoles.NormalizeOrThrow(dto.Role),
             IsActive = true,
             CreatedAt = DateTime.UtcNow,
             SupplierId = dto.SupplierId

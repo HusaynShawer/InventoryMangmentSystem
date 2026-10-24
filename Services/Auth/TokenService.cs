@@ -18,12 +18,18 @@ public class TokenService : ITokenService
     }
     public string GenerateToken(User user)
     {
+        // Keep the role claim canonical so the frontend role guards (which
+        // match "ADMIN"/"Supplier"/"User") always see the expected value.
+        var role = AppRoles.TryNormalize(user.Role, out var normalized)
+            ? normalized
+            : user.Role;
+
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim(ClaimTypes.Name, user.UserName),
             new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimTypes.Role, user.Role)
+            new Claim(ClaimTypes.Role, role)
         };
 
         if (user.SupplierId.HasValue)
