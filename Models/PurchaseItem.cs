@@ -1,9 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace InventoryMangmentSystem.Models
+namespace InventoryManagementSystem.Models
 {
-    public class PurchaseItems
+    public class PurchaseItem
     {
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();

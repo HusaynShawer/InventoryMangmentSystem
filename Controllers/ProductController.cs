@@ -1,41 +1,41 @@
 using System.Security.Claims;
-using InventoryMangmentSystem.Schemas;
-using InventoryMangmentSystem.Services;
+using InventoryManagementSystem.DTOs;
+using InventoryManagementSystem.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace InventoryMangmentSystem.Controllers;
+namespace InventoryManagementSystem.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
 [Authorize(Policy = "AdminOnly")]
 public class ProductController : ControllerBase
 {
-    private readonly GProductService _service;
+    private readonly ProductService _service;
 
-    public ProductController(GProductService service)
+    public ProductController(ProductService service)
     {
         _service = service;
     }
 
     [HttpGet]
     [AllowAnonymous]
-    public async Task<ActionResult<IEnumerable<ProductResponseDTO>>> GetAll()
+    public async Task<ActionResult<IEnumerable<ProductResponseDto>>> GetAllAsync()
     {
-        var products = await _service.GetAll();
+        var products = await _service.GetAllAsync();
         return Ok(products);
     }
 
     [HttpGet("{id}")]
     [AllowAnonymous]
-    public async Task<ActionResult<ProductResponseDTO>> GetById(Guid id)
+    public async Task<ActionResult<ProductResponseDto>> GetByIdAsync(Guid id)
     {
-        var product = await _service.GetByID(id);
+        var product = await _service.GetByIdAsync(id);
         return Ok(product);
     }
 
     [HttpPost]
-    public async Task<ActionResult<ProductResponseDTO>> Create(ProductDTO dto)
+    public async Task<ActionResult<ProductResponseDto>> Create(ProductDto dto)
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (!Guid.TryParse(userIdClaim, out var userId))
@@ -44,14 +44,14 @@ public class ProductController : ControllerBase
         var createdProduct = await _service.Create(userId, dto);
 
         return CreatedAtAction(
-            nameof(GetById),
+            nameof(GetByIdAsync),
             new { id = createdProduct.Id },
             createdProduct
         );
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<ProductResponseDTO>> Update(Guid id, ProductDTO dto)
+    public async Task<ActionResult<ProductResponseDto>> Update(Guid id, ProductDto dto)
     {
         var updated = await _service.Update(id, dto);
         return Ok(updated);

@@ -1,10 +1,10 @@
-using InventoryMangmentSystem.Exceptions;
-using InventoryMangmentSystem.Models;
-using InventoryMangmentSystem.Schemas;
-using InventoryMangmentSystem.Services;
+using InventoryManagementSystem.Exceptions;
+using InventoryManagementSystem.Models;
+using InventoryManagementSystem.DTOs;
+using InventoryManagementSystem.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-namespace InventoryMangmentSystem.Controllers;
+namespace InventoryManagementSystem.Controllers;
 
 
 [ApiController]
@@ -12,35 +12,35 @@ namespace InventoryMangmentSystem.Controllers;
 [Authorize(Policy = "AdminOnly")]
 public class SaleController : ControllerBase
 {
-    private readonly GsaleService _service;
-    public SaleController(GsaleService service)
+    private readonly SaleService _service;
+    public SaleController(SaleService service)
     {
         _service = service;
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Sale>>> GetAll()
+    public async Task<ActionResult<IEnumerable<Sale>>> GetAllAsync()
     {
-        var sales = await _service.GetAll();
+        var sales = await _service.GetAllAsync();
         return Ok(sales);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Sale>> GetById(Guid id)
+    public async Task<ActionResult<Sale>> GetByIdAsync(Guid id)
     {
-        var sale = await _service.GetByID(id);
+        var sale = await _service.GetByIdAsync(id);
         return Ok(sale);
     }
 
     [HttpPost]
-    public async Task<ActionResult<Sale>> Create([FromBody] SaleDTO dto)
+    public async Task<ActionResult<Sale>> Create([FromBody] SaleDto dto)
     {
         if (dto.Items is null || dto.Items.Count ==0)
             throw new BadRequestException(
                 "A sale must contain at least one item.");
         var _sale = await _service.Create(dto);
         return CreatedAtAction(
-            nameof(GetById),
+            nameof(GetByIdAsync),
             new {id = _sale.Id},
             dto
         );
@@ -52,7 +52,7 @@ public class SaleController : ControllerBase
         if (id != sale.Id)
             throw new BadRequestException(
                 "Route id does not match the sale id.");
-        var _sale = await GetById(id);
+        var _sale = await GetByIdAsync(id);
         await _service.Update(sale);
         return NoContent();
     }

@@ -1,11 +1,11 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using InventoryMangmentSystem.Models;
+using InventoryManagementSystem.Models;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.IdentityModel.Tokens;
 
-namespace InventoryMangmentSystem.Services.Auth;
+namespace InventoryManagementSystem.Services.Auth;
 
 public class TokenService : ITokenService
 {

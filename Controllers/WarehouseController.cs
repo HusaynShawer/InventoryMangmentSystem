@@ -1,9 +1,10 @@
-using InventoryMangmentSystem.Models;
-using InventoryMangmentSystem.Services;
+using InventoryManagementSystem.Models;
+using InventoryManagementSystem.DTOs;
+using InventoryManagementSystem.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-namespace InventoryMangmentSystem.Controllers;
+namespace InventoryManagementSystem.Controllers;
 
 
 [ApiController]
@@ -11,29 +12,29 @@ namespace InventoryMangmentSystem.Controllers;
 [Authorize(Policy ="AdminOnly")]
 public class WarehouseController : ControllerBase
 {
-    private readonly GWarehouseService _service;
-    public WarehouseController(GWarehouseService service)
+    private readonly WarehouseService _service;
+    public WarehouseController(WarehouseService service)
     {
         _service = service;
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<WarehouseResponseDTO>>> GetAll()
+    public async Task<ActionResult<IEnumerable<WarehouseResponseDto>>> GetAllAsync()
     {
-        var warehouses = await _service.GetAll();
+        var warehouses = await _service.GetAllAsync();
 
         return Ok(warehouses);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<WarehouseResponseDTO>> GetById(Guid id)
+    public async Task<ActionResult<WarehouseResponseDto>> GetByIdAsync(Guid id)
     {
-        var warehouse = await _service.GetByID(id);
+        var warehouse = await _service.GetByIdAsync(id);
 
         return Ok(warehouse);
     }
     [HttpPost]
-    public async Task<ActionResult<WarehouseResponseDTO>> Create(WarehouseDTO warehouseDTO)
+    public async Task<ActionResult<WarehouseResponseDto>> Create(WarehouseDto warehouseDTO)
     {
 
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier).Value;
@@ -43,14 +44,14 @@ public class WarehouseController : ControllerBase
         var _supplier = await _service.Create(userId, warehouseDTO);
 
         return CreatedAtAction(
-            nameof(GetById),
+            nameof(GetByIdAsync),
             new { id = _supplier.Id},
             _supplier
         );
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(Guid id, WarehouseDTO warehouseDTO)
+    public async Task<IActionResult> Update(Guid id, WarehouseDto warehouseDTO)
     {
         await _service.Update(id, warehouseDTO);
         return NoContent();

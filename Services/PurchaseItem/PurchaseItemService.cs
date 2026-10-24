@@ -1,34 +1,34 @@
-using InventoryMangmentSystem.Exceptions;
-using InventoryMangmentSystem.Models;
-using InventoryMangmentSystem.Data;
-using InventoryMangmentSystem.Repositories;
+using InventoryManagementSystem.Exceptions;
+using InventoryManagementSystem.Models;
+using InventoryManagementSystem.Data;
+using InventoryManagementSystem.Repositories;
 using System.Security.Authentication;
-namespace InventoryMangmentSystem.Services;
+namespace InventoryManagementSystem.Services;
 
-public class GPurchaseItemsService
+public class PurchaseItemService
 {
-    private readonly BaseRepository<PurchaseItems> _repo;
+    private readonly BaseRepository<PurchaseItem> _repo;
     private readonly UnitOfWork _unitOfWork;
-    public GPurchaseItemsService(
-        BaseRepository<PurchaseItems> repo, UnitOfWork unitOfWork)
+    public PurchaseItemService(
+        BaseRepository<PurchaseItem> repo, UnitOfWork unitOfWork)
     {
         _repo = repo;
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<IEnumerable<PurchaseItems>> GetAll()
+    public async Task<IEnumerable<PurchaseItem>> GetAllAsync()
     {
-        return await _repo.GetAll();
+        return await _repo.GetAllAsync();
     }
-    public async Task<PurchaseItems> GetByID(Guid id)
+    public async Task<PurchaseItem> GetByIdAsync(Guid id)
     {
-        var record = await _repo.GetById(id);
+        var record = await _repo.GetByIdAsync(id);
         if (record is null)
             throw new NotFoundException("Purchase item not found.");
         return record;
     }
 
-    public async Task<PurchaseItems> Create(PurchaseItems purchaseItems)
+    public async Task<PurchaseItem> Create(PurchaseItem purchaseItems)
     {
         var recod = await _repo.Add(purchaseItems);
         if (recod is null)
@@ -41,13 +41,13 @@ public class GPurchaseItemsService
 
     public async Task Delete(Guid id)
     {
-        var purchaseItem = await GetByID(id);
+        var purchaseItem = await GetByIdAsync(id);
         await _unitOfWork.SaveAsync();
         _repo.Delete(purchaseItem);
     }
-    public async Task Update(PurchaseItems purchaseItem)
+    public async Task Update(PurchaseItem purchaseItem)
     {
-        var record = await GetByID(purchaseItem.Id);
+        var record = await GetByIdAsync(purchaseItem.Id);
         record.Quantity = purchaseItem.Quantity;
         record.UnitPrice = purchaseItem.UnitPrice;
         await _unitOfWork.SaveAsync();

@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace InventoryMangmentSystem.Exceptions;
+namespace InventoryManagementSystem.Exceptions;
 
 public class GlobalExceptionHandler : IExceptionHandler
 {

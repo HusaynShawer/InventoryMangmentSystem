@@ -1,6 +1,6 @@
-using InventoryMangmentSystem.Exceptions;
+using InventoryManagementSystem.Exceptions;
 
-namespace InventoryMangmentSystem.Services.Auth;
+namespace InventoryManagementSystem.Services.Auth;
 
 public static class AppRoles
 {

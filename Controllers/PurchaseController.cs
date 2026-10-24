@@ -1,10 +1,10 @@
-using InventoryMangmentSystem.Exceptions;
-using InventoryMangmentSystem.Models;
-using InventoryMangmentSystem.Schemas;
-using InventoryMangmentSystem.Services;
+using InventoryManagementSystem.Exceptions;
+using InventoryManagementSystem.Models;
+using InventoryManagementSystem.DTOs;
+using InventoryManagementSystem.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-namespace InventoryMangmentSystem.Controllers;
+namespace InventoryManagementSystem.Controllers;
 
 
 [ApiController]
@@ -12,23 +12,23 @@ namespace InventoryMangmentSystem.Controllers;
 [Authorize(Policy ="AdminOnly")]
 public class PurchaseController : ControllerBase
 {
-    private readonly GPurchaseService _service;
-    public PurchaseController(GPurchaseService service)
+    private readonly PurchaseService _service;
+    public PurchaseController(PurchaseService service)
     {
         _service = service;
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Purchase>>> GetAll()
+    public async Task<ActionResult<IEnumerable<Purchase>>> GetAllAsync()
     {
-        var purcahses = await _service.GetAll();
+        var purcahses = await _service.GetAllAsync();
         return Ok(purcahses);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Purchase>> GetById(Guid id)
+    public async Task<ActionResult<Purchase>> GetByIdAsync(Guid id)
     {
-        var purcahse = await _service.GetByID(id);
+        var purcahse = await _service.GetByIdAsync(id);
         return Ok(purcahse);
     }
 
@@ -50,7 +50,7 @@ public class PurchaseController : ControllerBase
         if (id != purchase.Id)
             throw new BadRequestException(
                 "Route id does not match the purchase id.");
-        var purcahse = await GetById(id);
+        var purcahse = await GetByIdAsync(id);
         await _service.Update(purchase);
         return NoContent();
     }
@@ -58,7 +58,7 @@ public class PurchaseController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<ActionResult> Delete(Guid id)
     {
-        var purchase = await GetById(id);
+        var purchase = await GetByIdAsync(id);
         await _service.Delete(id);
         return NoContent();
     }

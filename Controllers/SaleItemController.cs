@@ -1,31 +1,31 @@
-using InventoryMangmentSystem.Exceptions;
-using InventoryMangmentSystem.Models;
-using InventoryMangmentSystem.Services;
+using InventoryManagementSystem.Exceptions;
+using InventoryManagementSystem.Models;
+using InventoryManagementSystem.Services;
 using Microsoft.AspNetCore.Mvc;
-namespace InventoryMangmentSystem.Controllers;
+namespace InventoryManagementSystem.Controllers;
 
 
 [ApiController]
 [Route("api/[controller]")]
 public class SaleItemController : ControllerBase
 {
-    private readonly GsaleItemService _service;
-    public SaleItemController(GsaleItemService service)
+    private readonly SaleItemService _service;
+    public SaleItemController(SaleItemService service)
     {
         _service = service;
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<SaleItem>>> GetAll()
+    public async Task<ActionResult<IEnumerable<SaleItem>>> GetAllAsync()
     {
-        var _salesItems = await _service.GetAll();
+        var _salesItems = await _service.GetAllAsync();
         return Ok(_salesItems);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<SaleItem>> GetById(Guid id)
+    public async Task<ActionResult<SaleItem>> GetByIdAsync(Guid id)
     {
-        var _salesItem = await _service.GetByID(id);
+        var _salesItem = await _service.GetByIdAsync(id);
         return Ok(_salesItem);
     }
 
@@ -34,7 +34,7 @@ public class SaleItemController : ControllerBase
     {
         var _saleItem = await _service.Create(saleItem);
         return CreatedAtAction(
-            nameof(GetById),
+            nameof(GetByIdAsync),
             new {id = _saleItem.Id},
             _saleItem
         );
@@ -46,7 +46,7 @@ public class SaleItemController : ControllerBase
         if (id != saleItem.Id)
             throw new BadRequestException(
                 "Route id does not match the sale item id.");
-        var _salesItem = await GetById(id);
+        var _salesItem = await GetByIdAsync(id);
         await _service.Update(saleItem);
         return NoContent();
     }

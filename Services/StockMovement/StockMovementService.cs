@@ -1,25 +1,25 @@
-using InventoryMangmentSystem.Exceptions;
-using InventoryMangmentSystem.Models;
-using InventoryMangmentSystem.Repositories;
-namespace InventoryMangmentSystem.Services;
+using InventoryManagementSystem.Exceptions;
+using InventoryManagementSystem.Models;
+using InventoryManagementSystem.Repositories;
+namespace InventoryManagementSystem.Services;
 
-public class GStockMovementService
+public class StockMovementService
 {
     private readonly BaseRepository<StockMovement> _repo;
 
-    public GStockMovementService(
+    public StockMovementService(
         BaseRepository<StockMovement> repo)
     {
         _repo = repo;
     }
 
-    public async Task<IEnumerable<StockMovement>> GetAll()
+    public async Task<IEnumerable<StockMovement>> GetAllAsync()
     {
-        return await _repo.GetAll();
+        return await _repo.GetAllAsync();
     }
-    public async Task<StockMovement> GetByID(Guid id)
+    public async Task<StockMovement> GetByIdAsync(Guid id)
     {
-        var record = await _repo.GetById(id);
+        var record = await _repo.GetByIdAsync(id);
         if (record is null)
             throw new NotFoundException("Stock movement not found.");
         return record;
@@ -37,12 +37,12 @@ public class GStockMovementService
 
     public async Task Delete(Guid id)
     {
-        var record = await GetByID(id);
+        var record = await GetByIdAsync(id);
         _repo.Delete(record);
     }
     public async Task Update(StockMovement stockMovement)
     {
-        var record = await GetByID(stockMovement.Id);
+        var record = await GetByIdAsync(stockMovement.Id);
         record.ProductId = stockMovement.ProductId;
         record.WarehouseId = stockMovement.WarehouseId;
         record.UserId = stockMovement.UserId;
