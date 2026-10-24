@@ -1,28 +1,28 @@
-using InventoryMangmentSystem.Exceptions;
-using InventoryMangmentSystem.Models;
-using InventoryMangmentSystem.Data;
-using InventoryMangmentSystem.Repositories;
+using InventoryManagementSystem.Exceptions;
+using InventoryManagementSystem.Models;
+using InventoryManagementSystem.Data;
+using InventoryManagementSystem.Repositories;
 using System.Security.Authentication;
 using Microsoft.AspNetCore.Authentication;
-namespace InventoryMangmentSystem.Services;
+namespace InventoryManagementSystem.Services;
 
-public class GsaleItemService
+public class SaleItemService
 {
     private readonly BaseRepository<SaleItem> _repo;
 
-    public GsaleItemService(
+    public SaleItemService(
         BaseRepository<SaleItem> repo)
     {
         _repo = repo;
     }
 
-    public async Task<IEnumerable<SaleItem>> GetAll()
+    public async Task<IEnumerable<SaleItem>> GetAllAsync()
     {
-        return await _repo.GetAll();
+        return await _repo.GetAllAsync();
     }
-    public async Task<SaleItem> GetByID(Guid id)
+    public async Task<SaleItem> GetByIdAsync(Guid id)
     {
-        var record = await _repo.GetById(id);
+        var record = await _repo.GetByIdAsync(id);
         if (record is null)
             throw new NotFoundException("Sale item not found.");
         return record;
@@ -39,12 +39,12 @@ public class GsaleItemService
 
     public async Task Delete(Guid id)
     {
-        var record = await GetByID(id);
+        var record = await GetByIdAsync(id);
         _repo.Delete(record);
     }
     public async Task Update(SaleItem saleItem)
     {
-        var record = await GetByID(saleItem.Id);
+        var record = await GetByIdAsync(saleItem.Id);
         record.Quantity = saleItem.Quantity;         
         record.UnitPrice = saleItem.UnitPrice; 
         _repo.Update(record);

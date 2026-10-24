@@ -1,4 +1,4 @@
-namespace InventoryMangmentSystem.Schemas;
+namespace InventoryManagementSystem.DTOs;
 public class PurchaseCreateDto
 {
     public Guid SupplierId { get; set; }

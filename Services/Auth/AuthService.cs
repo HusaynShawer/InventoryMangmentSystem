@@ -1,10 +1,10 @@
-using InventoryMangmentSystem.Data;
-using InventoryMangmentSystem.DTOs.Auth;
-using InventoryMangmentSystem.Exceptions;
-using InventoryMangmentSystem.Models;
-using InventoryMangmentSystem.Repositories;
+using InventoryManagementSystem.Data;
+using InventoryManagementSystem.DTOs.Auth;
+using InventoryManagementSystem.Exceptions;
+using InventoryManagementSystem.Models;
+using InventoryManagementSystem.Repositories;
 
-namespace InventoryMangmentSystem.Services.Auth;
+namespace InventoryManagementSystem.Services.Auth;
 
 public class AuthService : IAuthService
 {
@@ -43,7 +43,7 @@ public class AuthService : IAuthService
             Email = dto.Email,
             PasswordHash = _hasher.HashPassword(dto.Password),
             FullName = dto.FullName,
-            Role = dto.Role,
+            Role = AppRoles.NormalizeOrThrow(dto.Role),
             IsActive = true,
             CreatedAt = DateTime.UtcNow,
             SupplierId = dto.SupplierId

@@ -1,9 +1,9 @@
-using InventoryMangmentSystem.Exceptions;
-using InventoryMangmentSystem.Models;
-using InventoryMangmentSystem.Services;
+using InventoryManagementSystem.Exceptions;
+using InventoryManagementSystem.Models;
+using InventoryManagementSystem.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-namespace InventoryMangmentSystem.Controllers;
+namespace InventoryManagementSystem.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -11,26 +11,26 @@ namespace InventoryMangmentSystem.Controllers;
 public class StockMovementController : ControllerBase
 {
 
-    private readonly GStockMovementService _service;
+    private readonly StockMovementService _service;
 
 
-    public StockMovementController(GStockMovementService service)
+    public StockMovementController(StockMovementService service)
     {
         _service = service;
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<StockMovement>>> GetAll()
+    public async Task<ActionResult<IEnumerable<StockMovement>>> GetAllAsync()
     {
-        var _stocksMovement = await _service.GetAll();
+        var _stocksMovement = await _service.GetAllAsync();
 
         return Ok(_stocksMovement);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<StockMovement>> GetById(Guid id)
+    public async Task<ActionResult<StockMovement>> GetByIdAsync(Guid id)
     {
-        var _stockMovement = await _service.GetByID(id);
+        var _stockMovement = await _service.GetByIdAsync(id);
         return Ok(_stockMovement);
 
     }
@@ -41,7 +41,7 @@ public class StockMovementController : ControllerBase
         var _stockMovement = await _service.Create(stockMovement);
 
         return CreatedAtAction(
-            nameof(GetById),
+            nameof(GetByIdAsync),
             new { id = _stockMovement.Id},
             _stockMovement
         );

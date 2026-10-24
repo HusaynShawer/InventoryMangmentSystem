@@ -1,4 +1,4 @@
-namespace InventoryMangmentSystem.Exceptions;
+namespace InventoryManagementSystem.Exceptions;
 
 public class NotFoundException : Exception
 {

@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace InventoryMangmentSystem.Models
+namespace InventoryManagementSystem.Models
 {
     public class Stock
     {

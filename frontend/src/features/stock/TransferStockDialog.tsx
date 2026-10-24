@@ -14,11 +14,11 @@ import { useTransferStock } from './hooks'
 const schema = z
   .object({
     productId: z.string().uuid('Select a product'),
-    formWarehouseId: z.string().uuid('Select the source warehouse'),
+    fromWarehouseId: z.string().uuid('Select the source warehouse'),
     toWarehouseId: z.string().uuid('Select the destination warehouse'),
     quantity: z.coerce.number().int().positive('Must be greater than zero'),
   })
-  .refine((values) => values.formWarehouseId !== values.toWarehouseId, {
+  .refine((values) => values.fromWarehouseId !== values.toWarehouseId, {
     message: 'Source and destination must differ',
     path: ['toWarehouseId'],
   })
@@ -37,7 +37,7 @@ export function TransferStockDialog({ open, onClose }: { open: boolean; onClose:
   } = useForm<FormValues>({ resolver: zodResolver(schema) })
 
   useEffect(() => {
-    if (open) reset({ productId: '', formWarehouseId: '', toWarehouseId: '', quantity: 1 })
+    if (open) reset({ productId: '', fromWarehouseId: '', toWarehouseId: '', quantity: 1 })
   }, [open, reset])
 
   const onSubmit = async (values: FormValues) => {
@@ -74,8 +74,8 @@ export function TransferStockDialog({ open, onClose }: { open: boolean; onClose:
           </Select>
         </FormField>
         <div className="grid gap-4 sm:grid-cols-2">
-          <FormField label="From" htmlFor="formWarehouseId" error={errors.formWarehouseId?.message} required>
-            <Select id="formWarehouseId" {...register('formWarehouseId')}>
+          <FormField label="From" htmlFor="fromWarehouseId" error={errors.fromWarehouseId?.message} required>
+            <Select id="fromWarehouseId" {...register('fromWarehouseId')}>
               <option value="">Select…</option>
               {warehouses.map((warehouse) => (
                 <option key={warehouse.id} value={warehouse.id}>

@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace InventoryMangmentSystem.Models
+namespace InventoryManagementSystem.Models
 {
     public class Product
     {
@@ -19,7 +19,7 @@ namespace InventoryMangmentSystem.Models
         public int ReorderLevel { get; set; }
 
         public ICollection<Stock> Stocks { get; set; } = new List<Stock>();
-        public ICollection<PurchaseItems> PurchaseItems { get; set; } = new List<PurchaseItems>();
+        public ICollection<PurchaseItem> PurchaseItems { get; set; } = new List<PurchaseItem>();
         public ICollection<SaleItem> SaleItems { get; set; } = new List<SaleItem>();
         public ICollection<StockMovement> StockMovements { get; set; } = new List<StockMovement>();
     }

@@ -1,8 +1,8 @@
-using InventoryMangmentSystem.Data;
-using InventoryMangmentSystem.Models;
+using InventoryManagementSystem.Data;
+using InventoryManagementSystem.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace InventoryMangmentSystem.Repositories;
+namespace InventoryManagementSystem.Repositories;
 
 public class WarehouseRepository
 {

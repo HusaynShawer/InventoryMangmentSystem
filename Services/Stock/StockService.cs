@@ -1,14 +1,15 @@
-using InventoryMangmentSystem.Exceptions;
-using InventoryMangmentSystem.Models;
-using InventoryMangmentSystem.Data;
-using InventoryMangmentSystem.Repositories;
+using InventoryManagementSystem.Exceptions;
+using InventoryManagementSystem.DTOs;
+using InventoryManagementSystem.Models;
+using InventoryManagementSystem.Data;
+using InventoryManagementSystem.Repositories;
 using System.Security.Authentication;
 using Microsoft.AspNetCore.Authentication;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Components.RenderTree;
-namespace InventoryMangmentSystem.Services;
+namespace InventoryManagementSystem.Services;
 
-public class GStockService
+public class StockService
 {
     private readonly StockRepository _repo;
     private readonly IUserRepository _userRepo;
@@ -17,7 +18,7 @@ public class GStockService
     private readonly BaseRepository<Warehouse> _warehosueRepo;
 
     private readonly UnitOfWork _uow;
-    public GStockService(
+    public StockService(
         StockRepository repo,
         IUserRepository userRepo,
         BaseRepository<StockMovement> stockMovementRepo,
@@ -40,13 +41,13 @@ public class GStockService
         await _uow.SaveAsync();
         return result;
     }
-        public async Task<IEnumerable<Stock>> GetAll()
+        public async Task<IEnumerable<Stock>> GetAllAsync()
     {
-        return await _repo.GetAll();
+        return await _repo.GetAllAsync();
     }
-    public async Task<Stock> GetByID(Guid id)
+    public async Task<Stock> GetByIdAsync(Guid id)
     {
-        var record = await _repo.GetById(id);
+        var record = await _repo.GetByIdAsync(id);
         if (record is null)
             throw new NotFoundException("Stock not found.");
         return record;
@@ -61,18 +62,18 @@ public class GStockService
     }
         public async Task Delete(Guid id)
     {
-        var record = await GetByID(id);
+        var record = await GetByIdAsync(id);
         _repo.Delete(record);
         await _uow.SaveAsync();
     }
     public async Task Update(Stock stock)
     {
-        var record = await GetByID(stock.Id);
+        var record = await GetByIdAsync(stock.Id);
         record.Quantity = stock.Quantity;  
         _repo.Update(record);
         await _uow.SaveAsync();       
     }
-    public async Task AdjustStock(Guid userId,StockAdjustmentDTO stockAdjustmentDTO)
+    public async Task AdjustStock(Guid userId,StockAdjustmentDto stockAdjustmentDTO)
     {
 
         var user = await _userRepo.GetByIdAsync(userId);
@@ -98,7 +99,7 @@ public class GStockService
             WarehouseId = stock.WarehouseId,
             UserId = user.Id,
             Quantity = diff,
-            MovementType = stockAdjustmentDTO.reason,
+            MovementType = stockAdjustmentDTO.Reason,
             ReferenceId = stock.Id,
             Date = DateTime.UtcNow,
             Note = $"the diff after adjustmnet {diff}"
@@ -127,7 +128,7 @@ public class GStockService
             throw new ArgumentException(
                 "Transfer quantity must be greater than zero.");
 
-        if (dto.formWarehouseId == dto.toWarehouseId)
+        if (dto.FromWarehouseId == dto.ToWarehouseId)
             throw new ArgumentException(
                 "Source and destination warehouses must be different.");
 
@@ -141,22 +142,22 @@ public class GStockService
             Console.WriteLine($" كدا المفروض يشتغل{wu}");
         }
 
-        if (!warehouseIds.Contains(dto.formWarehouseId) ||
-            !warehouseIds.Contains(dto.toWarehouseId))
+        if (!warehouseIds.Contains(dto.FromWarehouseId) ||
+            !warehouseIds.Contains(dto.ToWarehouseId))
         {
             throw new ForbiddenException(
                 "You don't have access to both warehouses.");
         }
 
         var source = await _repo.GetByProductIdAsync(
-            dto.productId, dto.formWarehouseId);
+            dto.ProductId, dto.FromWarehouseId);
       
         if (source.Quantity < dto.Quantity)
             throw new ConflictException(
               "Insufficient stock for this transfer.");
 
         var destination = await _repo.GetByProductIdAsync(
-            dto.productId, dto.toWarehouseId);
+            dto.ProductId, dto.ToWarehouseId);
 
         source.Quantity -= dto.Quantity;
         _repo.Update(source);
@@ -166,8 +167,8 @@ public class GStockService
         {
             destination = new Stock
             {
-                ProductId = dto.productId,
-                WarehouseId = dto.toWarehouseId,
+                ProductId = dto.ProductId,
+                WarehouseId = dto.ToWarehouseId,
                 Quantity = dto.Quantity
             };
 
@@ -181,26 +182,26 @@ public class GStockService
 
         await _stockMovementRepo.Add(new StockMovement
         {
-            ProductId = dto.productId,
-            WarehouseId = dto.formWarehouseId,
+            ProductId = dto.ProductId,
+            WarehouseId = dto.FromWarehouseId,
             UserId = user.Id,
             Quantity = -dto.Quantity,
             MovementType = "TransferOut",
             ReferenceId = source.Id,
             Date = DateTime.UtcNow,
-            Note = $"Transferred to warehouse {dto.toWarehouseId}"
+            Note = $"Transferred to warehouse {dto.ToWarehouseId}"
         });
 
         await _stockMovementRepo.Add(new StockMovement
         {
-            ProductId = dto.productId,
-            WarehouseId = dto.toWarehouseId,
+            ProductId = dto.ProductId,
+            WarehouseId = dto.ToWarehouseId,
             UserId = user.Id,
             Quantity = dto.Quantity,
             MovementType = "TransferIn",
             ReferenceId = source.Id,
             Date = DateTime.UtcNow,
-            Note = $"Transferred from warehouse {dto.formWarehouseId}"
+            Note = $"Transferred from warehouse {dto.FromWarehouseId}"
         });
 
         await _uow.SaveAsync();

@@ -1,9 +1,9 @@
-using InventoryMangmentSystem.Data;
-using InventoryMangmentSystem.Exceptions;
-using InventoryMangmentSystem.Models;
+using InventoryManagementSystem.Data;
+using InventoryManagementSystem.Exceptions;
+using InventoryManagementSystem.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace InventoryMangmentSystem.Repositories;
+namespace InventoryManagementSystem.Repositories;
 
 public class UserRepository : IUserRepository
 {

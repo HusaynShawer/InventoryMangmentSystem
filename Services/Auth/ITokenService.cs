@@ -1,6 +1,6 @@
-using InventoryMangmentSystem.Models;
+using InventoryManagementSystem.Models;
 
-namespace InventoryMangmentSystem.Services.Auth;
+namespace InventoryManagementSystem.Services.Auth;
 
 public interface ITokenService
 {

@@ -1,47 +1,47 @@
-using InventoryMangmentSystem.Services;
-using InventoryMangmentSystem.Models;
+using InventoryManagementSystem.Services;
+using InventoryManagementSystem.Models;
 using Microsoft.AspNetCore.Mvc;
-using InventoryMangmentSystem.Repositories;
-using InventoryMangmentSystem.Schemas;
+using InventoryManagementSystem.Repositories;
+using InventoryManagementSystem.DTOs;
 using Microsoft.AspNetCore.Authorization;
-namespace InventoryMangmentSystem.Controllers;
+namespace InventoryManagementSystem.Controllers;
 
 [ApiController]
 [Route("api/[Controller]")]
 [Authorize(Policy ="AdminOnly")]
 public class CategoryController: ControllerBase
 {
-    private readonly GCategoryService _service;
-    public CategoryController(GCategoryService service) 
+    private readonly CategoryService _service;
+    public CategoryController(CategoryService service) 
     {
         _service = service;
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetAll()
+    public async Task<ActionResult<IEnumerable<CategoryDto>>> GetAllAsync()
     {
-        var record = await _service.GetAll();
+        var record = await _service.GetAllAsync();
         return Ok(record);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<CategoryResponseDTO>> GetById(Guid id)
+    public async Task<ActionResult<CategoryResponseDto>> GetByIdAsync(Guid id)
     {
-        var record = await _service.GetByID(id);
+        var record = await _service.GetByIdAsync(id);
         return Ok(record);
     }
     [HttpPost]
-    public async Task<ActionResult<CategoryResponseDTO>> Create(CategoryDTO dTO)
+    public async Task<ActionResult<CategoryResponseDto>> Create(CategoryDto dTO)
     {
         var record = await _service.Create(dTO);
         return CreatedAtAction(
-            nameof(GetById),
+            nameof(GetByIdAsync),
             new {id =record.Id},
             record
         );
     }
     [HttpPut("{id}")]
-    public async Task<ActionResult> Update(Guid id, CategoryDTO dTO)
+    public async Task<ActionResult> Update(Guid id, CategoryDto dTO)
     {
 
         await _service.Update(id,dTO);
