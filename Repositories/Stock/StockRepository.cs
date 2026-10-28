@@ -13,32 +13,40 @@ public class StockRepository : BaseRepository<Stock>
     {
     }
 
-    public async Task<Stock?> GetByProductIdAsync(Guid productId, Guid warehouseId)
+    public async Task<Stock?> GetByProductVariantIdAsync(Guid productVariantId, Guid warehouseId)
     {
         return await _context.Stocks
             .FirstOrDefaultAsync(s =>
-                s.ProductId == productId &&
+                s.ProductVariantId == productVariantId &&
                 s.WarehouseId == warehouseId);
+    }
+
+    public async Task<Stock?> GetByProductIdAsync(Guid productVariantId, Guid warehouseId)
+    {
+        return await GetByProductVariantIdAsync(productVariantId, warehouseId);
     }
 
     public async Task<IEnumerable<LowStockDto>> GetLowStockAsync(Guid warehouseId)
     {
-        return await _context.Stocks.Where(s => s.WarehouseId == warehouseId &&
-                                        s.Quantity <= s.Product.ReorderLevel).Select(s => new LowStockDto
-                                        {
-                                            ProductId = s.ProductId,
-                                            ProductName = s.Product.Name ?? string.Empty,
-                                            Sku = s.Product.Sku ?? string.Empty,
-                                            WarehouseId = s.WarehouseId,
-                                            WarehouseName = s.Warehouse.Name,
-                                            Quantity = s.Quantity
-                                        }).ToListAsync();
+        return await _context.Stocks
+            .Where(s => s.WarehouseId == warehouseId)
+            .Include(s => s.ProductVariant)!
+                .ThenInclude(pv => pv!.Product)
+            .Where(s => s.Quantity <= s.ProductVariant!.Product!.ReorderLevel)
+            .Select(s => new LowStockDto
+            {
+                ProductId = s.ProductVariant!.Product!.Id,
+                ProductName = s.ProductVariant!.Product!.Name ?? string.Empty,
+                Sku = s.ProductVariant!.Sku ?? s.ProductVariant!.Product!.Sku ?? string.Empty,
+                WarehouseId = s.WarehouseId,
+                Quantity = s.Quantity
+            }).ToListAsync();
     }
 
-    public async Task<Stock> IncreaseStockAsync(Guid productId, int quantity)
+    public async Task<Stock> IncreaseStockAsync(Guid productVariantId, int quantity)
     {
         var stock = await _context.Stocks
-            .FirstOrDefaultAsync(s => s.ProductId == productId);
+            .FirstOrDefaultAsync(s => s.ProductVariantId == productVariantId);
 
         if (stock is null)
             throw new NotFoundException("Stock not found.");
@@ -48,10 +56,10 @@ public class StockRepository : BaseRepository<Stock>
         return stock;
     }
 
-    public async Task DecreaseStockAsync(Guid productId, int quantity)
+    public async Task DecreaseStockAsync(Guid productVariantId, int quantity)
     {
         var stock = await _context.Stocks
-            .FirstOrDefaultAsync(s => s.ProductId == productId);
+            .FirstOrDefaultAsync(s => s.ProductVariantId == productVariantId);
 
         if (stock is null)
             throw new NotFoundException("Stock not found.");
@@ -59,9 +67,15 @@ public class StockRepository : BaseRepository<Stock>
         stock.Quantity -= quantity;
     }
 
-    public async Task<IEnumerable<Stock>> GetAllAsync()
+    public async Task<IEnumerable<StockResponseDto>> GetAllAsync(List<Guid> warehouseIds)
     {
-        return await base.GetAllAsync();
+
+        return await _context.Stocks.Where(s =>warehouseIds.Contains(s.WarehouseId)).Select(s => new StockResponseDto
+        {
+            Id = s.Id,
+            WarehouseId = s.WarehouseId,
+            Quantity=s.Quantity
+        }).ToListAsync();
     }
 
     public async Task<Stock?> GetByIdAsync(Guid id)

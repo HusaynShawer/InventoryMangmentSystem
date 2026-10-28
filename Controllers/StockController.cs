@@ -5,12 +5,13 @@ using InventoryManagementSystem.Models;
 using InventoryManagementSystem.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration.UserSecrets;
 
 namespace InventoryManagementSystem.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Policy ="AdminOnly")]
+[AllowAnonymous]
 public class StockController : ControllerBase
 {
     private readonly StockService _service;
@@ -21,10 +22,14 @@ public class StockController : ControllerBase
     }
 
     [HttpGet]
-    [AllowAnonymous]
-    public async Task<ActionResult<IEnumerable<Stock>>> GetAllAsync()
+    public async Task<ActionResult<IEnumerable<StockResponseDto>>> GetAllAsync()
     {
-        var stocks = await _service.GetAllAsync();
+        var claim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                    ?? User.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value
+                    ?? User.FindFirst("nameid")?.Value;
+        if (string.IsNullOrEmpty(claim) || !Guid.TryParse(claim, out var userId))
+            return Unauthorized();
+        var stocks = await _service.GetAllAsync(userId);
         return Ok(stocks);
     }
 

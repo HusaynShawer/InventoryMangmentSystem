@@ -45,7 +45,15 @@ public class ProductService
 
         if (dto.Stock is not null)
         {
-            product.Stocks.Add(new Stock
+            var defaultVariant = new ProductVariant
+            {
+                ProductId = product.Id,
+                Sku = product.Sku ?? $"{product.Name?.Replace(" ", "-") ?? "PRD"}-{Guid.NewGuid().ToString()[..8]}".ToUpper(),
+                IsDefault = true,
+                IsActive = true
+            };
+            product.Variants.Add(defaultVariant);
+            defaultVariant.Stocks.Add(new Stock
             {
                 WarehouseId = dto.Stock.WarehouseId,
                 Quantity = dto.Stock.Quantity
@@ -54,18 +62,6 @@ public class ProductService
 
         await _repo.Add(product);
         await _unitOfWork.SaveAsync();
-
-        var _stockMovement = new StockMovement
-        {
-            ProductId = product.Id,
-            WarehouseId = dto.Stock.WarehouseId,
-            UserId = userId,
-            Quantity = dto.Stock.Quantity,
-            MovementType = $"Add new Product to {dto.Stock.WarehouseId}",
-            ReferenceId = product.Id,
-            Date = DateTime.UtcNow,
-            Note = $"Add New Product to warehouse{dto.Stock.WarehouseId}"
-        };
 
         return MapToDto(product);
     }
@@ -116,6 +112,19 @@ public class ProductService
             Id = s.Id,
             WarehouseId = s.WarehouseId,
             Quantity = s.Quantity
+        }).ToList(),
+        Variants = p.Variants.Select(v => new ProductVariantResponseDto
+        {
+            Id = v.Id,
+            ProductId = v.ProductId,
+            Sku = v.Sku,
+            Barcode = v.Barcode,
+            PriceOverride = v.PriceOverride,
+            CostOverride = v.CostOverride,
+            EffectivePrice = v.PriceOverride ?? p.UnitPrice,
+            IsActive = v.IsActive,
+            IsDefault = v.IsDefault,
+            Attributes = new List<string>()
         }).ToList()
     };
 }

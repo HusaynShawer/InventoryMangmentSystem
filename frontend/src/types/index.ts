@@ -13,6 +13,12 @@ export type CategoryInput = Schemas['CategoryDTO']
 export type Product = Schemas['ProductResponseDTO']
 export type ProductInput = Schemas['ProductDTO']
 
+export type ProductVariant = any
+export type CreateProductVariantInput = any
+export type ProductAttribute = any
+export type ProductAttributeInput = any
+export type ProductAttributeValueInput = any
+
 export type Supplier = Schemas['Supplier']
 
 export type Warehouse = Schemas['WarehouseResponseDTO']

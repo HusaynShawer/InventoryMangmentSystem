@@ -47,13 +47,15 @@ namespace InventoryManagementSystem.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<int>("ReorderLevel")
                         .HasColumnType("int");
 
                     b.Property<string>("Sku")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
 
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("decimal(18,2)");
@@ -63,6 +65,112 @@ namespace InventoryManagementSystem.Migrations
                     b.HasIndex("CategoryId");
 
                     b.ToTable("Products");
+                });
+
+            modelBuilder.Entity("InventoryManagementSystem.Models.ProductAttribute", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("ProductAttributes");
+                });
+
+            modelBuilder.Entity("InventoryManagementSystem.Models.ProductAttributeValue", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<Guid>("ProductAttributeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductAttributeId", "Code")
+                        .IsUnique();
+
+                    b.ToTable("ProductAttributeValues");
+                });
+
+            modelBuilder.Entity("InventoryManagementSystem.Models.ProductVariant", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Barcode")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<decimal?>("CostOverride")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("PriceOverride")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Sku")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("Sku")
+                        .IsUnique();
+
+                    b.ToTable("ProductVariants");
+                });
+
+            modelBuilder.Entity("InventoryManagementSystem.Models.ProductVariantAttributeValue", b =>
+                {
+                    b.Property<Guid>("ProductVariantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ProductAttributeValueId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("ProductVariantId", "ProductAttributeValueId");
+
+                    b.HasIndex("ProductAttributeValueId");
+
+                    b.ToTable("ProductVariantAttributeValues");
                 });
 
             modelBuilder.Entity("InventoryManagementSystem.Models.Purchase", b =>
@@ -97,7 +205,7 @@ namespace InventoryManagementSystem.Migrations
                     b.ToTable("Purchases");
                 });
 
-            modelBuilder.Entity("InventoryManagementSystem.Models.PurchaseItems", b =>
+            modelBuilder.Entity("InventoryManagementSystem.Models.PurchaseItem", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -184,7 +292,10 @@ namespace InventoryManagementSystem.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ProductId")
+                    b.Property<Guid?>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ProductVariantId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Quantity")
@@ -198,6 +309,9 @@ namespace InventoryManagementSystem.Migrations
                     b.HasIndex("ProductId");
 
                     b.HasIndex("WarehouseId");
+
+                    b.HasIndex("ProductVariantId", "WarehouseId")
+                        .IsUnique();
 
                     b.ToTable("Stocks");
                 });
@@ -378,6 +492,47 @@ namespace InventoryManagementSystem.Migrations
                     b.Navigation("Category");
                 });
 
+            modelBuilder.Entity("InventoryManagementSystem.Models.ProductAttributeValue", b =>
+                {
+                    b.HasOne("InventoryManagementSystem.Models.ProductAttribute", "ProductAttribute")
+                        .WithMany("Values")
+                        .HasForeignKey("ProductAttributeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ProductAttribute");
+                });
+
+            modelBuilder.Entity("InventoryManagementSystem.Models.ProductVariant", b =>
+                {
+                    b.HasOne("InventoryManagementSystem.Models.Product", "Product")
+                        .WithMany("Variants")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("InventoryManagementSystem.Models.ProductVariantAttributeValue", b =>
+                {
+                    b.HasOne("InventoryManagementSystem.Models.ProductAttributeValue", "ProductAttributeValue")
+                        .WithMany("ProductVariantAttributeValues")
+                        .HasForeignKey("ProductAttributeValueId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("InventoryManagementSystem.Models.ProductVariant", "ProductVariant")
+                        .WithMany("ProductVariantAttributeValues")
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ProductAttributeValue");
+
+                    b.Navigation("ProductVariant");
+                });
+
             modelBuilder.Entity("InventoryManagementSystem.Models.Purchase", b =>
                 {
                     b.HasOne("InventoryManagementSystem.Models.User", "CreatedByUser")
@@ -405,7 +560,7 @@ namespace InventoryManagementSystem.Migrations
                     b.Navigation("Warehouse");
                 });
 
-            modelBuilder.Entity("InventoryManagementSystem.Models.PurchaseItems", b =>
+            modelBuilder.Entity("InventoryManagementSystem.Models.PurchaseItem", b =>
                 {
                     b.HasOne("InventoryManagementSystem.Models.Product", "Product")
                         .WithMany("PurchaseItems")
@@ -464,10 +619,14 @@ namespace InventoryManagementSystem.Migrations
 
             modelBuilder.Entity("InventoryManagementSystem.Models.Stock", b =>
                 {
-                    b.HasOne("InventoryManagementSystem.Models.Product", "Product")
+                    b.HasOne("InventoryManagementSystem.Models.Product", null)
                         .WithMany("Stocks")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("ProductId");
+
+                    b.HasOne("InventoryManagementSystem.Models.ProductVariant", "ProductVariant")
+                        .WithMany("Stocks")
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("InventoryManagementSystem.Models.Warehouse", "Warehouse")
@@ -476,7 +635,7 @@ namespace InventoryManagementSystem.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Product");
+                    b.Navigation("ProductVariant");
 
                     b.Navigation("Warehouse");
                 });
@@ -549,6 +708,25 @@ namespace InventoryManagementSystem.Migrations
                     b.Navigation("SaleItems");
 
                     b.Navigation("StockMovements");
+
+                    b.Navigation("Stocks");
+
+                    b.Navigation("Variants");
+                });
+
+            modelBuilder.Entity("InventoryManagementSystem.Models.ProductAttribute", b =>
+                {
+                    b.Navigation("Values");
+                });
+
+            modelBuilder.Entity("InventoryManagementSystem.Models.ProductAttributeValue", b =>
+                {
+                    b.Navigation("ProductVariantAttributeValues");
+                });
+
+            modelBuilder.Entity("InventoryManagementSystem.Models.ProductVariant", b =>
+                {
+                    b.Navigation("ProductVariantAttributeValues");
 
                     b.Navigation("Stocks");
                 });

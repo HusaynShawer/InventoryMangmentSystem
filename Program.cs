@@ -25,6 +25,8 @@ builder.Services.AddScoped<IUserWarehouseRepository, UserWarehouseRepository>();
 builder.Services.AddScoped(typeof(BaseRepository<>));
 
 builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped<ProductVariantService>();
+builder.Services.AddScoped<ProductAttributeService>();
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<StockService>();
 builder.Services.AddScoped<SupplierService>();
@@ -35,6 +37,10 @@ builder.Services.AddScoped<UserWarehouseService>();
 builder.Services.AddScoped<SaleItemService>();
 builder.Services.AddScoped<StockMovementService>();
 builder.Services.AddScoped<WarehouseService>();
+builder.Services.AddScoped<ProductVariantRepository>();
+builder.Services.AddScoped<ProductAttributeRepository>();
+builder.Services.AddScoped<ProductAttributeValueRepository>();
+builder.Services.AddScoped<ProductVariantService>();
 builder.Services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -111,7 +117,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseAuthorization();
 app.MapControllers();
 
 app.Run();

@@ -3,6 +3,7 @@ import {
   Boxes,
   ClipboardList,
   LayoutDashboard,
+  SlidersHorizontal,
   Package,
   ShoppingCart,
   Tags,
@@ -28,6 +29,7 @@ const all: Role[] = ['ADMIN', 'Supplier', 'User']
 export const navItems: NavItem[] = [
   { to: paths.dashboard, label: 'Dashboard', icon: LayoutDashboard, roles: all },
   { to: paths.products, label: 'Products', icon: Package, roles: all },
+  { to: '/product-attributes', label: 'Attributes', icon: SlidersHorizontal, roles: ['ADMIN'] },
   { to: paths.categories, label: 'Categories', icon: Tags, roles: ['ADMIN'] },
   { to: paths.suppliers, label: 'Suppliers', icon: Truck, roles: all },
   { to: paths.warehouses, label: 'Warehouses', icon: Warehouse, roles: ['ADMIN'] },

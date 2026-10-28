@@ -7,7 +7,7 @@
 # Build outputs
 bin/
 obj/
-
+REVIEW_VARIANT_IMPLEMENTATION.txt
 # Visual Studio Code
 .vscode/*
 !.vscode/launch.json
