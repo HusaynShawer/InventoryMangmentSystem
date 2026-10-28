@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Pencil, Plus, Trash2 } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { PageHeader } from '@/components/data/PageHeader'
@@ -40,7 +41,7 @@ export function ProductListPage() {
     (product.stocks ?? []).reduce((sum, stock) => sum + (stock.quantity ?? 0), 0)
 
   const columns: Column<Product>[] = [
-    { key: 'sku', header: 'SKU', cell: (r) => <span className="font-mono text-xs">{r.sku}</span>, sortValue: (r) => r.sku ?? '' },
+    { key: 'sku', header: 'SKU', cell: (r) => <Link to={`/products/${r.id}`} className="font-mono text-xs text-primary hover:underline">{r.sku}</Link>, sortValue: (r) => r.sku ?? '' },
     { key: 'name', header: 'Name', cell: (r) => <span className="font-medium">{r.name}</span>, sortValue: (r) => r.name ?? '' },
     {
       key: 'category',

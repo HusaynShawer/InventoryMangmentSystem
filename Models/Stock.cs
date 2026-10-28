@@ -9,8 +9,8 @@ namespace InventoryManagementSystem.Models
         public Guid Id { get; set; } = Guid.NewGuid();
 
         [ForeignKey("Product")]
-        public Guid ProductId { get; set; }
-        public Product? Product { get; set; }
+        public Guid ProductVariantId { get; set; }
+        public ProductVariant? ProductVariant { get; set; }
 
         [ForeignKey("Warehouse")]
         public Guid WarehouseId { get; set; }

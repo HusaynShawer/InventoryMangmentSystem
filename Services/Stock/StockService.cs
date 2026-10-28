@@ -15,7 +15,7 @@ public class StockService
     private readonly IUserRepository _userRepo;
     private readonly BaseRepository<StockMovement> _stockMovementRepo;
     private readonly BaseRepository<Product> _prodcutRepo;
-    private readonly BaseRepository<Warehouse> _warehosueRepo;
+    private readonly WarehouseRepository _warehosueRepo;
 
     private readonly UnitOfWork _uow;
     public StockService(
@@ -23,7 +23,7 @@ public class StockService
         IUserRepository userRepo,
         BaseRepository<StockMovement> stockMovementRepo,
         BaseRepository<Product> prodcutRepo,
-        BaseRepository<Warehouse> warehouseRepo,
+        WarehouseRepository warehouseRepo,
         
         UnitOfWork uow)
     {
@@ -41,9 +41,10 @@ public class StockService
         await _uow.SaveAsync();
         return result;
     }
-        public async Task<IEnumerable<Stock>> GetAllAsync()
+    public async Task<IEnumerable<StockResponseDto>> GetAllAsync(Guid userId)
     {
-        return await _repo.GetAllAsync();
+        var UserWarehousesIds = await _warehosueRepo.GetByUserId(userId);
+        return await _repo.GetAllAsync(UserWarehousesIds.ToList());
     }
     public async Task<Stock> GetByIdAsync(Guid id)
     {
@@ -95,7 +96,7 @@ public class StockService
 
         var stockMovement = new StockMovement
         {
-            ProductId = stock.ProductId,
+            ProductId = stock.ProductVariant != null ? stock.ProductVariant.ProductId : Guid.Empty,
             WarehouseId = stock.WarehouseId,
             UserId = user.Id,
             Quantity = diff,
@@ -152,6 +153,9 @@ public class StockService
         var source = await _repo.GetByProductIdAsync(
             dto.ProductId, dto.FromWarehouseId);
       
+        if (source == null)
+            throw new NotFoundException("No stock record found for this product in the given warehouse.");
+
         if (source.Quantity < dto.Quantity)
             throw new ConflictException(
               "Insufficient stock for this transfer.");
@@ -167,7 +171,7 @@ public class StockService
         {
             destination = new Stock
             {
-                ProductId = dto.ProductId,
+                ProductVariantId = dto.ProductId,
                 WarehouseId = dto.ToWarehouseId,
                 Quantity = dto.Quantity
             };
@@ -182,7 +186,7 @@ public class StockService
 
         await _stockMovementRepo.Add(new StockMovement
         {
-            ProductId = dto.ProductId,
+            ProductId = source.ProductVariant != null ? source.ProductVariant.ProductId : Guid.Empty,
             WarehouseId = dto.FromWarehouseId,
             UserId = user.Id,
             Quantity = -dto.Quantity,
@@ -194,16 +198,15 @@ public class StockService
 
         await _stockMovementRepo.Add(new StockMovement
         {
-            ProductId = dto.ProductId,
+            ProductId = source.ProductVariant != null ? source.ProductVariant.ProductId : Guid.Empty,
             WarehouseId = dto.ToWarehouseId,
             UserId = user.Id,
             Quantity = dto.Quantity,
             MovementType = "TransferIn",
-            ReferenceId = source.Id,
+            ReferenceId = destination.Id,
             Date = DateTime.UtcNow,
             Note = $"Transferred from warehouse {dto.FromWarehouseId}"
         });
-
         await _uow.SaveAsync();
     }
 }

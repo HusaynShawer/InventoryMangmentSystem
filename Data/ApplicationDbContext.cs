@@ -10,7 +10,7 @@ namespace InventoryManagementSystem.Data
         }
 
         public DbSet<User> Users { get; set; }
-        public DbSet<UserWarehouse> UserWarehouses { get; set; }   // ✅ جديد
+        public DbSet<UserWarehouse> UserWarehouses { get; set; } 
         public DbSet<Category> Categories { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Supplier> Suppliers { get; set; }
@@ -21,6 +21,10 @@ namespace InventoryManagementSystem.Data
         public DbSet<Warehouse> Warehouses { get; set; }
         public DbSet<Stock> Stocks { get; set; }
         public DbSet<StockMovement> StockMovements { get; set; }
+        public DbSet<ProductVariant> ProductVariants { get; set; }
+        public DbSet<ProductAttribute> ProductAttributes { get; set; }
+        public DbSet<ProductAttributeValue> ProductAttributeValues { get; set; }
+        public DbSet<ProductVariantAttributeValue> ProductVariantAttributeValues { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -97,6 +101,56 @@ namespace InventoryManagementSystem.Data
                  .HasForeignKey(sm => sm.UserId)
                  .OnDelete(DeleteBehavior.Restrict);
             });
-        }
+
+            modelBuilder.Entity<ProductVariant>(e =>
+            {
+                e.HasIndex(e => e.Sku).IsUnique();
+                e.Property(e => e.Sku).HasMaxLength(64).IsRequired();
+
+                e.HasOne(v => v.Product)
+                    .WithMany(p => p.Variants)
+                    .HasForeignKey(v => v.ProductId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<ProductAttribute>(e =>
+            {
+                e.HasIndex(e => e.Code).IsUnique();
+            });
+
+            modelBuilder.Entity<ProductAttributeValue>(e =>
+            {
+                e.HasIndex(e => new { e.ProductAttributeId, e.Code }).IsUnique();
+                e.HasOne(v => v.ProductAttribute)
+                    .WithMany(a => a.Values)
+                    .HasForeignKey(v => v.ProductAttributeId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<ProductVariantAttributeValue>(pv =>
+            {
+                pv.HasKey(x => new { x.ProductVariantId, x.ProductAttributeValueId });
+
+                pv.HasOne(x => x.ProductVariant)
+                    .WithMany(v => v.ProductVariantAttributeValues)
+                    .HasForeignKey(x => x.ProductVariantId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                pv.HasOne(x => x.ProductAttributeValue)
+                    .WithMany(av => av.ProductVariantAttributeValues)
+                    .HasForeignKey(x => x.ProductAttributeValueId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<Stock>(s =>
+            {
+                s.HasIndex(s => new { s.ProductVariantId, s.WarehouseId }).IsUnique();
+
+                s.HasOne(s => s.ProductVariant)
+                    .WithMany(v => v.Stocks)
+                    .HasForeignKey(s => s.ProductVariantId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
     }
+}
 }
