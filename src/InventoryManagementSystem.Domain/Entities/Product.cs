@@ -26,7 +26,6 @@ namespace InventoryManagementSystem.Domain.Entities
         public ICollection<Stock> Stocks { get; set; } = new List<Stock>();
         public ICollection<PurchaseItem> PurchaseItems { get; set; } = new List<PurchaseItem>();
         public ICollection<SaleItem> SaleItems { get; set; } = new List<SaleItem>();
-        public ICollection<StockMovement> StockMovements { get; set; } = new List<StockMovement>();
         public ICollection<ProductVariant> Variants { get; set; } = new List<ProductVariant>();
     }
 

@@ -1,6 +1,7 @@
 using InventoryManagementSystem.Application.Abstractions.Persistence;
 using InventoryManagementSystem.Domain.Exceptions;
 using InventoryManagementSystem.Domain.Entities;
+using InventoryManagementSystem.Domain.Enums;
 using InventoryManagementSystem.Application.DTOs;
 namespace InventoryManagementSystem.Application.Services;
 
@@ -8,6 +9,7 @@ public class PurchaseService
 {
     private readonly IRepository<Purchase> _repo;
     private readonly IRepository<StockMovement> _stockMovementRepo;
+    private readonly IStockLevelRepository _stockLevelRepo;
     private readonly IStockRepository _stockRepo;
     private readonly IUnitOfWork _unitOfWork;
 
@@ -15,11 +17,13 @@ public class PurchaseService
         IRepository<Purchase> repo,
         IStockRepository stockRepo,
         IRepository<StockMovement> stockMovementRepo,
+        IStockLevelRepository stockLevelRepo,
         IUnitOfWork unitOfWork)
     {
         _repo = repo;
         _stockRepo = stockRepo;
         _stockMovementRepo = stockMovementRepo;
+        _stockLevelRepo = stockLevelRepo;
         _unitOfWork = unitOfWork;
     }
 
@@ -79,15 +83,20 @@ public class PurchaseService
 
                 _stockRepo.Update(stock);
 
+                var stockLevel = await _stockLevelRepo.GetOrCreateForStockAsync(stock);
+
                 var stockMovement = new StockMovement
                 {
-                    ProductId = item.ProductId,
+                    StockLevelId = stockLevel.Id,
+                    ProductVariantId = stock.ProductVariantId,
                     WarehouseId = purchase.WarehouseId,
                     UserId = purchase.CreatedByUserId,
-                    Quantity = item.Quantity,
-                    MovementType = "Purchase",
+                    MovementType = StockMovementType.PurchaseIn,
+                    QuantityDelta = item.Quantity,
+                    ResultingOnHand = stock.Quantity,
+                    ReferenceType = "Purchase",
                     ReferenceId = purchase.Id,
-                    Date = DateTime.UtcNow,
+                    CreatedAt = DateTime.UtcNow,
                     Note = "Purchase operation"
                 };
 

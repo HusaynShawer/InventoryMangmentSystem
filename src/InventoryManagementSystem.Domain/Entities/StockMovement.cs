@@ -1,30 +1,33 @@
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using InventoryManagementSystem.Domain.Enums;
 
-namespace InventoryManagementSystem.Domain.Entities
+namespace InventoryManagementSystem.Domain.Entities;
+
+public class StockMovement
 {
-    public class StockMovement
-    {
-        [Key]
-        public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid Id { get; set; } = Guid.NewGuid();
 
-        [ForeignKey("Product")]
-        public Guid ProductId { get; set; }
-        public Product? Product { get; set; }
+    public Guid StockLevelId { get; set; }
+    public Guid ProductVariantId { get; set; }  
+    public Guid WarehouseId { get; set; }
 
-        [ForeignKey("Warehouse")]
-        public Guid WarehouseId { get; set; }
-        public Warehouse? Warehouse { get; set; }
+    public StockMovementType MovementType { get; set; }
 
+    public int QuantityDelta { get; set; }
 
-        [ForeignKey("User")]
-        public Guid UserId { get; set; }
-        public User? User { get; set; }
+    public int ResultingOnHand { get; set; }
 
-        public int Quantity { get; set; }
-        public string MovementType { get; set; } = string.Empty;
-        public Guid ReferenceId { get; set; }
-        public DateTime Date { get; set; }
-        public string? Note { get; set; }
-    }
+    public string? ReferenceType { get; set; }
+    public Guid? ReferenceId { get; set; }
+
+    public string? IdempotencyKey { get; set; }
+
+    public string? Note { get; set; }
+
+    public Guid? UserId { get; set; }
+    public Guid? CreatedByUserId { get; set; }
+
+    public DateTime CreatedAt { get; set; }
+
+    // Navigation
+    public StockLevel StockLevel { get; set; } = null!;
 }

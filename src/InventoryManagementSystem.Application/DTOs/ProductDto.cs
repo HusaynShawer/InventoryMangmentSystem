@@ -45,6 +45,7 @@ public class UserDto
 public class CreateProductVariantDto
 {
     public string Sku { get; set; } = string.Empty;
+    public Guid WarehouseId { get; set; }
     public string? Barcode { get; set; }
     public decimal? PriceOverride { get; set; }
     public decimal? CostOverride { get; set; }

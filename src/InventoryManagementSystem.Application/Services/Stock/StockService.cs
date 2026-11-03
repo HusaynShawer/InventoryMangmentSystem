@@ -1,6 +1,7 @@
 using InventoryManagementSystem.Domain.Exceptions;
 using InventoryManagementSystem.Application.DTOs;
 using InventoryManagementSystem.Domain.Entities;
+using InventoryManagementSystem.Domain.Enums;
 using InventoryManagementSystem.Application.Abstractions.Persistence;
 using System.Security.Authentication;
 using System.ComponentModel.DataAnnotations;
@@ -11,6 +12,7 @@ public class StockService
     private readonly IStockRepository _repo;
     private readonly IUserRepository _userRepo;
     private readonly IRepository<StockMovement> _stockMovementRepo;
+    private readonly IStockLevelRepository _stockLevelRepo;
     private readonly IRepository<Product> _prodcutRepo;
     private readonly IWarehouseRepository _warehosueRepo;
 
@@ -19,6 +21,7 @@ public class StockService
         IStockRepository repo,
         IUserRepository userRepo,
         IRepository<StockMovement> stockMovementRepo,
+        IStockLevelRepository stockLevelRepo,
         IRepository<Product> prodcutRepo,
         IWarehouseRepository warehouseRepo,
         
@@ -27,6 +30,7 @@ public class StockService
         _repo = repo;
         _userRepo = userRepo;
         _stockMovementRepo = stockMovementRepo;
+        _stockLevelRepo = stockLevelRepo;
         _prodcutRepo = prodcutRepo;
         _warehosueRepo = warehouseRepo;
         _uow = uow;
@@ -35,6 +39,7 @@ public class StockService
     public async Task<Stock> Create(Stock stock)
     {
         var result =  await _repo.AddAsync(stock);
+        await _stockLevelRepo.GetOrCreateForStockAsync(stock);
         await _uow.SaveAsync();
         return result;
     }
@@ -69,6 +74,7 @@ public class StockService
         var record = await GetByIdAsync(stock.Id);
         record.Quantity = stock.Quantity;  
         _repo.Update(record);
+        await _stockLevelRepo.GetOrCreateForStockAsync(record);
         await _uow.SaveAsync();       
     }
     public async Task AdjustStock(Guid userId,StockAdjustmentDto stockAdjustmentDTO)
@@ -91,16 +97,21 @@ public class StockService
         stock.Quantity = stockAdjustmentDTO.ActualQuantity;
         _repo.Update(stock);
 
+        var stockLevel = await _stockLevelRepo.GetOrCreateForStockAsync(stock);
+
         var stockMovement = new StockMovement
         {
-            ProductId = stock.ProductVariant != null ? stock.ProductVariant.ProductId : Guid.Empty,
+            StockLevelId = stockLevel.Id,
+            ProductVariantId = stock.ProductVariantId,
             WarehouseId = stock.WarehouseId,
             UserId = user.Id,
-            Quantity = diff,
-            MovementType = stockAdjustmentDTO.Reason,
+            MovementType = StockMovementType.Adjustment,
+            QuantityDelta = diff,
+            ResultingOnHand = stock.Quantity,
+            ReferenceType = "StockAdjustment",
             ReferenceId = stock.Id,
-            Date = DateTime.UtcNow,
-            Note = $"the diff after adjustmnet {diff}"
+            CreatedAt = DateTime.UtcNow,
+            Note = $"Adjusted by {diff}. Reason: {stockAdjustmentDTO.Reason}"
         };
         await _stockMovementRepo.AddAsync(stockMovement);
         await _uow.SaveAsync();
@@ -181,27 +192,36 @@ public class StockService
             _repo.Update(destination);
         }
 
+        var sourceLevel = await _stockLevelRepo.GetOrCreateForStockAsync(source);
+        var destinationLevel = await _stockLevelRepo.GetOrCreateForStockAsync(destination);
+
         await _stockMovementRepo.AddAsync(new StockMovement
         {
-            ProductId = source.ProductVariant != null ? source.ProductVariant.ProductId : Guid.Empty,
+            StockLevelId = sourceLevel.Id,
+            ProductVariantId = source.ProductVariantId,
             WarehouseId = dto.FromWarehouseId,
             UserId = user.Id,
-            Quantity = -dto.Quantity,
-            MovementType = "TransferOut",
+            MovementType = StockMovementType.Transfer,
+            QuantityDelta = -dto.Quantity,
+            ResultingOnHand = source.Quantity,
+            ReferenceType = "StockTransfer",
             ReferenceId = source.Id,
-            Date = DateTime.UtcNow,
+            CreatedAt = DateTime.UtcNow,
             Note = $"Transferred to warehouse {dto.ToWarehouseId}"
         });
 
         await _stockMovementRepo.AddAsync(new StockMovement
         {
-            ProductId = source.ProductVariant != null ? source.ProductVariant.ProductId : Guid.Empty,
+            StockLevelId = destinationLevel.Id,
+            ProductVariantId = destination.ProductVariantId,
             WarehouseId = dto.ToWarehouseId,
             UserId = user.Id,
-            Quantity = dto.Quantity,
-            MovementType = "TransferIn",
+            MovementType = StockMovementType.Transfer,
+            QuantityDelta = dto.Quantity,
+            ResultingOnHand = destination.Quantity,
+            ReferenceType = "StockTransfer",
             ReferenceId = destination.Id,
-            Date = DateTime.UtcNow,
+            CreatedAt = DateTime.UtcNow,
             Note = $"Transferred from warehouse {dto.FromWarehouseId}"
         });
         await _uow.SaveAsync();

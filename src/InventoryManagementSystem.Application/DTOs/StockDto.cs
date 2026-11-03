@@ -1,3 +1,5 @@
+using InventoryManagementSystem.Domain.Enums;
+
 namespace InventoryManagementSystem.Application.DTOs;
 
 public class StockDto
@@ -15,13 +17,18 @@ public class StockResponseDto
 
 public class StockMovementDto
 {
-    public Guid ProductId { get; set; }
+    public Guid StockLevelId { get; set; }
+    public Guid ProductVariantId { get; set; }
     public Guid WarehouseId { get; set; }
-    public Guid UserId { get; set; }
-    public int Quantity { get; set; }
-    public string MovementType { get; set; } = string.Empty;
-    public Guid ReferenceId { get; set; }
-    public DateTime Date { get; set; }
+    public Guid? UserId { get; set; }
+    public Guid? CreatedByUserId { get; set; }
+    public StockMovementType MovementType { get; set; }
+    public int QuantityDelta { get; set; }
+    public int ResultingOnHand { get; set; }
+    public string? ReferenceType { get; set; }
+    public Guid? ReferenceId { get; set; }
+    public string? IdempotencyKey { get; set; }
+    public DateTime CreatedAt { get; set; }
     public string? Note { get; set; }
 }
 

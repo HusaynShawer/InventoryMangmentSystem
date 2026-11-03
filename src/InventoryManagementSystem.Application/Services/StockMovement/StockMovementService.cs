@@ -43,12 +43,18 @@ public class StockMovementService
     public async Task Update(StockMovement stockMovement)
     {
         var record = await GetByIdAsync(stockMovement.Id);
-        record.ProductId = stockMovement.ProductId;
+        record.StockLevelId = stockMovement.StockLevelId;
+        record.ProductVariantId = stockMovement.ProductVariantId;
         record.WarehouseId = stockMovement.WarehouseId;
         record.UserId = stockMovement.UserId;
-        record.Quantity = stockMovement.Quantity;
+        record.CreatedByUserId = stockMovement.CreatedByUserId;
         record.MovementType = stockMovement.MovementType;
-        record.Date = stockMovement.Date;
+        record.QuantityDelta = stockMovement.QuantityDelta;
+        record.ResultingOnHand = stockMovement.ResultingOnHand;
+        record.ReferenceType = stockMovement.ReferenceType;
+        record.ReferenceId = stockMovement.ReferenceId;
+        record.IdempotencyKey = stockMovement.IdempotencyKey;
+        record.CreatedAt = stockMovement.CreatedAt;
         record.Note = stockMovement.Note;
         _repo.Update(record);
     }

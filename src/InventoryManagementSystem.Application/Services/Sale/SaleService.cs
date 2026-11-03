@@ -1,5 +1,6 @@
 using InventoryManagementSystem.Domain.Exceptions;
 using InventoryManagementSystem.Domain.Entities;
+using InventoryManagementSystem.Domain.Enums;
 using InventoryManagementSystem.Application.Abstractions.Persistence;
 using InventoryManagementSystem.Application.DTOs;
 namespace InventoryManagementSystem.Application.Services;
@@ -8,6 +9,7 @@ public class SaleService
 {
     private readonly IRepository<Sale> _repo;
         private readonly IRepository<StockMovement> _stockMovementRepo;
+    private readonly IStockLevelRepository _stockLevelRepo;
 
     private readonly IStockRepository _stockRepo;
     private readonly IUnitOfWork _unitOfWork;
@@ -15,11 +17,13 @@ public class SaleService
         IRepository<Sale> repo,
         IStockRepository stockRepo,
         IRepository<StockMovement> stockMovement,
+        IStockLevelRepository stockLevelRepo,
         IUnitOfWork unitOfWork)
     {
         _repo = repo;
         _stockRepo = stockRepo;
         _stockMovementRepo = stockMovement;
+        _stockLevelRepo = stockLevelRepo;
         _unitOfWork = unitOfWork;
     }
 
@@ -73,16 +77,21 @@ public class SaleService
 
                 _stock.Quantity -= item.Quantity;
                 _stockRepo.Update(_stock);
-               
+
+                var stockLevel = await _stockLevelRepo.GetOrCreateForStockAsync(_stock);
+
                 var stockMovement = new StockMovement
                 {
-                    ProductId = item.ProductId,
+                    StockLevelId = stockLevel.Id,
+                    ProductVariantId = _stock.ProductVariantId,
                     WarehouseId = _sale.WarehouseId,
                     UserId = _sale.CreatedByUserId,
-                    Quantity = item.Quantity,
-                    MovementType = "Purchase",
+                    MovementType = StockMovementType.SaleOut,
+                    QuantityDelta = -item.Quantity,
+                    ResultingOnHand = _stock.Quantity,
+                    ReferenceType = "Sale",
                     ReferenceId = _sale.Id,
-                    Date = DateTime.UtcNow,
+                    CreatedAt = DateTime.UtcNow,
                     Note = "Sale operation"
                 };
                 await _stockMovementRepo.AddAsync(stockMovement);
