@@ -30,7 +30,9 @@ public enum StockMovementType
     Reservation = 3,    
     Release = 4,        
     Transfer = 5,       
-    Adjustment = 6      
+    Adjustment = 6,
+    TransferIn = 7,
+    TransferOut = 8
 }
 
 public enum StockReservationStatus
