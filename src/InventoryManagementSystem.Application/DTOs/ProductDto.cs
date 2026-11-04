@@ -58,7 +58,7 @@ public class ProductVariantDto
     public Guid ProductId { get; set; }
     public string Sku { get; set; } = string.Empty;
     public string? Barcode { get; set; }
-    public decimal? PriceOverride { get; set; }
+    public decimal PriceOverride { get; set; }
     public decimal? CostOverride { get; set; }
     public decimal EffectivePrice { get; set; }
     public bool IsActive { get; set; }

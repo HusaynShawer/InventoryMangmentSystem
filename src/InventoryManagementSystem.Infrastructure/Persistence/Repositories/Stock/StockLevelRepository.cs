@@ -1,5 +1,6 @@
 using InventoryManagementSystem.Application.Abstractions.Persistence;
 using InventoryManagementSystem.Domain.Entities;
+using InventoryManagementSystem.Domain.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace InventoryManagementSystem.Infrastructure.Persistence.Repositories;
@@ -11,22 +12,21 @@ public class StockLevelRepository : BaseRepository<StockLevel>, IStockLevelRepos
     {
     }
 
-    public async Task<StockLevel> GetOrCreateAsync(Guid productVariantId, Guid warehouseId)
+    public async Task<StockLevel> GetAsync(Guid productVariantId, Guid warehouseId)
     {
-        var stockLevel = await _context.StockLevels
+        return await _context.StockLevels
             .FirstOrDefaultAsync(s =>
                 s.ProductVariantId == productVariantId &&
-                s.WarehouseId == warehouseId);
-
-        if (stockLevel is not null)
-            return stockLevel;
-
-        stockLevel = new StockLevel
+                s.WarehouseId == warehouseId) ?? throw new NotFoundException("Stock level not found.");
+    }
+    public async Task<StockLevel> CreateAsync(Guid productVariantId, Guid warehouseId)
+    {
+        var stockLevel = new StockLevel
         {
             Id = Guid.NewGuid(),
             ProductVariantId = productVariantId,
             WarehouseId = warehouseId,
-            QuantityOnHand = 0,
+            QuantityOnHand = 120,
             ReservedQuantity = 0,
             AvailableQuantity = 0,
             CreatedAt = DateTime.UtcNow,
@@ -37,14 +37,14 @@ public class StockLevelRepository : BaseRepository<StockLevel>, IStockLevelRepos
         return stockLevel;
     }
 
-    public async Task<StockLevel> GetOrCreateForStockAsync(Stock stock)
-    {
-        var stockLevel = await GetOrCreateAsync(stock.ProductVariantId, stock.WarehouseId);
+    // public async Task<StockLevel> GetOrCreateForStockAsync(Stock stock)
+    // {
+    //     var stockLevel = await GetOrCreateAsync(stock.ProductVariantId, stock.WarehouseId);
 
-        stockLevel.QuantityOnHand = stock.Quantity;
-        stockLevel.AvailableQuantity = stock.Quantity - stockLevel.ReservedQuantity;
-        stockLevel.UpdatedAt = DateTime.UtcNow;
+    //     stockLevel.QuantityOnHand = stock.Quantity;
+    //     stockLevel.AvailableQuantity = stock.Quantity - stockLevel.ReservedQuantity;
+    //     stockLevel.UpdatedAt = DateTime.UtcNow;
 
-        return stockLevel;
-    }
+    //     return stockLevel;
+    // }
 }
