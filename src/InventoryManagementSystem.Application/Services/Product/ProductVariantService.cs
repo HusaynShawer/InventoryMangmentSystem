@@ -84,6 +84,9 @@ public class ProductVariantService
             throw new ForbiddenException(
                 "You do not have access to this warehouse.");
 
+        await _repo.AddAsync(variant);
+        await _unitOfWork.SaveAsync();
+
         var stockLevel = await _stockLevelRepo.GetOrCreateAsync(variant.Id, dto.WarehouseId);
 
         var movement = new StockMovement
@@ -102,9 +105,8 @@ public class ProductVariantService
         };
 
         await _stockMovement.AddAsync(movement);
-
-        await _repo.AddAsync(variant);
         await _unitOfWork.SaveAsync();
+
         var created = await _repo.GetByIdAsync(variant.Id);
         return MapToDto(created!);
     }

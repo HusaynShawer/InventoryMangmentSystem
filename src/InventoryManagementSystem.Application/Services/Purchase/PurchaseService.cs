@@ -10,18 +10,15 @@ public class PurchaseService
     private readonly IRepository<Purchase> _repo;
     private readonly IRepository<StockMovement> _stockMovementRepo;
     private readonly IStockLevelRepository _stockLevelRepo;
-    private readonly IStockRepository _stockRepo;
     private readonly IUnitOfWork _unitOfWork;
 
     public PurchaseService(
         IRepository<Purchase> repo,
-        IStockRepository stockRepo,
         IRepository<StockMovement> stockMovementRepo,
         IStockLevelRepository stockLevelRepo,
         IUnitOfWork unitOfWork)
     {
         _repo = repo;
-        _stockRepo = stockRepo;
         _stockMovementRepo = stockMovementRepo;
         _stockLevelRepo = stockLevelRepo;
         _unitOfWork = unitOfWork;
@@ -69,31 +66,21 @@ public class PurchaseService
 
             foreach (var item in purchase.PurchaseItems)
             {
-                var stock = await _stockRepo.GetByProductIdAsync(
+                var stockLevel = await _stockLevelRepo.GetOrCreateAsync(
                     item.ProductId,
-                    purchase.WarehouseId
-                );
+                    purchase.WarehouseId);
 
-                if (stock is null)
-                    throw new NotFoundException(
-                        $"Stock not found for ProductId: {item.ProductId}"
-                    );
-
-                stock.Quantity += item.Quantity;
-
-                _stockRepo.Update(stock);
-
-                var stockLevel = await _stockLevelRepo.GetOrCreateForStockAsync(stock);
+                stockLevel.IncreaseOnHand(item.Quantity);
 
                 var stockMovement = new StockMovement
                 {
                     StockLevelId = stockLevel.Id,
-                    ProductVariantId = stock.ProductVariantId,
+                    ProductVariantId = stockLevel.ProductVariantId,
                     WarehouseId = purchase.WarehouseId,
                     UserId = purchase.CreatedByUserId,
                     MovementType = StockMovementType.PurchaseIn,
                     QuantityDelta = item.Quantity,
-                    ResultingOnHand = stock.Quantity,
+                    ResultingOnHand = stockLevel.QuantityOnHand,
                     ReferenceType = "Purchase",
                     ReferenceId = purchase.Id,
                     CreatedAt = DateTime.UtcNow,

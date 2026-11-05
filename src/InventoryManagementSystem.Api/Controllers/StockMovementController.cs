@@ -36,7 +36,7 @@ public class StockMovementController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Stock>> Create(StockMovement stockMovement)
+    public async Task<ActionResult<StockMovement>> Create(StockMovement stockMovement)
     {
         var _stockMovement = await _service.Create(stockMovement);
 

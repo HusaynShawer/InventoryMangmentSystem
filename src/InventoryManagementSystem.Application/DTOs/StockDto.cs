@@ -4,6 +4,8 @@ namespace InventoryManagementSystem.Application.DTOs;
 
 public class StockDto
 {
+    public Guid ProductId { get; set; }
+    public Guid ProductVariantId { get; set; }
     public Guid WarehouseId { get; set; }
     public required int Quantity { get; set; }
 }
@@ -11,8 +13,13 @@ public class StockDto
 public class StockResponseDto
 {
     public Guid Id { get; set; }
+    public Guid ProductId { get; set; }
+    public Guid ProductVariantId { get; set; }
     public Guid WarehouseId { get; set; }
     public int Quantity { get; set; }
+    public int QuantityOnHand { get; set; }
+    public int ReservedQuantity { get; set; }
+    public int AvailableQuantity { get; set; }
 }
 
 public class StockMovementDto

@@ -23,7 +23,6 @@ namespace InventoryManagementSystem.Domain.Entities
 
         public int ReorderLevel { get; set; }
 
-        public ICollection<Stock> Stocks { get; set; } = new List<Stock>();
         public ICollection<PurchaseItem> PurchaseItems { get; set; } = new List<PurchaseItem>();
         public ICollection<SaleItem> SaleItems { get; set; } = new List<SaleItem>();
         public ICollection<ProductVariant> Variants { get; set; } = new List<ProductVariant>();
@@ -89,7 +88,7 @@ namespace InventoryManagementSystem.Domain.Entities
         public bool IsDefault { get; set; } = false;
 
         public ICollection<ProductVariantAttributeValue> ProductVariantAttributeValues { get; set; } = new List<ProductVariantAttributeValue>();
-        public ICollection<Stock> Stocks { get; set; } = new List<Stock>();
+        public ICollection<StockLevel> StockLevels { get; set; } = new List<StockLevel>();
     }
 
     public class ProductVariantAttributeValue

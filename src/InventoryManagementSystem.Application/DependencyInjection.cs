@@ -13,6 +13,7 @@ public static class DependencyInjection
         services.AddScoped<ProductVariantService>();
         services.AddScoped<ProductAttributeService>();
         services.AddScoped<StockService>();
+        services.AddScoped<StokLevelService>();
         services.AddScoped<SupplierService>();
         services.AddScoped<PurchaseService>();
         services.AddScoped<PurchaseItemService>();

@@ -20,7 +20,6 @@ namespace InventoryManagementSystem.Infrastructure.Persistence
         public DbSet<Sale> Sales { get; set; }
         public DbSet<SaleItem> SaleItems { get; set; }
         public DbSet<Warehouse> Warehouses { get; set; }
-        public DbSet<Stock> Stocks { get; set; }
         public DbSet<StockLevel> StockLevels { get; set; }
         public DbSet<StockMovement> StockMovements { get; set; }
         public DbSet<Cart> Carts { get; set; }
@@ -106,6 +105,16 @@ namespace InventoryManagementSystem.Infrastructure.Persistence
                 s.ToTable("StockLevels");
                 s.HasIndex(s => new { s.ProductVariantId, s.WarehouseId }).IsUnique();
                 s.Property(s => s.RowVersion).IsRowVersion();
+
+                s.HasOne(s => s.ProductVariant)
+                    .WithMany(v => v.StockLevels)
+                    .HasForeignKey(s => s.ProductVariantId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                s.HasOne(s => s.Warehouse)
+                    .WithMany(w => w.StockLevels)
+                    .HasForeignKey(s => s.WarehouseId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<StockMovement>(e =>
@@ -175,15 +184,6 @@ namespace InventoryManagementSystem.Infrastructure.Persistence
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
-            modelBuilder.Entity<Stock>(s =>
-            {
-                s.HasIndex(s => new { s.ProductVariantId, s.WarehouseId }).IsUnique();
-
-                s.HasOne(s => s.ProductVariant)
-                    .WithMany(v => v.Stocks)
-                    .HasForeignKey(s => s.ProductVariantId)
-                    .OnDelete(DeleteBehavior.Restrict);
-            });
             modelBuilder.Entity<Cart>(c =>
             {
                 c.Property(c => c.Status).HasConversion<string>()

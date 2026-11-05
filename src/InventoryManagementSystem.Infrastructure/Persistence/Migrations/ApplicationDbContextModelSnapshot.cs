@@ -466,36 +466,6 @@ namespace InventoryManagementSystem.Infrastructure.Persistence.Migrations
                     b.ToTable("SaleItems");
                 });
 
-            modelBuilder.Entity("InventoryManagementSystem.Domain.Entities.Stock", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("ProductId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ProductVariantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("WarehouseId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductId");
-
-                    b.HasIndex("WarehouseId");
-
-                    b.HasIndex("ProductVariantId", "WarehouseId")
-                        .IsUnique();
-
-                    b.ToTable("Stocks");
-                });
-
             modelBuilder.Entity("InventoryManagementSystem.Domain.Entities.StockLevel", b =>
                 {
                     b.Property<Guid>("Id")
@@ -530,6 +500,8 @@ namespace InventoryManagementSystem.Infrastructure.Persistence.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("WarehouseId");
 
                     b.HasIndex("ProductVariantId", "WarehouseId")
                         .IsUnique();
@@ -927,22 +899,18 @@ namespace InventoryManagementSystem.Infrastructure.Persistence.Migrations
                     b.Navigation("Sale");
                 });
 
-            modelBuilder.Entity("InventoryManagementSystem.Domain.Entities.Stock", b =>
+            modelBuilder.Entity("InventoryManagementSystem.Domain.Entities.StockLevel", b =>
                 {
-                    b.HasOne("InventoryManagementSystem.Domain.Entities.Product", null)
-                        .WithMany("Stocks")
-                        .HasForeignKey("ProductId");
-
                     b.HasOne("InventoryManagementSystem.Domain.Entities.ProductVariant", "ProductVariant")
-                        .WithMany("Stocks")
+                        .WithMany("StockLevels")
                         .HasForeignKey("ProductVariantId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("InventoryManagementSystem.Domain.Entities.Warehouse", "Warehouse")
-                        .WithMany("Stocks")
+                        .WithMany("StockLevels")
                         .HasForeignKey("WarehouseId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("ProductVariant");
@@ -1032,8 +1000,6 @@ namespace InventoryManagementSystem.Infrastructure.Persistence.Migrations
 
                     b.Navigation("SaleItems");
 
-                    b.Navigation("Stocks");
-
                     b.Navigation("Variants");
                 });
 
@@ -1051,7 +1017,7 @@ namespace InventoryManagementSystem.Infrastructure.Persistence.Migrations
                 {
                     b.Navigation("ProductVariantAttributeValues");
 
-                    b.Navigation("Stocks");
+                    b.Navigation("StockLevels");
                 });
 
             modelBuilder.Entity("InventoryManagementSystem.Domain.Entities.Purchase", b =>
@@ -1095,9 +1061,9 @@ namespace InventoryManagementSystem.Infrastructure.Persistence.Migrations
 
                     b.Navigation("Sales");
 
-                    b.Navigation("StockMovements");
+                    b.Navigation("StockLevels");
 
-                    b.Navigation("Stocks");
+                    b.Navigation("StockMovements");
 
                     b.Navigation("UserWarehouses");
                 });

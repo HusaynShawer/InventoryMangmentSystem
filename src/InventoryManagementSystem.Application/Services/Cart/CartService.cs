@@ -66,12 +66,15 @@ public class CartService
         }
 
         var existingItem = cart.Items.FirstOrDefault(i => i.ProductVariantId == request.variantId);
+        var requestedTotal = (existingItem?.Quantity ?? 0) + request.quantity;
+
+        if (requestedTotal > stockLevel.AvailableQuantity)
+            throw new ConflictException("Insufficient available stock.");
+
         if (existingItem is not null)
         {
-            existingItem.Quantity += request.quantity;
+            existingItem.Quantity = requestedTotal;
             existingItem.UnitPriceSnapshot = variant.PriceOverride ?? variant.Product.UnitPrice;
-            stockLevel.ReservedQuantity -= request.quantity;
-
         }
         else
         {
@@ -81,7 +84,6 @@ public class CartService
                 Quantity = request.quantity,
                 UnitPriceSnapshot = variant.PriceOverride ?? variant.Product.UnitPrice
             });
-            stockLevel.ReservedQuantity -= request.quantity;
         }
         cart.UpdatedAt = DateTime.UtcNow;
         await _unitOfWork.SaveAsync();

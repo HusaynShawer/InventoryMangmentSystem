@@ -51,7 +51,7 @@ public class CartController : ControllerBase
         {
             return BadRequest("Invalid user ID.");
         }   
-        await _cartService.AddToCart(userId, request.variantId, request.quantity);
+        await _cartService.AddToCart(userId, request);
         return Ok();
     }
 }

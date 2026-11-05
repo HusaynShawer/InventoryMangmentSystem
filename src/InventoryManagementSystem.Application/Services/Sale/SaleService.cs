@@ -8,20 +8,17 @@ namespace InventoryManagementSystem.Application.Services;
 public class SaleService
 {
     private readonly IRepository<Sale> _repo;
-        private readonly IRepository<StockMovement> _stockMovementRepo;
+    private readonly IRepository<StockMovement> _stockMovementRepo;
     private readonly IStockLevelRepository _stockLevelRepo;
-
-    private readonly IStockRepository _stockRepo;
     private readonly IUnitOfWork _unitOfWork;
+
     public SaleService(
         IRepository<Sale> repo,
-        IStockRepository stockRepo,
         IRepository<StockMovement> stockMovement,
         IStockLevelRepository stockLevelRepo,
         IUnitOfWork unitOfWork)
     {
         _repo = repo;
-        _stockRepo = stockRepo;
         _stockMovementRepo = stockMovement;
         _stockLevelRepo = stockLevelRepo;
         _unitOfWork = unitOfWork;
@@ -64,31 +61,24 @@ public class SaleService
 
             foreach(var item in _sale.SaleItems)
             {
-                var _stock = await _stockRepo.GetByProductIdAsync(item.ProductId,_sale.WarehouseId);
-                
-                if (_stock is null)
-                    throw new NotFoundException(
-                        $"Stock not found for ProductId: {item.ProductId}"
-                    );
-                
-                if(item.Quantity > _stock.Quantity)
+                var stockLevel = await _stockLevelRepo.GetAsync(
+                    item.ProductId, _sale.WarehouseId);
+
+                if (item.Quantity > stockLevel.AvailableQuantity)
                     throw new ConflictException(
                         "Insufficient stock: the requested quantity cannot be covered.");
 
-                _stock.Quantity -= item.Quantity;
-                _stockRepo.Update(_stock);
-
-                var stockLevel = await _stockLevelRepo.GetOrCreateForStockAsync(_stock);
+                stockLevel.DecreaseOnHand(item.Quantity);
 
                 var stockMovement = new StockMovement
                 {
                     StockLevelId = stockLevel.Id,
-                    ProductVariantId = _stock.ProductVariantId,
+                    ProductVariantId = stockLevel.ProductVariantId,
                     WarehouseId = _sale.WarehouseId,
                     UserId = _sale.CreatedByUserId,
                     MovementType = StockMovementType.SaleOut,
                     QuantityDelta = -item.Quantity,
-                    ResultingOnHand = _stock.Quantity,
+                    ResultingOnHand = stockLevel.QuantityOnHand,
                     ReferenceType = "Sale",
                     ReferenceId = _sale.Id,
                     CreatedAt = DateTime.UtcNow,
