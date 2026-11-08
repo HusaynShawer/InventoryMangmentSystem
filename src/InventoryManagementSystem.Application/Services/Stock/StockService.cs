@@ -48,7 +48,6 @@ public class StockService
             WarehouseId = dto.WarehouseId,
             QuantityOnHand = dto.Quantity,
             ReservedQuantity = 0,
-            AvailableQuantity = dto.Quantity,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -104,8 +103,12 @@ public class StockService
         if (!userWarehouseIds.Contains(stockAdjustmentDTO.WarehouseId))
             throw new ForbiddenException("You do not have access to this warehouse.");
 
+        var productVariantId = stockAdjustmentDTO.ProductVariantId != Guid.Empty
+            ? stockAdjustmentDTO.ProductVariantId
+            : stockAdjustmentDTO.ProductId;
+
         var stockLevel = await _repo.GetAsync(
-            stockAdjustmentDTO.ProductId, stockAdjustmentDTO.WarehouseId);
+            productVariantId, stockAdjustmentDTO.WarehouseId);
 
         var diff = stockAdjustmentDTO.ActualQuantity - stockLevel.QuantityOnHand;
         if (diff == 0)
@@ -172,13 +175,17 @@ public class StockService
                 "You don't have access to both warehouses.");
         }
 
-        var source = await _repo.GetAsync(dto.ProductId, dto.FromWarehouseId);
+        var productVariantId = dto.ProductVariantId != Guid.Empty
+            ? dto.ProductVariantId
+            : dto.ProductId;
+
+        var source = await _repo.GetAsync(productVariantId, dto.FromWarehouseId);
 
         if (source.AvailableQuantity < dto.Quantity)
             throw new ConflictException("Insufficient stock for this transfer.");
 
         var destination = await _repo.GetOrCreateAsync(
-            dto.ProductId, dto.ToWarehouseId);
+            productVariantId, dto.ToWarehouseId);
 
         source.DecreaseOnHand(dto.Quantity);
         destination.IncreaseOnHand(dto.Quantity);

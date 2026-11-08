@@ -7,7 +7,10 @@ public class Order
     public Guid Id { get; set; } = Guid.NewGuid();
     public string OrderNumber { get; set; } = null!;   // ORD-2026-00042
     public Guid UserId { get; set; }
-    public Guid WarehouseId { get; set; }
+    /// <summary>
+    /// Gets or sets the ID of the warehouse associated with the order.
+    /// </summary>
+   // public Guid WarehouseId { get; set; }
 
     public OrderStatus Status { get; set; } = OrderStatus.Pending;
 
@@ -19,6 +22,9 @@ public class Order
     public decimal TotalAmount { get; set; }
     public string Currency { get; set; } = "EGP";
 
+    /// <summary>
+    /// Gets or sets the snapshot of the shipping address.
+    /// </summary>
     public string ShippingAddressSnapshot { get; set; } = null!;
 
     public Guid IdempotencyKey { get; set; } = Guid.NewGuid();
@@ -43,7 +49,7 @@ public class OrderItem
     public Guid WarehouseId { get; set; }
     public int Quantity { get; set; }
     public decimal UnitPrice { get; set; }
-    public decimal TotalPrice { get; set; }
+    public decimal TotalPrice => UnitPrice * Quantity;
     public OrderItemStatus Status { get; set; } = OrderItemStatus.Active;
 
     public Order Order { get; set; } = null!;

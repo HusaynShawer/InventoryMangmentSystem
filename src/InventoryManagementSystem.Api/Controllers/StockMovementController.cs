@@ -1,5 +1,7 @@
+using System.Security.Claims;
 using InventoryManagementSystem.Domain.Exceptions;
 using InventoryManagementSystem.Domain.Entities;
+using InventoryManagementSystem.Application.DTOs;
 using InventoryManagementSystem.Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -36,9 +38,13 @@ public class StockMovementController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<StockMovement>> Create(StockMovement stockMovement)
+    public async Task<ActionResult<StockMovement>> Create(CreateStockMovementDto dto)
     {
-        var _stockMovement = await _service.Create(stockMovement);
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!Guid.TryParse(userIdClaim, out var userId))
+            return Unauthorized();
+
+        var _stockMovement = await _service.Create(userId, dto);
 
         return CreatedAtAction(
             nameof(GetByIdAsync),

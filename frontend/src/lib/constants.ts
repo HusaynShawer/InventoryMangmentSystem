@@ -25,4 +25,7 @@ export const queryKeys = {
   sales: ['sales'] as const,
   saleItems: ['sale-items'] as const,
   userWarehouses: ['user-warehouses'] as const,
+  cart: ['cart'] as const,
+  productVariants: ['product-variants'] as const,
+  productAttributes: ['product-attributes'] as const,
 }

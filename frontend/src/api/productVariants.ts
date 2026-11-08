@@ -8,5 +8,6 @@ export const productVariantsApi = {
     api.post<ProductVariant>(`/products/${productId}/variants`, input).then((r) => r.data),
   update: (productId: string, id: string, input: CreateProductVariantInput) =>
     api.put<ProductVariant>(`/products/${productId}/variants/${id}`, input).then((r) => r.data),
-  remove: (productId: string, id: string) => api.delete(`/products/${productId}/variants/${id}`).then((r) => r.data),
+  remove: (productId: string, id: string, warehouseId: string) =>
+    api.delete(`/products/${productId}/variants/${id}`, { params: { warehouseId } }).then((r) => r.data),
 }

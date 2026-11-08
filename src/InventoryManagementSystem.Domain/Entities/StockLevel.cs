@@ -12,7 +12,7 @@ public class StockLevel
 
     public int QuantityOnHand { get; set; }
     public int ReservedQuantity { get; set; }
-    public int AvailableQuantity { get; set; }
+    public int AvailableQuantity => QuantityOnHand - ReservedQuantity;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
@@ -79,7 +79,6 @@ public class StockLevel
 
     private void Recalculate()
     {
-        AvailableQuantity = QuantityOnHand - ReservedQuantity;
         UpdatedAt = DateTime.UtcNow;
     }
 }

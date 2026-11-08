@@ -10,10 +10,28 @@ import { warehousesApi } from '@/api/warehouses'
 import { extractErrorMessage } from '@/api/client'
 import { productHooks } from '@/features/products/hooks'
 import { queryKeys } from '@/lib/constants'
-import { formatDateTime, formatNumber } from '@/lib/utils'
+import { formatDateTime, formatNumber, shortId } from '@/lib/utils'
+import { variantOptionMap } from '@/lib/variants'
 import { StockMovementFormDialog } from './StockMovementFormDialog'
 import { useDeleteStockMovement, useStockMovements } from './hooks'
 import type { StockMovement } from '@/types'
+
+const MOVEMENT_LABELS: Record<number, string> = {
+  1: 'Purchase in',
+  2: 'Sale out',
+  3: 'Reservation',
+  4: 'Release',
+  5: 'Transfer',
+  6: 'Adjustment',
+  7: 'Transfer in',
+  8: 'Transfer out',
+}
+
+function movementLabel(movementType: StockMovement['movementType']): string {
+  if (movementType == null) return '—'
+  const numeric = typeof movementType === 'number' ? movementType : Number(movementType)
+  return MOVEMENT_LABELS[numeric] ?? String(movementType)
+}
 
 export function StockMovementListPage() {
   const { data = [], isLoading, error, refetch } = useStockMovements()
@@ -24,7 +42,7 @@ export function StockMovementListPage() {
     queryFn: warehousesApi.list,
   })
 
-  const productNames = useMemo(() => new Map(products.map((p) => [p.id, p.name])), [products])
+  const variantsById = useMemo(() => variantOptionMap(products), [products])
   const warehouseNames = useMemo(() => new Map(warehouses.map((w) => [w.id, w.name])), [warehouses])
 
   const [formOpen, setFormOpen] = useState(false)
@@ -34,34 +52,51 @@ export function StockMovementListPage() {
     {
       key: 'date',
       header: 'Date',
-      cell: (r) => formatDateTime(r.date),
-      sortValue: (r) => r.date ?? '',
+      cell: (r) => formatDateTime(r.createdAt ?? r.date),
+      sortValue: (r) => r.createdAt ?? r.date ?? '',
     },
     {
       key: 'product',
       header: 'Product',
-      cell: (r) => productNames.get(r.productId ?? '') ?? r.productId?.slice(0, 8),
+      cell: (r) => {
+        const variant = variantsById.get(r.productVariantId ?? '')
+        return variant?.productName ?? shortId(r.productVariantId)
+      },
+      sortValue: (r) => variantsById.get(r.productVariantId ?? '')?.productName ?? '',
+    },
+    {
+      key: 'variant',
+      header: 'Variant',
+      cell: (r) => (
+        <span className="font-mono text-xs text-muted-foreground">
+          {variantsById.get(r.productVariantId ?? '')?.sku ?? shortId(r.productVariantId)}
+        </span>
+      ),
+      sortValue: (r) => variantsById.get(r.productVariantId ?? '')?.sku ?? '',
     },
     {
       key: 'warehouse',
       header: 'Warehouse',
-      cell: (r) => warehouseNames.get(r.warehouseId ?? '') ?? r.warehouseId?.slice(0, 8),
+      cell: (r) => warehouseNames.get(r.warehouseId ?? '') ?? shortId(r.warehouseId),
     },
     {
       key: 'type',
       header: 'Type',
-      cell: (r) => <Badge variant="outline">{r.movementType}</Badge>,
-      sortValue: (r) => r.movementType ?? '',
+      cell: (r) => <Badge variant="outline">{movementLabel(r.movementType)}</Badge>,
+      sortValue: (r) => movementLabel(r.movementType),
     },
     {
       key: 'quantity',
       header: 'Qty',
-      cell: (r) => (
-        <span className={(r.quantity ?? 0) < 0 ? 'text-destructive' : 'text-success'}>
-          {formatNumber(r.quantity)}
-        </span>
-      ),
-      sortValue: (r) => r.quantity ?? 0,
+      cell: (r) => {
+        const quantity = r.quantityDelta ?? r.quantity ?? 0
+        return (
+          <span className={quantity < 0 ? 'text-destructive' : 'text-success'}>
+            {formatNumber(quantity)}
+          </span>
+        )
+      },
+      sortValue: (r) => r.quantityDelta ?? r.quantity ?? 0,
     },
     { key: 'note', header: 'Note', cell: (r) => <span className="text-muted-foreground">{r.note ?? '—'}</span> },
     {
@@ -100,7 +135,9 @@ export function StockMovementListPage() {
         getRowId={(r) => r.id ?? ''}
         searchPlaceholder="Search movements…"
         searchFn={(r, q) =>
-          `${r.movementType} ${r.note} ${productNames.get(r.productId ?? '') ?? ''}`
+          `${movementLabel(r.movementType)} ${r.note ?? ''} ${
+            variantsById.get(r.productVariantId ?? '')?.productName ?? ''
+          } ${variantsById.get(r.productVariantId ?? '')?.sku ?? ''}`
             .toLowerCase()
             .includes(q)
         }

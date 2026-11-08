@@ -44,7 +44,6 @@ public class StockLevelRepository : BaseRepository<StockLevel>, IStockLevelRepos
             WarehouseId = warehouseId,
             QuantityOnHand = 0,
             ReservedQuantity = 0,
-            AvailableQuantity = 0,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -60,7 +59,7 @@ public class StockLevelRepository : BaseRepository<StockLevel>, IStockLevelRepos
             .Include(s => s.ProductVariant)
                 .ThenInclude(v => v.Product)
             .Include(s => s.Warehouse)
-            .Where(s => s.AvailableQuantity <= s.ProductVariant.Product!.ReorderLevel)
+            .Where(s => s.QuantityOnHand - s.ReservedQuantity <= s.ProductVariant.Product!.ReorderLevel)
             .Select(s => new LowStockDto
             {
                 ProductId = s.ProductVariant.ProductId,
@@ -68,7 +67,7 @@ public class StockLevelRepository : BaseRepository<StockLevel>, IStockLevelRepos
                 Sku = s.ProductVariant.Sku,
                 WarehouseId = s.WarehouseId,
                 WarehouseName = s.Warehouse.Name,
-                Quantity = s.AvailableQuantity
+                Quantity = s.QuantityOnHand - s.ReservedQuantity
             }).ToListAsync();
     }
 
@@ -85,7 +84,7 @@ public class StockLevelRepository : BaseRepository<StockLevel>, IStockLevelRepos
                 Quantity = s.QuantityOnHand,
                 QuantityOnHand = s.QuantityOnHand,
                 ReservedQuantity = s.ReservedQuantity,
-                AvailableQuantity = s.AvailableQuantity
+                AvailableQuantity = s.QuantityOnHand - s.ReservedQuantity
             }).ToListAsync();
     }
 }

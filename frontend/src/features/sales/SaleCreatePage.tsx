@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -13,6 +14,7 @@ import { warehouseHooks } from '@/features/warehouses/hooks'
 import { productHooks } from '@/features/products/hooks'
 import { useAuth } from '@/features/auth/useAuth'
 import { formatCurrency } from '@/lib/utils'
+import { toVariantOptions } from '@/lib/variants'
 import { paths } from '@/routes/paths'
 import { saleHooks } from './hooks'
 import type { SaleInput } from '@/types'
@@ -23,7 +25,7 @@ const schema = z.object({
   items: z
     .array(
       z.object({
-        productId: z.string().uuid('Select a product'),
+        productVariantId: z.string().uuid('Select a product variant'),
         quantity: z.coerce.number().int().positive('Must be at least 1'),
         unitPrice: z.coerce.number().min(0, 'Cannot be negative'),
       }),
@@ -38,6 +40,7 @@ export function SaleCreatePage() {
   const createMutation = saleHooks.useCreate()
   const { data: warehouses = [] } = warehouseHooks.useList()
   const { data: products = [] } = productHooks.useList()
+  const variants = useMemo(() => toVariantOptions(products), [products])
 
   const {
     register,
@@ -51,7 +54,7 @@ export function SaleCreatePage() {
     defaultValues: {
       warehouseId: '',
       date: '',
-      items: [{ productId: '', quantity: 1, unitPrice: 0 }],
+      items: [{ productVariantId: '', quantity: 1, unitPrice: 0 }],
     },
   })
 
@@ -67,11 +70,15 @@ export function SaleCreatePage() {
       createdByUserID: user?.userId ?? undefined,
       date: values.date ? new Date(values.date).toISOString() : undefined,
       totalAmount: total,
-      items: values.items.map((item) => ({
-        productId: item.productId,
-        quantity: item.quantity,
-        unitPrice: item.unitPrice,
-      })),
+      items: values.items.map((item) => {
+        const variant = variants.find((option) => option.id === item.productVariantId)
+        return {
+          productId: variant?.productId ?? '',
+          productVariantId: item.productVariantId,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+        }
+      }),
     }
     await createMutation.mutateAsync(payload)
     navigate(paths.sales)
@@ -114,7 +121,7 @@ export function SaleCreatePage() {
             register={register}
             setValue={setValue}
             errors={errors}
-            products={products}
+            variants={variants}
           />
 
           <div className="mt-5 flex items-center justify-end gap-4 border-t border-border pt-4">

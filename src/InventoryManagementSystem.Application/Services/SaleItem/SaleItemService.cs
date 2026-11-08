@@ -7,11 +7,14 @@ namespace InventoryManagementSystem.Application.Services;
 public class SaleItemService
 {
     private readonly IRepository<SaleItem> _repo;
+    private readonly IUnitOfWork _unitOfWork;
 
     public SaleItemService(
-        IRepository<SaleItem> repo)
+        IRepository<SaleItem> repo,
+        IUnitOfWork unitOfWork)
     {
         _repo = repo;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<IEnumerable<SaleItem>> GetAllAsync()
@@ -31,6 +34,7 @@ public class SaleItemService
         if (recod is null)
             throw new InvalidOperationException(
                 "Sale item could not be created.");
+        await _unitOfWork.SaveAsync();
         return saleItem;
 
     }
@@ -39,12 +43,16 @@ public class SaleItemService
     {
         var record = await GetByIdAsync(id);
         _repo.Delete(record);
+        await _unitOfWork.SaveAsync();
     }
     public async Task Update(SaleItem saleItem)
     {
         var record = await GetByIdAsync(saleItem.Id);
+        record.ProductId = saleItem.ProductId;
+        record.ProductVariantId = saleItem.ProductVariantId;
         record.Quantity = saleItem.Quantity;         
         record.UnitPrice = saleItem.UnitPrice; 
         _repo.Update(record);
+        await _unitOfWork.SaveAsync();
     }
 }

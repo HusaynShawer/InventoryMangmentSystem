@@ -10,17 +10,20 @@ public class PurchaseService
     private readonly IRepository<Purchase> _repo;
     private readonly IRepository<StockMovement> _stockMovementRepo;
     private readonly IStockLevelRepository _stockLevelRepo;
+    private readonly IProductVariantRepository _variantRepo;
     private readonly IUnitOfWork _unitOfWork;
 
     public PurchaseService(
         IRepository<Purchase> repo,
         IRepository<StockMovement> stockMovementRepo,
         IStockLevelRepository stockLevelRepo,
+        IProductVariantRepository variantRepo,
         IUnitOfWork unitOfWork)
     {
         _repo = repo;
         _stockMovementRepo = stockMovementRepo;
         _stockLevelRepo = stockLevelRepo;
+        _variantRepo = variantRepo;
         _unitOfWork = unitOfWork;
     }
 
@@ -48,14 +51,21 @@ public class PurchaseService
                 Date = dto.Date ?? DateTime.UtcNow
             };
 
-            purchase.PurchaseItems = dto.Items
-                .Select(i => new PurchaseItem
+            var purchaseItems = new List<PurchaseItem>();
+            foreach (var item in dto.Items)
+            {
+                var variant = await ResolveVariantAsync(item.ProductId, item.ProductVariantId);
+
+                purchaseItems.Add(new PurchaseItem
                 {
-                    ProductId = i.ProductId,
-                    Quantity = i.Quantity,
-                    UnitPrice = i.UnitPrice
-                })
-                .ToList();
+                    ProductId = variant.ProductId,
+                    ProductVariantId = variant.Id,
+                    Quantity = item.Quantity,
+                    UnitPrice = item.UnitPrice
+                });
+            }
+
+            purchase.PurchaseItems = purchaseItems;
 
             purchase.TotalAmount = purchase.PurchaseItems
                 .Sum(i => i.Quantity * i.UnitPrice);
@@ -67,7 +77,7 @@ public class PurchaseService
             foreach (var item in purchase.PurchaseItems)
             {
                 var stockLevel = await _stockLevelRepo.GetOrCreateAsync(
-                    item.ProductId,
+                    item.ProductVariantId!.Value,
                     purchase.WarehouseId);
 
                 stockLevel.IncreaseOnHand(item.Quantity);
@@ -93,6 +103,23 @@ public class PurchaseService
             await _unitOfWork.SaveAsync();
             return purchase;
         });
+    }
+
+    private async Task<ProductVariant> ResolveVariantAsync(Guid productId, Guid productVariantId)
+    {
+        if (productVariantId != Guid.Empty)
+        {
+            return await _variantRepo.GetByIdAsync(productVariantId)
+                ?? throw new NotFoundException("Product variant not found.");
+        }
+
+        var variants = (await _variantRepo.GetByProductIdAsync(productId)).ToList();
+        var selected = variants.FirstOrDefault(v => v.IsDefault) ?? variants.FirstOrDefault();
+        if (selected is null)
+            throw new NotFoundException("Product variant not found.");
+
+        return await _variantRepo.GetByIdAsync(selected.Id)
+            ?? throw new NotFoundException("Product variant not found.");
     }
 
     public async Task Delete(Guid id)

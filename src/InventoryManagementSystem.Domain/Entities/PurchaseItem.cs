@@ -16,6 +16,10 @@ namespace InventoryManagementSystem.Domain.Entities
         public Guid ProductId { get; set; }
         public Product? Product { get; set; }
 
+        [ForeignKey("ProductVariant")]
+        public Guid? ProductVariantId { get; set; }
+        public ProductVariant? ProductVariant { get; set; }
+
         public int Quantity { get; set; }
         public decimal UnitPrice { get; set; }
     }

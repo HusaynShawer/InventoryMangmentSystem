@@ -1,5 +1,6 @@
 using InventoryManagementSystem.Application.Abstractions.Persistence;
 using InventoryManagementSystem.Domain.Entities;
+using InventoryManagementSystem.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace InventoryManagementSystem.Infrastructure.Persistence.Repositories;
@@ -32,7 +33,7 @@ public class WarehouseRepository : BaseRepository<Warehouse>, IWarehouseReposito
     {
         var warehouseIds = await GetByUserId(userId);
         return await _context.StockLevels
-            .Where(s => warehouseIds.Contains(s.WarehouseId) && s.ProductVariant != null && s.AvailableQuantity < 5)
+            .Where(s => warehouseIds.Contains(s.WarehouseId) && s.ProductVariant != null && s.QuantityOnHand - s.ReservedQuantity < 5)
             .Include(s => s.ProductVariant)!
                 .ThenInclude(pv => pv!.Product)
             .Select(s => s.ProductVariant!.Product!)

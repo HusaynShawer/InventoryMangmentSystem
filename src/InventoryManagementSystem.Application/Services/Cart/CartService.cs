@@ -25,7 +25,6 @@ public class CartService
         _unitOfWork = unitOfWork;
     }
 
-
     public async Task<CartResponseDto?> GetByUserId(Guid userId)
     {
         var cart = await _repo.GetByUserIdAsync(userId);
@@ -41,15 +40,13 @@ public class CartService
         return cart.Items.Select(MapItemToDto).ToList();
     }
 
-
     public async Task AddToCart(Guid userId, AddToCartRequestDto request)
     {
         if (request.quantity <= 0)
             throw new ArgumentException("Quantity must be greater than zero.");
 
-        var variant = await _variants.GetByIdAsync(request.variantId);
-        if (variant is null)
-            throw new NotFoundException("Product variant not found.");
+        var variant = await _variants.GetByIdAsync(request.variantId)
+            ?? throw new NotFoundException("Product variant not found.");
 
         var stockLevel = await _stockLevelRepository.GetAsync(request.variantId, request.warehouseId);
 
@@ -65,7 +62,9 @@ public class CartService
             await _repo.AddAsync(cart);
         }
 
-        var existingItem = cart.Items.FirstOrDefault(i => i.ProductVariantId == request.variantId);
+        var existingItem = cart.Items.FirstOrDefault(i =>
+            i.ProductVariantId == request.variantId &&
+            i.WarehouseId == request.warehouseId);
         var requestedTotal = (existingItem?.Quantity ?? 0) + request.quantity;
 
         if (requestedTotal > stockLevel.AvailableQuantity)
@@ -74,17 +73,44 @@ public class CartService
         if (existingItem is not null)
         {
             existingItem.Quantity = requestedTotal;
-            existingItem.UnitPriceSnapshot = variant.PriceOverride ?? variant.Product.UnitPrice;
+            existingItem.UnitPriceSnapshot = variant.PriceOverride ?? variant.Product?.UnitPrice ?? 0;
         }
         else
         {
             cart.Items.Add(new CartItem
             {
                 ProductVariantId = request.variantId,
+                WarehouseId = request.warehouseId,
                 Quantity = request.quantity,
-                UnitPriceSnapshot = variant.PriceOverride ?? variant.Product.UnitPrice
+                UnitPriceSnapshot = variant.PriceOverride ?? variant.Product?.UnitPrice ?? 0
             });
         }
+
+        stockLevel.Reserve(request.quantity);
+        cart.UpdatedAt = DateTime.UtcNow;
+        await _unitOfWork.SaveAsync();
+    }
+
+    public async Task UpdateItem(Guid userId, Guid itemId, int quantity)
+    {
+        if (quantity <= 0)
+            throw new ArgumentException("Quantity must be greater than zero.");
+
+        var cart = await _repo.GetByUserIdAsync(userId)
+            ?? throw new NotFoundException("Cart not found.");
+
+        var item = cart.Items.FirstOrDefault(i => i.Id == itemId)
+            ?? throw new NotFoundException("Cart item not found.");
+
+        var stockLevel = await _stockLevelRepository.GetAsync(item.ProductVariantId, item.WarehouseId);
+
+        var delta = quantity - item.Quantity;
+        if (delta > 0)
+            stockLevel.Reserve(delta);
+        else if (delta < 0)
+            stockLevel.Release(-delta);
+
+        item.Quantity = quantity;
         cart.UpdatedAt = DateTime.UtcNow;
         await _unitOfWork.SaveAsync();
     }
@@ -94,6 +120,7 @@ public class CartService
         var cart = await _repo.GetByUserIdAsync(userId)
             ?? throw new NotFoundException("Cart not found.");
 
+        await ReleaseReservations(cart);
         _repo.Delete(cart);
         await _unitOfWork.SaveAsync();
     }
@@ -103,6 +130,7 @@ public class CartService
         var cart = await _repo.GetByUserIdAsync(userId)
             ?? throw new NotFoundException("Cart not found.");
 
+        await ReleaseReservations(cart);
         cart.Items.Clear();
         cart.UpdatedAt = DateTime.UtcNow;
         await _unitOfWork.SaveAsync();
@@ -116,11 +144,22 @@ public class CartService
         var item = cart.Items.FirstOrDefault(i => i.Id == itemId)
             ?? throw new NotFoundException("Cart item not found.");
 
+        var stockLevel = await _stockLevelRepository.GetAsync(item.ProductVariantId, item.WarehouseId);
+        stockLevel.Release(item.Quantity);
+
         cart.Items.Remove(item);
         cart.UpdatedAt = DateTime.UtcNow;
         await _unitOfWork.SaveAsync();
     }
 
+    private async Task ReleaseReservations(Cart cart)
+    {
+        foreach (var item in cart.Items)
+        {
+            var stockLevel = await _stockLevelRepository.GetAsync(item.ProductVariantId, item.WarehouseId);
+            stockLevel.Release(item.Quantity);
+        }
+    }
 
     private static CartResponseDto MapCartToDto(Cart cart) => new()
     {
@@ -134,10 +173,10 @@ public class CartService
     private static CartItemResponseDto MapItemToDto(CartItem item) => new()
     {
         Id = item.Id,
+        CartId = item.CartId,
         ProductVariantId = item.ProductVariantId,
+        WarehouseId = item.WarehouseId,
         Quantity = item.Quantity,
         UnitPriceSnapshot = item.UnitPriceSnapshot
     };
-
-
 }

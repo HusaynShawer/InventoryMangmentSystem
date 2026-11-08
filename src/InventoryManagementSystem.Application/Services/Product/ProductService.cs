@@ -56,8 +56,7 @@ public class ProductService
             {
                 WarehouseId = dto.Stock.WarehouseId,
                 QuantityOnHand = dto.Stock.Quantity,
-                ReservedQuantity = 0,
-                AvailableQuantity = dto.Stock.Quantity
+                ReservedQuantity = 0
             });
         }
 

@@ -22,6 +22,15 @@ public class StockResponseDto
     public int AvailableQuantity { get; set; }
 }
 
+public class CreateStockMovementDto
+{
+    public Guid ProductVariantId { get; set; }
+    public Guid WarehouseId { get; set; }
+    public StockMovementType MovementType { get; set; }
+    public int QuantityDelta { get; set; }
+    public string? Note { get; set; }
+}
+
 public class StockMovementDto
 {
     public Guid StockLevelId { get; set; }
@@ -42,6 +51,7 @@ public class StockMovementDto
 public class StockAdjustmentDto
 {
     public Guid ProductId { get; set; }
+    public Guid ProductVariantId { get; set; }
     public Guid WarehouseId { get; set; }
     public string Reason { get; set; } = string.Empty;
     public int ActualQuantity { get; set; }
@@ -60,6 +70,7 @@ public class LowStockDto
 public class TransferDto
 {
     public Guid ProductId { get; set; }
+    public Guid ProductVariantId { get; set; }
     public Guid FromWarehouseId { get; set; }
     public Guid ToWarehouseId { get; set; }
     public int Quantity { get; set; }

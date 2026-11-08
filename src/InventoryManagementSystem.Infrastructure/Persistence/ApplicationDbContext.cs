@@ -105,6 +105,7 @@ namespace InventoryManagementSystem.Infrastructure.Persistence
                 s.ToTable("StockLevels");
                 s.HasIndex(s => new { s.ProductVariantId, s.WarehouseId }).IsUnique();
                 s.Property(s => s.RowVersion).IsRowVersion();
+                s.Ignore(s => s.AvailableQuantity);
 
                 s.HasOne(s => s.ProductVariant)
                     .WithMany(v => v.StockLevels)
@@ -184,6 +185,22 @@ namespace InventoryManagementSystem.Infrastructure.Persistence
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
+            modelBuilder.Entity<PurchaseItem>(e =>
+            {
+                e.HasOne(i => i.ProductVariant)
+                    .WithMany()
+                    .HasForeignKey(i => i.ProductVariantId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<SaleItem>(e =>
+            {
+                e.HasOne(i => i.ProductVariant)
+                    .WithMany()
+                    .HasForeignKey(i => i.ProductVariantId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
             modelBuilder.Entity<Cart>(c =>
             {
                 c.Property(c => c.Status).HasConversion<string>()
@@ -199,7 +216,7 @@ namespace InventoryManagementSystem.Infrastructure.Persistence
 
             modelBuilder.Entity<CartItem>(ci =>
             {
-                ci.HasIndex(ci => new { ci.CartId, ci.ProductVariantId }).IsUnique();
+                ci.HasIndex(ci => new { ci.CartId, ci.ProductVariantId, ci.WarehouseId }).IsUnique();
             });
 
             modelBuilder.Entity<Order>(o =>
@@ -244,7 +261,7 @@ namespace InventoryManagementSystem.Infrastructure.Persistence
                     .IsRequired();
 
                 oi.Property(oi => oi.UnitPrice).HasPrecision(18, 2);
-                oi.Property(oi => oi.TotalPrice).HasPrecision(18, 2);
+                oi.Ignore(oi => oi.TotalPrice);
 
                 oi.HasIndex(oi => new { oi.OrderId, oi.ProductVariantId }).IsUnique();
             });

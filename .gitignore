@@ -20,6 +20,7 @@ REVIEW_VARIANT_IMPLEMENTATION.txt
 *.userosscache
 *.sln.docstates
 *.env
+opencode.json
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

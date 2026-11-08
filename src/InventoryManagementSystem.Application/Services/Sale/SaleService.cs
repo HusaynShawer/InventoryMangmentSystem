@@ -10,17 +10,20 @@ public class SaleService
     private readonly IRepository<Sale> _repo;
     private readonly IRepository<StockMovement> _stockMovementRepo;
     private readonly IStockLevelRepository _stockLevelRepo;
+    private readonly IProductVariantRepository _variantRepo;
     private readonly IUnitOfWork _unitOfWork;
 
     public SaleService(
         IRepository<Sale> repo,
         IRepository<StockMovement> stockMovement,
         IStockLevelRepository stockLevelRepo,
+        IProductVariantRepository variantRepo,
         IUnitOfWork unitOfWork)
     {
         _repo = repo;
         _stockMovementRepo = stockMovement;
         _stockLevelRepo = stockLevelRepo;
+        _variantRepo = variantRepo;
         _unitOfWork = unitOfWork;
     }
 
@@ -46,13 +49,21 @@ public class SaleService
                 Date = dto.Date ?? DateTime.UtcNow,
             };
 
-            _sale.SaleItems = dto.Items.Select(i => new SaleItem
+            var saleItems = new List<SaleItem>();
+            foreach (var item in dto.Items)
             {
-                ProductId = i.ProductId,
-                Quantity = i.Quantity,
-                UnitPrice = i.UnitPrice
+                var variant = await ResolveVariantAsync(item.ProductId, item.ProductVariantId);
 
-            }).ToList();
+                saleItems.Add(new SaleItem
+                {
+                    ProductId = variant.ProductId,
+                    ProductVariantId = variant.Id,
+                    Quantity = item.Quantity,
+                    UnitPrice = item.UnitPrice
+                });
+            }
+
+            _sale.SaleItems = saleItems;
 
             _sale.TotalAmount = _sale.SaleItems.Sum(i =>i.Quantity * i.UnitPrice);
             
@@ -62,7 +73,7 @@ public class SaleService
             foreach(var item in _sale.SaleItems)
             {
                 var stockLevel = await _stockLevelRepo.GetAsync(
-                    item.ProductId, _sale.WarehouseId);
+                    item.ProductVariantId!.Value, _sale.WarehouseId);
 
                 if (item.Quantity > stockLevel.AvailableQuantity)
                     throw new ConflictException(
@@ -94,10 +105,28 @@ public class SaleService
         
     }
 
+    private async Task<ProductVariant> ResolveVariantAsync(Guid productId, Guid productVariantId)
+    {
+        if (productVariantId != Guid.Empty)
+        {
+            return await _variantRepo.GetByIdAsync(productVariantId)
+                ?? throw new NotFoundException("Product variant not found.");
+        }
+
+        var variants = (await _variantRepo.GetByProductIdAsync(productId)).ToList();
+        var selected = variants.FirstOrDefault(v => v.IsDefault) ?? variants.FirstOrDefault();
+        if (selected is null)
+            throw new NotFoundException("Product variant not found.");
+
+        return await _variantRepo.GetByIdAsync(selected.Id)
+            ?? throw new NotFoundException("Product variant not found.");
+    }
+
     public async Task Delete(Guid id)
     {
         var record = await GetByIdAsync(id);
         _repo.Delete(record);
+        await _unitOfWork.SaveAsync();
     }
     public async Task Update(Sale sale)
     {
@@ -106,5 +135,6 @@ public class SaleService
         record.CreatedByUserId = sale.CreatedByUserId; 
         record.TotalAmount = sale.TotalAmount;
         _repo.Update(record);
+        await _unitOfWork.SaveAsync();
     }
 }
