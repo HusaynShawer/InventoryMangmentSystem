@@ -1,16 +1,24 @@
 using InventoryManagementSystem.Domain.Exceptions;
 using InventoryManagementSystem.Domain.Entities;
 using InventoryManagementSystem.Application.Abstractions.Persistence;
+using InventoryManagementSystem.Application.DTOs;
+
 namespace InventoryManagementSystem.Application.Services;
 
 public class StockMovementService
 {
     private readonly IRepository<StockMovement> _repo;
+    private readonly IStockLevelRepository _stockLevelRepo;
+    private readonly IUnitOfWork _unitOfWork;
 
     public StockMovementService(
-        IRepository<StockMovement> repo)
+        IRepository<StockMovement> repo,
+        IStockLevelRepository stockLevelRepo,
+        IUnitOfWork unitOfWork)
     {
         _repo = repo;
+        _stockLevelRepo = stockLevelRepo;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<IEnumerable<StockMovement>> GetAllAsync()
@@ -24,32 +32,63 @@ public class StockMovementService
             throw new NotFoundException("Stock movement not found.");
         return record;
     }
-    public async Task<StockMovement> Create(StockMovement stockMovement)
+
+    public async Task<StockMovement> Create(Guid userId, CreateStockMovementDto dto)
     {
-        var recod = await _repo.AddAsync(stockMovement);
-        if (recod is null)
-            throw new InvalidOperationException(
-                "Stock movement could not be created.");
-        return stockMovement;
+        if (dto.QuantityDelta == 0)
+            throw new ArgumentException("Quantity delta cannot be zero.");
 
+        var stockLevel = await _stockLevelRepo.GetOrCreateAsync(
+            dto.ProductVariantId, dto.WarehouseId);
+
+        if (dto.QuantityDelta > 0)
+            stockLevel.IncreaseOnHand(dto.QuantityDelta);
+        else
+            stockLevel.DecreaseOnHand(-dto.QuantityDelta);
+
+        var movement = new StockMovement
+        {
+            StockLevelId = stockLevel.Id,
+            ProductVariantId = dto.ProductVariantId,
+            WarehouseId = dto.WarehouseId,
+            UserId = userId,
+            MovementType = dto.MovementType,
+            QuantityDelta = dto.QuantityDelta,
+            ResultingOnHand = stockLevel.QuantityOnHand,
+            ReferenceType = "Manual",
+            CreatedAt = DateTime.UtcNow,
+            Note = dto.Note
+        };
+
+        await _repo.AddAsync(movement);
+        await _unitOfWork.SaveAsync();
+        return movement;
     }
-
 
     public async Task Delete(Guid id)
     {
         var record = await GetByIdAsync(id);
         _repo.Delete(record);
+        await _unitOfWork.SaveAsync();
     }
+
     public async Task Update(StockMovement stockMovement)
     {
         var record = await GetByIdAsync(stockMovement.Id);
-        record.ProductId = stockMovement.ProductId;
+        record.StockLevelId = stockMovement.StockLevelId;
+        record.ProductVariantId = stockMovement.ProductVariantId;
         record.WarehouseId = stockMovement.WarehouseId;
         record.UserId = stockMovement.UserId;
-        record.Quantity = stockMovement.Quantity;
+        record.CreatedByUserId = stockMovement.CreatedByUserId;
         record.MovementType = stockMovement.MovementType;
-        record.Date = stockMovement.Date;
+        record.QuantityDelta = stockMovement.QuantityDelta;
+        record.ResultingOnHand = stockMovement.ResultingOnHand;
+        record.ReferenceType = stockMovement.ReferenceType;
+        record.ReferenceId = stockMovement.ReferenceId;
+        record.IdempotencyKey = stockMovement.IdempotencyKey;
+        record.CreatedAt = stockMovement.CreatedAt;
         record.Note = stockMovement.Note;
         _repo.Update(record);
+        await _unitOfWork.SaveAsync();
     }
 }

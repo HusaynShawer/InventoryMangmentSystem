@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -9,20 +9,22 @@ import { Select } from '@/components/ui/select'
 import { FormField } from '@/components/ui/form-field'
 import { productHooks } from '@/features/products/hooks'
 import { warehouseHooks } from '@/features/warehouses/hooks'
+import { toVariantOptions, variantLabel } from '@/lib/variants'
 import { useCreateStock } from './hooks'
 
 const schema = z.object({
-  productId: z.string().uuid('Select a product'),
+  productVariantId: z.string().uuid('Select a product variant'),
   warehouseId: z.string().uuid('Select a warehouse'),
   quantity: z.coerce.number().int().min(0, 'Cannot be negative'),
 })
 type FormValues = z.infer<typeof schema>
 
-/** Creates a brand new stock row (product + warehouse pair). */
+/** Creates a brand new stock row (product variant + warehouse pair). */
 export function StockFormDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const create = useCreateStock()
   const { data: products = [] } = productHooks.useList()
   const { data: warehouses = [] } = warehouseHooks.useList()
+  const variants = useMemo(() => toVariantOptions(products), [products])
 
   const {
     register,
@@ -32,11 +34,19 @@ export function StockFormDialog({ open, onClose }: { open: boolean; onClose: () 
   } = useForm<FormValues>({ resolver: zodResolver(schema) })
 
   useEffect(() => {
-    if (open) reset({ productId: '', warehouseId: '', quantity: 0 })
+    if (open) reset({ productVariantId: '', warehouseId: '', quantity: 0 })
   }, [open, reset])
 
   const onSubmit = async (values: FormValues) => {
-    await create.mutateAsync(values)
+    const variant = variants.find((option) => option.id === values.productVariantId)
+    if (!variant) return
+
+    await create.mutateAsync({
+      productId: variant.productId,
+      productVariantId: variant.id,
+      warehouseId: values.warehouseId,
+      quantity: values.quantity,
+    })
     onClose()
   }
 
@@ -45,7 +55,7 @@ export function StockFormDialog({ open, onClose }: { open: boolean; onClose: () 
       open={open}
       onClose={onClose}
       title="New stock record"
-      description="Add stock for a product/warehouse combination that does not exist yet."
+      description="Add stock for a product variant/warehouse combination that does not exist yet."
       footer={
         <>
           <Button variant="outline" onClick={onClose} disabled={create.isPending}>
@@ -58,12 +68,17 @@ export function StockFormDialog({ open, onClose }: { open: boolean; onClose: () 
       }
     >
       <form id="stock-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <FormField label="Product" htmlFor="productId" error={errors.productId?.message} required>
-          <Select id="productId" {...register('productId')}>
-            <option value="">Select a product…</option>
-            {products.map((product) => (
-              <option key={product.id} value={product.id}>
-                {product.name} ({product.sku})
+        <FormField
+          label="Product variant"
+          htmlFor="productVariantId"
+          error={errors.productVariantId?.message}
+          required
+        >
+          <Select id="productVariantId" {...register('productVariantId')}>
+            <option value="">Select a product variant…</option>
+            {variants.map((variant) => (
+              <option key={variant.id} value={variant.id}>
+                {variantLabel(variant)}
               </option>
             ))}
           </Select>

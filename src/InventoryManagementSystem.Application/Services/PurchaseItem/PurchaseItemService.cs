@@ -41,15 +41,17 @@ public class PurchaseItemService
     public async Task Delete(Guid id)
     {
         var purchaseItem = await GetByIdAsync(id);
-        await _unitOfWork.SaveAsync();
         _repo.Delete(purchaseItem);
+        await _unitOfWork.SaveAsync();
     }
     public async Task Update(PurchaseItem purchaseItem)
     {
         var record = await GetByIdAsync(purchaseItem.Id);
+        record.ProductId = purchaseItem.ProductId;
+        record.ProductVariantId = purchaseItem.ProductVariantId;
         record.Quantity = purchaseItem.Quantity;
         record.UnitPrice = purchaseItem.UnitPrice;
-        await _unitOfWork.SaveAsync();
         _repo.Update(record);
+        await _unitOfWork.SaveAsync();
     }
 }

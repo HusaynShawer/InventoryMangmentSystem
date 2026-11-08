@@ -22,11 +22,13 @@ public static class DependencyInjection
                 sql => sql.EnableRetryOnFailure()));
 
         services.AddScoped(typeof(IRepository<>), typeof(BaseRepository<>));
+        services.AddScoped<ICartRepository, CartRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserWarehouseRepository, UserWarehouseRepository>();
         services.AddScoped<IWarehouseRepository, WarehouseRepository>();
-        services.AddScoped<IStockRepository, StockRepository>();
+        services.AddScoped<IStockLevelRepository, StockLevelRepository>();
+        services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<IProductVariantRepository, ProductVariantRepository>();
         services.AddScoped<IProductAttributeRepository, ProductAttributeRepository>();
         services.AddScoped<IProductAttributeValueRepository, ProductAttributeValueRepository>();
@@ -44,22 +46,35 @@ public static class DependencyInjection
             .GetRequiredService<ILoggerFactory>()
             .CreateLogger("DatabaseStartup");
 
-        const int maxAttempts = 10;
+        const int maxAttempts = 60;
+        var delay = TimeSpan.FromSeconds(2);
         for (var attempt = 1; ; attempt++)
         {
             try
             {
                 await db.Database.MigrateAsync();
+                await UserWarehouseSeeder.SeedAdminWarehousesAsync(db, logger);
+                logger.LogInformation("Database migrations are up to date.");
                 break;
             }
-            catch (Exception ex) when (attempt < maxAttempts)
+            catch (Exception ex)
             {
+                if (attempt >= maxAttempts)
+                {
+                    logger.LogError(
+                        ex,
+                        "Database migration failed after {Max} attempts.",
+                        maxAttempts);
+                    throw;
+                }
+
                 logger.LogWarning(
                     ex,
-                    "Database migration failed (attempt {Attempt}/{Max}). Retrying in 5s...",
+                    "Database migration failed (attempt {Attempt}/{Max}). Retrying in {Delay}s...",
                     attempt,
-                    maxAttempts);
-                await Task.Delay(TimeSpan.FromSeconds(5));
+                    maxAttempts,
+                    delay.TotalSeconds);
+                await Task.Delay(delay);
             }
         }
     }

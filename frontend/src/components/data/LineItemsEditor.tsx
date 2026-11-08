@@ -4,10 +4,11 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
 import { formatCurrency } from '@/lib/utils'
-import type { Product } from '@/types'
+import { variantLabel } from '@/lib/variants'
+import type { ProductVariantOption } from '@/types'
 
 export interface LineItemValues {
-  productId: string
+  productVariantId: string
   quantity: number
   unitPrice: number
 }
@@ -19,7 +20,7 @@ interface LineItemsEditorProps {
   register: any
   setValue: any
   errors: any
-  products: Product[]
+  variants: ProductVariantOption[]
   unitPriceHint?: string
 }
 
@@ -33,17 +34,17 @@ export function LineItemsEditor({
   register,
   setValue,
   errors,
-  products,
+  variants,
   unitPriceHint = 'Unit price',
 }: LineItemsEditorProps) {
   const { fields, append, remove } = useFieldArray({ control, name: 'items' })
 
-  const addRow = () => append({ productId: '', quantity: 1, unitPrice: 0 })
+  const addRow = () => append({ productVariantId: '', quantity: 1, unitPrice: 0 })
 
   return (
     <div className="space-y-3">
       <div className="hidden gap-3 px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground sm:grid sm:grid-cols-[1fr_100px_130px_110px_40px]">
-        <span>Product</span>
+        <span>Product variant</span>
         <span>Quantity</span>
         <span>{unitPriceHint}</span>
         <span className="text-right">Line total</span>
@@ -52,7 +53,7 @@ export function LineItemsEditor({
 
       {fields.map((field, index) => {
         const rowError = errors.items?.[index] as
-          | { productId?: { message?: string } }
+          | { productVariantId?: { message?: string } }
           | undefined
         return (
           <div
@@ -61,23 +62,23 @@ export function LineItemsEditor({
           >
             <div>
               <Select
-                {...register(`items.${index}.productId` as const)}
+                {...register(`items.${index}.productVariantId` as const)}
                 onChange={(event) => {
-                  // Default the unit price to the product's catalogue price.
-                  const product = products.find((p) => p.id === event.target.value)
-                  setValue(`items.${index}.productId`, event.target.value)
-                  if (product) setValue(`items.${index}.unitPrice`, product.unitPrice ?? 0)
+                  // Default the unit price to the variant's effective catalogue price.
+                  const variant = variants.find((option) => option.id === event.target.value)
+                  setValue(`items.${index}.productVariantId`, event.target.value)
+                  if (variant) setValue(`items.${index}.unitPrice`, variant.effectivePrice ?? 0)
                 }}
               >
-                <option value="">Select product…</option>
-                {products.map((product) => (
-                  <option key={product.id} value={product.id}>
-                    {product.name} ({product.sku})
+                <option value="">Select product variant…</option>
+                {variants.map((variant) => (
+                  <option key={variant.id} value={variant.id}>
+                    {variantLabel(variant)}
                   </option>
                 ))}
               </Select>
-              {rowError?.productId && (
-                <p className="mt-1 text-xs text-destructive">{rowError.productId.message}</p>
+              {rowError?.productVariantId && (
+                <p className="mt-1 text-xs text-destructive">{rowError.productVariantId.message}</p>
               )}
             </div>
 

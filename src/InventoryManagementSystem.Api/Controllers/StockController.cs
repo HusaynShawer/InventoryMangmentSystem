@@ -34,7 +34,7 @@ public class StockController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Stock>> GetByIdAsync(Guid id)
+    public async Task<ActionResult<StockLevel>> GetByIdAsync(Guid id)
     {
         var stock = await _service.GetByIdAsync(id);
         return Ok(stock);
@@ -42,9 +42,9 @@ public class StockController : ControllerBase
 
     [HttpPost]
     [AllowAnonymous]
-    public async Task<ActionResult<Stock>> Create(Stock stock)
+    public async Task<ActionResult<StockLevel>> Create(StockDto dto)
     {
-        var created = await _service.Create(stock);
+        var created = await _service.Create(dto);
         return CreatedAtAction(
             nameof(GetByIdAsync),
             new { id = created.Id },
@@ -54,13 +54,9 @@ public class StockController : ControllerBase
 
     [HttpPut("{id}")]
     [Authorize(Policy = "AdminOnly")]
-    public async Task<IActionResult> Update(Guid id, Stock stock)
+    public async Task<IActionResult> Update(Guid id, StockDto dto)
     {
-        if (id != stock.Id)
-            throw new BadRequestException(
-                "Route id does not match the stock id.");
-
-        await _service.Update(stock);
+        await _service.Update(id, dto);
         return NoContent();
     }
 

@@ -6,11 +6,11 @@ namespace InventoryManagementSystem.Application.Services;
 
 public class ProductService
 {
-    private readonly IRepository<Product> _repo;
+    private readonly IProductRepository _repo;
     private readonly IUnitOfWork _unitOfWork;
 
     public ProductService(
-        IRepository<Product> repo,
+        IProductRepository repo,
         IUnitOfWork unitOfWork)
     {
         _repo = repo;
@@ -20,7 +20,7 @@ public class ProductService
 
     public async Task<IEnumerable<ProductResponseDto>> GetAllAsync()
     {
-        var products = await _repo.GetAllAsync();
+        var products = await _repo.GetAllWithDetailsAsync();
         return products.Select(MapToDto).ToList();
     }
 
@@ -52,10 +52,11 @@ public class ProductService
                 IsActive = true
             };
             product.Variants.Add(defaultVariant);
-            defaultVariant.Stocks.Add(new Stock
+            defaultVariant.StockLevels.Add(new StockLevel
             {
                 WarehouseId = dto.Stock.WarehouseId,
-                Quantity = dto.Stock.Quantity
+                QuantityOnHand = dto.Stock.Quantity,
+                ReservedQuantity = 0
             });
         }
 
@@ -92,7 +93,7 @@ public class ProductService
 
     private async Task<Product> GetEntityOrThrow(Guid id)
     {
-        var product = await _repo.GetByIdAsync(id);
+        var product = await _repo.GetByIdWithDetailsAsync(id);
         if (product is null)
             throw new NotFoundException("Product not found.");
         return product;
@@ -106,11 +107,16 @@ public class ProductService
         CategoryId = p.CategoryId,
         UnitPrice = p.UnitPrice,
         ReorderLevel = p.ReorderLevel,
-        Stocks = p.Stocks.Select(s => new StockResponseDto
+        Stocks = p.Variants.SelectMany(v => v.StockLevels).Select(s => new StockResponseDto
         {
             Id = s.Id,
+            ProductId = p.Id,
+            ProductVariantId = s.ProductVariantId,
             WarehouseId = s.WarehouseId,
-            Quantity = s.Quantity
+            Quantity = s.QuantityOnHand,
+            QuantityOnHand = s.QuantityOnHand,
+            ReservedQuantity = s.ReservedQuantity,
+            AvailableQuantity = s.AvailableQuantity
         }).ToList(),
         Variants = p.Variants.Select(v => new ProductVariantResponseDto
         {

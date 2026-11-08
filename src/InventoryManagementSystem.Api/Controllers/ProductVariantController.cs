@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using InventoryManagementSystem.Application.DTOs;
 using InventoryManagementSystem.Application.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -37,7 +38,11 @@ public class ProductVariantController : ControllerBase
     [Authorize(Policy = "AdminOnly")]
     public async Task<ActionResult<ProductVariantResponseDto>> Create(Guid productId, [FromBody] CreateProductVariantDto dto)
     {
-        var created = await _service.Create(productId, dto);
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!Guid.TryParse(userIdClaim, out var userId))
+            return Unauthorized();
+
+        var created = await _service.Create(productId, userId, dto);
         return CreatedAtAction(nameof(GetById), new { productId, id = created.Id }, created);
     }
 
@@ -51,9 +56,13 @@ public class ProductVariantController : ControllerBase
 
     [HttpDelete("{id}")]
     [Authorize(Policy = "AdminOnly")]
-    public async Task<IActionResult> Delete(Guid productId, Guid id)
+    public async Task<IActionResult> Delete(Guid productId, Guid id, [FromQuery] Guid warehouseId)
     {
-        await _service.Delete(id);
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!Guid.TryParse(userIdClaim, out var userId))
+            return Unauthorized();
+
+        await _service.Delete(id, userId, warehouseId);
         return NoContent();
     }
 }

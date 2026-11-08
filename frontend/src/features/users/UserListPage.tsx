@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Info, Plus } from 'lucide-react'
+import { Info, Link2, Plus } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { PageHeader } from '@/components/data/PageHeader'
 import { DataTable, type Column } from '@/components/data/DataTable'
@@ -9,6 +9,7 @@ import { userWarehousesApi } from '@/api/userWarehouses'
 import { queryKeys } from '@/lib/constants'
 import { formatDate, shortId } from '@/lib/utils'
 import { UserCreateDialog } from './UserCreateDialog'
+import { AssignWarehouseDialog } from './AssignWarehouseDialog'
 import type { UserWarehouse } from '@/types'
 
 /**
@@ -17,6 +18,7 @@ import type { UserWarehouse } from '@/types'
  */
 export function UserListPage() {
   const [createOpen, setCreateOpen] = useState(false)
+  const [assignOpen, setAssignOpen] = useState(false)
   const { data: assignments = [], isLoading } = useQuery({
     queryKey: queryKeys.userWarehouses,
     queryFn: userWarehousesApi.list,
@@ -49,10 +51,16 @@ export function UserListPage() {
         title="Users"
         description="Create accounts and review warehouse access."
         actions={
-          <Button onClick={() => setCreateOpen(true)}>
-            <Plus className="h-4 w-4" />
-            Create user
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setAssignOpen(true)}>
+              <Link2 className="h-4 w-4" />
+              Assign warehouse
+            </Button>
+            <Button onClick={() => setCreateOpen(true)}>
+              <Plus className="h-4 w-4" />
+              Create user
+            </Button>
+          </div>
         }
       />
 
@@ -78,6 +86,7 @@ export function UserListPage() {
       />
 
       <UserCreateDialog open={createOpen} onClose={() => setCreateOpen(false)} />
+      <AssignWarehouseDialog open={assignOpen} onClose={() => setAssignOpen(false)} />
     </>
   )
 }

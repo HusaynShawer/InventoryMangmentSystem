@@ -7,6 +7,7 @@ import { DashboardPage } from '@/features/dashboard/DashboardPage'
 import { ProductListPage } from '@/features/products/ProductListPage'
 import { ProductDetailPage } from '@/features/products/ProductDetailPage'
 import { AttributeManager } from '@/features/attributes/AttributeManager'
+import { CartPage } from '@/features/cart/CartPage'
 import { CategoryListPage } from '@/features/categories/CategoryListPage'
 import { SupplierListPage } from '@/features/suppliers/SupplierListPage'
 import { WarehouseListPage } from '@/features/warehouses/WarehouseListPage'
@@ -44,6 +45,7 @@ export const router = createBrowserRouter([
           { index: true, element: <DashboardPage /> },
           { path: 'products', element: <ProductListPage /> },
           { path: 'products/:id', element: <ProductDetailPage /> },
+          { path: 'cart', element: <CartPage /> },
           {
             path: 'product-attributes',
             element: (

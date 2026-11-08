@@ -1,29 +1,63 @@
+import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
-import { productHooks } from './hooks'
+import { productsApi } from '@/api/products'
+import { extractErrorMessage } from '@/api/client'
+import { PageHeader } from '@/components/data/PageHeader'
+import { ErrorState, TableSkeleton } from '@/components/data/States'
+import { formatCurrency } from '@/lib/utils'
 import { ProductVariantsManager } from './variants'
 
 export function ProductDetailPage() {
   const { id } = useParams<{ id: string }>()
-  const { data: products = [], isLoading } = productHooks.useList()
-  const product = (products as any[]).find((p: any) => p.id === id) || (products as any)[0]
 
-  if (isLoading) return <div className="p-4">Loading...</div>
-  if (!product) return <div className="p-4">Product not found</div>
+  const { data: product, isLoading, error, refetch } = useQuery({
+    queryKey: ['product', id],
+    queryFn: () => productsApi.get(id!),
+    enabled: Boolean(id),
+  })
+
+  if (isLoading) {
+    return (
+      <>
+        <PageHeader title="Product" />
+        <TableSkeleton rows={4} cols={4} />
+      </>
+    )
+  }
+
+  if (error) {
+    return (
+      <>
+        <PageHeader title="Product" />
+        <div className="rounded-lg border border-border bg-card">
+          <ErrorState message={extractErrorMessage(error)} onRetry={refetch} />
+        </div>
+      </>
+    )
+  }
+
+  if (!product) {
+    return (
+      <>
+        <PageHeader title="Product" />
+        <p className="text-sm text-muted-foreground">Product not found.</p>
+      </>
+    )
+  }
 
   return (
-    <div className="space-y-4 p-4">
-      <div>
-        <h1 className="text-xl font-semibold">{product.name}</h1>
-        <p className="text-sm text-muted-foreground">SKU: {product.sku}</p>
-      </div>
+    <>
+      <PageHeader title={product.name ?? 'Product'} description={`SKU: ${product.sku ?? '—'}`} />
+
       <div className="rounded-md border p-4">
         <div className="grid grid-cols-2 gap-2 text-sm">
           <div>Category ID: {product.categoryId}</div>
-          <div>Unit price: {product.unitPrice}</div>
+          <div>Unit price: {formatCurrency(product.unitPrice)}</div>
           <div>Reorder level: {product.reorderLevel}</div>
         </div>
       </div>
+
       {id && <ProductVariantsManager productId={id} />}
-    </div>
+    </>
   )
 }

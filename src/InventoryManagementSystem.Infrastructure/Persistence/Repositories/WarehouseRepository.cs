@@ -1,5 +1,6 @@
 using InventoryManagementSystem.Application.Abstractions.Persistence;
 using InventoryManagementSystem.Domain.Entities;
+using InventoryManagementSystem.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace InventoryManagementSystem.Infrastructure.Persistence.Repositories;
@@ -18,7 +19,7 @@ public class WarehouseRepository : BaseRepository<Warehouse>, IWarehouseReposito
     public async Task<IEnumerable<Product>> GetWarehouseProduct(Guid userId)
     {
         var warehouseIds = await GetByUserId(userId);
-        return await _context.Stocks
+        return await _context.StockLevels
             .Where(s => warehouseIds.Contains(s.WarehouseId) && s.ProductVariant != null)
             .Include(s => s.ProductVariant)!
                 .ThenInclude(pv => pv!.Product)
@@ -31,8 +32,8 @@ public class WarehouseRepository : BaseRepository<Warehouse>, IWarehouseReposito
     public async Task<IEnumerable<Product>> GetWarehouseLowProducts(Guid userId)
     {
         var warehouseIds = await GetByUserId(userId);
-        return await _context.Stocks
-            .Where(s => warehouseIds.Contains(s.WarehouseId) && s.ProductVariant != null && s.Quantity < 5)
+        return await _context.StockLevels
+            .Where(s => warehouseIds.Contains(s.WarehouseId) && s.ProductVariant != null && s.QuantityOnHand - s.ReservedQuantity < 5)
             .Include(s => s.ProductVariant)!
                 .ThenInclude(pv => pv!.Product)
             .Select(s => s.ProductVariant!.Product!)

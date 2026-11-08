@@ -10,7 +10,7 @@ namespace InventoryManagementSystem.Domain.Entities
         public string Name { get; set; } = string.Empty;
         public string Location { get; set; } = string.Empty;
 
-        public ICollection<Stock> Stocks { get; set; } = new List<Stock>();
+        public ICollection<StockLevel> StockLevels { get; set; } = new List<StockLevel>();
         public ICollection<StockMovement> StockMovements { get; set; } = new List<StockMovement>();
         public ICollection<UserWarehouse> UserWarehouses { get; set; } = new List<UserWarehouse>();
         public ICollection<Purchase> Purchases { get; set; } = new List<Purchase>();
