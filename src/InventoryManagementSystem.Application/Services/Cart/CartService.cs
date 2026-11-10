@@ -127,15 +127,18 @@ public class CartService
 
     public async Task ClearCart(Guid userId)
     {
-        var cart = await _repo.GetByUserIdAsync(userId)
-            ?? throw new NotFoundException("Cart not found.");
-
-        await ReleaseReservations(cart);
-        cart.Items.Clear();
-        cart.UpdatedAt = DateTime.UtcNow;
+        await ClearCartInternal(userId);
         await _unitOfWork.SaveAsync();
     }
 
+    internal async Task ClearCartInternal(Guid userId)
+    {
+        var cart = await _repo.GetByUserIdAsync(userId)
+            ?? throw new NotFoundException("Cart not found.");
+        await ReleaseReservations(cart);
+        cart.Items.Clear();
+        cart.UpdatedAt = DateTime.UtcNow;
+    }
     public async Task RemoveItem(Guid userId, Guid itemId)
     {
         var cart = await _repo.GetByUserIdAsync(userId)
