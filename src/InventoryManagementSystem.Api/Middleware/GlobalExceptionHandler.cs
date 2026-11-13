@@ -64,6 +64,9 @@ public class GlobalExceptionHandler : IExceptionHandler
             StatusCodes.Status500InternalServerError =>
                 "An unexpected error occurred.",
 
+            StatusCodes.Status409Conflict when exception is DbUpdateConcurrencyException =>
+                "The record was modified by another operation. Reload the latest data and try again.",
+
             StatusCodes.Status409Conflict when exception is DbUpdateException =>
                 "The request conflicts with existing data.",
 
